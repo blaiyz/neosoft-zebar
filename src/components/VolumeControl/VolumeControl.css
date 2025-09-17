@@ -1,0 +1,84 @@
+#VolumeSlider {
+  @apply transition-colors;
+  --pip-height: 0.4rem;
+  --track-width: 0.4rem;
+  --handle-rotate: 0deg;
+
+  --range-slider: hsl(var(--border));
+  --range-inactive: hsl(var(--volume-end));
+  --range-range: hsl(var(--volume-end));
+  --range-low: hsl(var(--volume-start));
+
+  --range-handle-inactive: hsl(var(--volume-inner));
+  --range-handle: hsl(var(--volume-inner));
+  --range-handle-focus: hsl(var(--volume-inner));
+  --range-handle-border: transparent;
+
+  --range-pip: hsl(var(--text));
+  --range-pip-in-range: hsl(var(--volume-end));
+  --range-pip-active: hsl(var(--volume-end));
+  --range-pip-hover: hsl(var(--volume-end));
+}
+
+#VolumeSlider.rangeSlider.rsPips {
+  margin-bottom: 0;
+}
+
+#VolumeSlider.rangeSlider {
+  margin: 0;
+  margin-inline: 0.5rem;
+  @apply transition-[margin];
+}
+
+#VolumeSlider.rangeSlider:hover,
+#VolumeSlider.rangeSlider:active {
+  margin-inline: 1.2rem;
+}
+
+#VolumeSlider .rangeBar {
+  @apply bg-gradient-to-r from-[var(--range-low)] to-[var(--range)];
+}
+
+#VolumeSlider .rangePips .rsPip {
+  height: var(--pip-height);
+  width: 0.1rem;
+}
+
+#VolumeSlider.rangeSlider .rangeHandle {
+  width: 0;
+  height: 0;
+  background: none;
+  display: grid;
+  grid-template: 1fr / 1fr;
+  align-items: center;
+  overflow: hidden;
+  @apply transition-[width,height];
+}
+
+#VolumeSlider.rangeSlider:hover .rangeHandle,
+#VolumeSlider.rangeSlider:active .rangeHandle {
+  width: 2.2rem;
+  height: 1.2rem;
+}
+
+#VolumeSlider.rangeSlider .rangeFloat {
+  opacity: 0;
+  background: transparent;
+  translate: none;
+  grid-area: 1 / 1;
+  position: static;
+  padding: 0;
+}
+
+#VolumeSlider.rangeSlider:hover .rangeFloat,
+#VolumeSlider.rangeSlider:active .rangeFloat {
+  opacity: 1;
+}
+
+#VolumeSlider.rangeSlider .rangeNub {
+  transform: none;
+  border-width: 0.2rem;
+  color: var(--range-handle);
+  border-color: var(--range-handle);
+  background-color: color-mix(in srgb, currentColor 50%, hsl(var(--bg)));
+}

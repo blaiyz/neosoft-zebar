@@ -53,6 +53,9 @@
   --not-playing: var(--tau-love);
   --network: var(--tau-text);
   --weather: var(--tau-text);
+  --volume-start: var(--tau-strong);
+  --volume-end: var(--tau-accent);
+  --volume-inner: var(--tau-accent);
   --bg-focused: var(--tau-highlight-high) / 0.4;
   --bg-unfocused: var(--tau-overlay) / 0.5;
 }

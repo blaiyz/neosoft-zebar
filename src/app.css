@@ -11,7 +11,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
+@layer custom-base {
   body {
     overflow: hidden;
     font-size: var(--font-size);

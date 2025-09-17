@@ -163,6 +163,9 @@ In addition to colors, `config.css` provides variables that control other style 
 --not-playing: var(--tau-love);
 --network: var(--tau-text);
 --weather: var(--tau-text);
+--volume-start: var(--tau-strong);
+--volume-end: var(--tau-accent);
+--volume-inner: var(--tau-accent);
 --bg-focused: var(--tau-highlight-high) / 0.4;
 --bg-unfocused: var(--tau-overlay) / 0.5;
 ```
@@ -202,6 +205,9 @@ In addition to colors, `config.css` provides variables that control other style 
 --tiling-direction: var(--rp-rose);
 --network: var(--rp-text);
 --weather: var(--rp-text);
+--volume-start: var(--rp-love);
+--volume-end: var(--rp-foam);
+--volume-inner: var(--rp-foam);
 --bg-focused: var(--rp-subtle) / 0.4;
 --bg-unfocused: var(--rp-base) / 0.5;
 ```
@@ -234,6 +240,9 @@ In addition to colors, `config.css` provides variables that control other style 
 --tiling-direction: var(--rp-moon-rose);
 --network: var(--rp-moon-text);
 --weather: var(--rp-moon-text);
+--volume-start: var(--rp-moon-love);
+--volume-end: var(--rp-moon-foam);
+--volume-inner: var(--rp-moon-foam);
 --bg-focused: var(--rp-moon-subtle) / 0.4;
 --bg-unfocused: var(--rp-moon-base) / 0.5;
 ```
@@ -266,6 +275,9 @@ In addition to colors, `config.css` provides variables that control other style 
 --tiling-direction: var(--rp-dawn-rose);
 --network: var(--rp-dawn-text);
 --weather: var(--rp-dawn-text);
+--volume-start: var(--rp-dawn-love);
+--volume-end: var(--rp-dawn-foam);
+--volume-inner: var(--rp-dawn-foam);
 --bg-focused: var(--rp-dawn-overlay) / 0.4;
 --bg-unfocused: var(--rp-dawn-text) / 0.5;
 ```

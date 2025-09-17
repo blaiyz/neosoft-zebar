@@ -8,12 +8,13 @@ import { configLoaded, type Config } from "./config.svelte";
 const providerConfig = {
   battery: { type: "battery", refreshInterval: 1000 * 60 * 1 }, // 1 minute
   cpu: { type: "cpu", refreshInterval: 2000 },
-  date: { type: "date", formatting: "HH:mm" },
+  date: { type: "date" },
   glazewm: { type: "glazewm" },
   memory: { type: "memory", refreshInterval: 5000 },
   network: { type: "network", refreshInterval: 2000 },
   weather: { type: "weather", refreshInterval: 1000 * 60 * 15 }, // 15 minutes
-  media: { type: "media" }
+  media: { type: "media" },
+  audio: { type: "audio" }
 } satisfies ProviderGroupConfig;
 
 const providers: ProviderGroup<typeof providerConfig>["outputMap"] = $state({
@@ -24,7 +25,8 @@ const providers: ProviderGroup<typeof providerConfig>["outputMap"] = $state({
   memory: null,
   network: null,
   weather: null,
-  media: null
+  media: null,
+  audio: null
 });
 
 async function initProviders() {

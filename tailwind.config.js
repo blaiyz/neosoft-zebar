@@ -36,7 +36,12 @@ export default {
           accent: "hsl( var(--accent) )",
           "tiling-direction": "hsl( var(--tiling-direction) )",
           network: "hsl( var(--network) )",
-          weather: "hsl( var(--weather) )"
+          weather: "hsl( var(--weather) )",
+          volume: {
+            start: "hsl( var(--volume-start) )",
+            end: "hsl( var(--volume-end) )",
+            inner: "hsl( var(--volume-inner) )"
+          }
         },
         blend: generateBlends()
       },

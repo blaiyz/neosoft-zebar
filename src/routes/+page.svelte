@@ -122,7 +122,7 @@
       <Group
         rightCurve={!config.attachSides}
         outerClass="h-full justify-self-end"
-        innerClass="h-full px-4 flex items-center {isOnPrimaryMonitor()
+        innerClass="h-full pl-2 pr-4 flex items-center {isOnPrimaryMonitor()
           ? 'pr-zrby'
           : ''}"
       >

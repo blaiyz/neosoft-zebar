@@ -11,6 +11,9 @@ importers:
       glazewm:
         specifier: ^1.7.0
         version: 1.7.0
+      svelte-range-slider-pips:
+        specifier: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main
+        version: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main(svelte@5.38.6)
       zebar:
         specifier: ^3.1.1
         version: 3.1.1
@@ -1385,6 +1388,12 @@ packages:
       svelte:
         optional: true
 
+  svelte-range-slider-pips@https://github.com/blaiyz/svelte-range-slider-pips/tarball/main:
+    resolution: {tarball: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main}
+    version: 4.0.7
+    peerDependencies:
+      svelte: ^4.2.7 || ^5.0.0
+
   svelte@5.38.6:
     resolution: {integrity: sha512-ltBPlkvqk3bgCK7/N323atUpP3O3Y+DrGV4dcULrsSn4fZaaNnOmdplNznwfdWclAgvSr5rxjtzn/zJhRm6TKg==}
     engines: {node: '>=18'}
@@ -2722,6 +2731,10 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.6)
       postcss-selector-parser: 7.1.0
     optionalDependencies:
+      svelte: 5.38.6
+
+  svelte-range-slider-pips@https://github.com/blaiyz/svelte-range-slider-pips/tarball/main(svelte@5.38.6):
+    dependencies:
       svelte: 5.38.6
 
   svelte@5.38.6:

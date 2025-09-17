@@ -5,6 +5,7 @@
   import PointFilled from "@tabler/icons-svelte/icons/point-filled";
   import NowPlaying from "./NowPlaying.svelte";
   import SmoothDiv from "./SmoothDiv.svelte";
+  import VolumeControl from "./VolumeControl/VolumeControl.svelte";
 
   let date = $derived(providers.date);
   let weather = $derived(providers.weather);
@@ -15,12 +16,24 @@
     const shortDay = days[date.getDay()];
     return shortDay + " " + date.toLocaleDateString();
   };
+
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit"
+  };
 </script>
 
 <div class="flex flex-row items-center h-full">
   <NowPlaying />
+  {#if isOnPrimaryMonitor()}
+    <VolumeControl />
+  {/if}
   {#if weather}
-    <div class="truncate flex items-center mr-2">
+    <div
+      class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
+        ? 'pl-2'
+        : ''}"
+    >
       <span class="text-2xl">
         {#if weather.status === "clear_day"}
           <i class="nf nf-weather-day_sunny"></i>
@@ -53,10 +66,13 @@
   {/if}
   {#if !isOnPrimaryMonitor() || !config.taskbarIntegration.enabled}
     <PointFilled class="mr-2" />
-    <SmoothDiv outerClass="flex h-full overflow-hidden">
-      <button onclick={() => (fullDate = !fullDate)}>
+    <SmoothDiv outerClass="flex items-stretch h-full overflow-hidden">
+      <button
+        class="hover:text-zb-accent"
+        onclick={() => (fullDate = !fullDate)}
+      >
         <p class="whitespace-nowrap">
-          {date?.formatted}
+          {date?.new.toLocaleTimeString(undefined, timeOptions)}
           {#if fullDate}
             -
             {date && getDate(date?.new)}

@@ -53,17 +53,17 @@
   {#if isOnPrimaryMonitor() && media && shownSession}
     <div
       transition:fly={{ y: 20, duration: config.transitionDuration }}
-      class="flex items-center gap-3 mr-2"
+      class="flex items-stretch"
     >
       <button
-        class="transition hover:text-zb-accent hover:scale-125"
+        class="transition px-2 hover:text-zb-accent hover:scale-125"
         aria-label="Previous"
         onclick={() => media.previous()}
       >
         <SkipBack />
       </button>
       <button
-        class="relative gap-x-2 overflow-hidden inline-flex items-center justify-center group transition hover:text-zb-accent"
+        class="relative px-1 gap-x-2 overflow-hidden inline-flex items-center justify-center group transition hover:text-zb-accent"
         aria-label="Toggle"
         onclick={() => media.togglePlayPause()}
       >
@@ -102,7 +102,7 @@
         </SmoothDiv>
       </button>
       <button
-        class="transition hover:text-zb-accent hover:scale-125"
+        class="transition px-2 hover:text-zb-accent hover:scale-125"
         aria-label="Next"
         onclick={() => media.next()}
       >
