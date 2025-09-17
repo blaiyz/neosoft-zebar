@@ -16,7 +16,7 @@
     "@lucide/svelte": "^0.541.0",
     "@sveltejs/adapter-auto": "^6.1.0",
     "@sveltejs/adapter-static": "^3.0.9",
-    "@sveltejs/kit": "^2.31.1",
+    "@sveltejs/kit": "^2.42.1",
     "@sveltejs/vite-plugin-svelte": "^6.1.2",
     "@tabler/icons-svelte": "^3.34.1",
     "@tauri-apps/api": "^2.7.0",
