@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
-    "@lucide/svelte": "^0.541.0",
+    "@lucide/svelte": "^0.546.0",
     "@sveltejs/adapter-auto": "^6.1.0",
     "@sveltejs/adapter-static": "^3.0.9",
     "@sveltejs/kit": "^2.31.1",
