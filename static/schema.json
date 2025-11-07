@@ -93,8 +93,26 @@
       "$ref": "#/definitions/ProvidersConfig",
       "description": "Options for the providers, including refresh intervals and error logging."
     },
+    "showBatterySection": {
+      "type": "boolean"
+    },
+    "showCpuSection": {
+      "type": "boolean"
+    },
     "showFullDateByDefault": {
       "description": "Whether to show the full date by default instead of just the time.\n\n(This can be toggled in the UI by clicking the date/time)",
+      "type": "boolean"
+    },
+    "showHeartButton": {
+      "type": "boolean"
+    },
+    "showMemorySection": {
+      "type": "boolean"
+    },
+    "showNetworkSection": {
+      "type": "boolean"
+    },
+    "showWeatherSection": {
       "type": "boolean"
     },
     "taskbarIntegration": {

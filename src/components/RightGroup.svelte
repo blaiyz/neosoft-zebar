@@ -28,7 +28,7 @@
   {#if isOnPrimaryMonitor()}
     <VolumeControl />
   {/if}
-  {#if weather}
+  {#if config.showWeatherSection && weather}
     <div
       class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
         ? 'pl-2'

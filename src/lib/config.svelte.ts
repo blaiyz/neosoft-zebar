@@ -75,6 +75,15 @@ export interface Config {
    * (This can be toggled in the UI by clicking the date/time)
    */
   showFullDateByDefault: boolean;
+
+  // Individual section toggles
+
+  showHeartButton: boolean;
+  showCpuSection: boolean;
+  showMemorySection: boolean;
+  showBatterySection: boolean;
+  showNetworkSection: boolean;
+  showWeatherSection: boolean;
 }
 
 export type AttachmentDirection = "top" | "bottom" | "floating";

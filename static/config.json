@@ -22,5 +22,11 @@
   },
   "backgroundEffect": "acrylic",
   "enableAutoTiling": true,
-  "showFullDateByDefault": false
+  "showFullDateByDefault": false,
+  "showHeartButton": true,
+  "showCpuSection": true,
+  "showMemorySection": true,
+  "showBatterySection": true,
+  "showNetworkSection": true,
+  "showWeatherSection": true
 }

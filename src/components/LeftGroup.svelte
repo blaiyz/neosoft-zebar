@@ -1,26 +1,27 @@
 <script lang="ts">
-  import Button from "./Button.svelte";
-  import Meter from "./Meter.svelte";
   import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
-  import MemoryStick from "@lucide/svelte/icons/memory-stick";
-  import Cpu from "@lucide/svelte/icons/cpu";
+  import Battery from "@lucide/svelte/icons/battery";
   import BatteryCharging from "@lucide/svelte/icons/battery-charging";
-  import BatteryWarning from "@lucide/svelte/icons/battery-warning";
+  import BatteryFull from "@lucide/svelte/icons/battery-full";
   import BatteryLow from "@lucide/svelte/icons/battery-low";
   import BatteryMedium from "@lucide/svelte/icons/battery-medium";
-  import BatteryFull from "@lucide/svelte/icons/battery-full";
-  import Battery from "@lucide/svelte/icons/battery";
+  import BatteryWarning from "@lucide/svelte/icons/battery-warning";
+  import ChevronsDown from "@lucide/svelte/icons/chevrons-down";
+  import ChevronsUp from "@lucide/svelte/icons/chevrons-up";
+  import Cpu from "@lucide/svelte/icons/cpu";
   import EthernetPort from "@lucide/svelte/icons/ethernet-port";
+  import MemoryStick from "@lucide/svelte/icons/memory-stick";
   import Wifi from "@lucide/svelte/icons/wifi";
   import WifiHigh from "@lucide/svelte/icons/wifi-high";
   import WifiLow from "@lucide/svelte/icons/wifi-low";
-  import WifiZero from "@lucide/svelte/icons/wifi-zero";
   import WifiOff from "@lucide/svelte/icons/wifi-off";
-  import ChevronsDown from "@lucide/svelte/icons/chevrons-down";
-  import ChevronsUp from "@lucide/svelte/icons/chevrons-up";
+  import WifiZero from "@lucide/svelte/icons/wifi-zero";
+  import Button from "./Button.svelte";
+  import Meter from "./Meter.svelte";
 
   import IconHeartFilled from "@tabler/icons-svelte/icons/heart-filled";
   // import Test from "./Test.svelte";
+  import { config } from "$lib/config.svelte";
   import { providers } from "$lib/providers.svelte";
 
   let memory = $derived(providers.memory);
@@ -40,14 +41,25 @@
 </script>
 
 <div class="flex flex-row gap-3 items-center">
-  <Button class="text-zb-icon"><IconHeartFilled class="text-zb-icon" /></Button>
-  <Meter class="stroke-zb-memory h-8" percent={Math.round(memory?.usage ?? 0)}>
-    <MemoryStick />
-  </Meter>
-  <Meter class="stroke-zb-cpu h-8" percent={Math.round(cpu?.usage ?? 0)}>
-    <Cpu />
-  </Meter>
-  {#if battery?.state}
+  {#if config.showHeartButton}
+    <Button class="text-zb-icon"
+      ><IconHeartFilled class="text-zb-icon" /></Button
+    >
+  {/if}
+  {#if config.showMemorySection}
+    <Meter
+      class="stroke-zb-memory h-8"
+      percent={Math.round(memory?.usage ?? 0)}
+    >
+      <MemoryStick />
+    </Meter>
+  {/if}
+  {#if config.showCpuSection}
+    <Meter class="stroke-zb-cpu h-8" percent={Math.round(cpu?.usage ?? 0)}>
+      <Cpu />
+    </Meter>
+  {/if}
+  {#if config.showBatterySection && battery?.state}
     <Meter
       class="stroke-zb-battery-good h-8"
       percent={Math.round(battery?.chargePercent ?? 100)}
@@ -67,7 +79,7 @@
       {/if}
     </Meter>
   {/if}
-  {#if isOnPrimaryMonitor()}
+  {#if config.showNetworkSection && isOnPrimaryMonitor()}
     <div class="flex flex-row pl-2 items-center gap-1">
       {#if network?.defaultInterface?.type === "ethernet"}
         <EthernetPort />
