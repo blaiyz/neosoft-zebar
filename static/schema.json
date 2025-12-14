@@ -77,6 +77,10 @@
       "$ref": "#/definitions/BackgroundEffect",
       "description": "The background effect to use for the widget.\n\nNOTE: In order to use anything other than inherit, you must recompile zebar with an extra permission. More details in the README.\n\n`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).\n`acrylic`- Use an acrylic background effect. Windows 10, 11.\n`blur`- Use a blur background effect. Windows 10, 11.\n`mica`- Use a mica background effect. Windows 11 only."
     },
+    "clickThroughByDefault": {
+      "description": "Enable click-through by default.",
+      "type": "boolean"
+    },
     "direction": {
       "$ref": "#/definitions/AttachmentDirection",
       "description": "The visual direction of the widget.\n\n`top`- The top of the widget has inverted corner radius, and the bottom has normal corner radius.\n\n`bottom`- The bottom of the widget has inverted corner radius, and the top has normal corner radius.\n\n`floating`- All corners of the widget have normal corner radius."

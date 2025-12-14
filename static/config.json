@@ -22,6 +22,7 @@
   },
   "backgroundEffect": "acrylic",
   "enableAutoTiling": true,
+  "clickThroughByDefault": false,
   "showFullDateByDefault": false,
   "showHeartButton": true,
   "showCpuSection": true,

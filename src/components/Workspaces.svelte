@@ -7,12 +7,14 @@
   import { providers } from "$lib/providers.svelte";
   import { getWindows } from "$lib/utils/glaze_wm_utils.svelte";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
+  import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
   import type { Icon as IconType } from "@tabler/icons-svelte";
   import Background from "@tabler/icons-svelte/icons/background";
   import { flip } from "svelte/animate";
   import { fly } from "svelte/transition";
   import Button from "./Button.svelte";
   import SmoothDiv from "./SmoothDiv.svelte";
+  import { toggleModes } from "$lib/binding_modes.svelte";
 
   const getProcessIcon = (child: Window): IconType => {
     const possibleAppNames = [
@@ -84,30 +86,36 @@
       />
     </button>
     <SmoothDiv outerClass="flex justify-end" innerClass="flex items-center">
-      {#each glazewm.bindingModes as bindingMode (bindingMode.name)}
+      {#if toggleModes.clickThrough}
+        <span
+          transition:fly={{ y: 20, duration: config.transitionDuration }}
+          class="relative flex flex-row-reverse"
+        >
+          <MousePointer2Off
+            class="{toggleModes.clickThrough
+              ? ''
+              : 'absolute'} text-zb-click-through mx-1"
+          />
+        </span>
+      {/if}
+    </SmoothDiv>
+    <SmoothDiv outerClass="flex justify-end" innerClass="flex items-center">
+      {#each glazewm.bindingModes.filter((mode) => mode.name !== "ct") as bindingMode (bindingMode.name)}
         <button
           transition:fly={{ y: 20, duration: config.transitionDuration }}
           animate:flip={{ duration: config.transitionDuration }}
           class="mx-[0.5rem]"
           onclick={() => {
-            switch (bindingMode.name.toLowerCase()) {
-              case "pause":
-                glazewm!.runCommand("wm-disable-binding-mode --name pause");
-                break;
-
-              case "resize":
-                glazewm!.runCommand("wm-disable-binding-mode --name resize");
-                break;
-
-              default:
-                break;
-            }
+            glazewm!.runCommand(
+              `wm-disable-binding-mode --name ${bindingMode.name}`
+            );
           }}
         >
           {bindingMode.displayName ?? bindingMode.name}
         </button>
       {/each}
     </SmoothDiv>
+
     {#if glazewm.displayedWorkspace}
       <SmoothDiv
         outerClass="flex justify-end"

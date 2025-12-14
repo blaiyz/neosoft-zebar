@@ -14,6 +14,7 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 - Multi-monitor support
 - Windows Taskbar integration (experimental)
 - Background effects (Acrylic, Blur, Mica)
+- Click-through ability (disable interactivity and cursor events to windows below)
 
 ## 🖼️ Showcase
 
@@ -98,7 +99,15 @@ General configuration is defined in `config.json`, which ships together with the
     "enableErrorLogging": false
   },
   "backgroundEffect": "acrylic",
-  "enableAutoTiling": true
+  "enableAutoTiling": true,
+  "clickThroughByDefault": false,
+  "showFullDateByDefault": false,
+  "showHeartButton": true,
+  "showCpuSection": true,
+  "showMemorySection": true,
+  "showBatterySection": true,
+  "showNetworkSection": true,
+  "showWeatherSection": true
 }
 ```
 
@@ -326,15 +335,16 @@ In addition to colors, `config.css` provides variables that control other style 
 
 </details>
 
-## 🎉 Background Effects
+## 🎉 Background Effects & Click-Through
 
 > [!WARNING]
-> This feature does not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
+> Background effects do not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
+> Click-through works fine in all platforms, however note that it completely disables interactivity with the Zebar widget.
 
-To enable background effects, you need to recompile Zebar with a modification. You must have Rust and Node.js installed on your system.
+To enable any of these two features, you need to recompile Zebar with a modification. You must have Rust and Node.js installed on your system.
 
 1. Clone the Zebar repository: `git clone https://github.com/glzr-io/zebar.git`
-2. Navigate to `packages/desktop/capabilities/widget.json` and add the following permission:
+2. Navigate to `packages/desktop/capabilities/widget.json` and add the following two permissions (don't forget the trailing commas!):
 
 ```json
 {
@@ -347,7 +357,8 @@ To enable background effects, you need to recompile Zebar with a modification. Y
     "core:window:allow-set-position",
     "core:window:allow-set-size",
     "core:window:allow-set-title",
-    "core:window:allow-set-effects" <--- ADD THIS
+    "core:window:allow-set-effects",             <--- ADD THIS
+    "core:window:allow-set-ignore-cursor-events" <--- AND THIS
   ]
 }
 ```
@@ -373,7 +384,42 @@ pnpm run build
 > [!NOTE]
 > By default, Zebar uses the rust nightly channel. To install it properly, you need to run (after uninstalling nightly if you have it already installed) `rustup toolchain install nightly --allow-downgrade --profile minimal`, otherwise Zebar may not be able to build. If it still doesn't manage to build, try changing the channel in `rust-toolchain.toml` to `stable`.
 
-After installation, you can enable background effects in `config.json`.
+After installation, follow these instructions:
+
+### Enable Background Effects
+
+In `config.json`, set the `backgroundEffect` field to one of the values provided by the schema.
+
+### Enable Click-Through
+
+To use click-through, you must modify the GlazeWM configuration.
+
+- In `config.yaml`, add a new binding mode for click-through under `binding_modes`:
+
+```yaml
+binding_modes:
+  ...
+
+  # Click-through mode disables interactivity
+  - name: 'ct'
+```
+
+The name of the binding mode **must** be `ct` for the commands to work properly.
+
+- Add a keybinding to toggle click-through mode under `keybindings`:
+
+```yaml
+keybindings:
+  ...
+
+  # Sends a signal to Zebar via the binding mode
+  - commands: ['wm-enable-binding-mode --name ct', "wm-disable-binding-mode --name ct"]
+    bindings: ['alt+shift+c']
+```
+
+And now you can toggle click-through mode by pressing `Alt + Shift + C`.
+
+`config.json` also provides `clickThroughByDefault` field to enable click-through mode by default on startup.
 
 ## 🧪 Taskbar Integration
 

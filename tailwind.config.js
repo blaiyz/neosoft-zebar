@@ -35,6 +35,7 @@ export default {
           },
           accent: "hsl( var(--accent) )",
           "tiling-direction": "hsl( var(--tiling-direction) )",
+          "click-through": "hsl( var(--tiling-direction) )",
           network: "hsl( var(--network) )",
           weather: "hsl( var(--weather) )",
           volume: {

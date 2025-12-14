@@ -43,7 +43,16 @@
 <div class="flex flex-row gap-3 items-center">
   {#if config.showHeartButton}
     <Button class="text-zb-icon"
-      ><IconHeartFilled class="text-zb-icon" /></Button
+      ><IconHeartFilled
+        class="text-zb-icon"
+        onclick={() => {
+          // Opens in a new msedge webview window. Can't open in the default
+          // browser without additional ACL in tauri.
+          window
+            .open("https://github.com/blaiyz/neosoft-zebar", "_blank")
+            ?.focus();
+        }}
+      /></Button
     >
   {/if}
   {#if config.showMemorySection}

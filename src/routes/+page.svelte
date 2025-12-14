@@ -5,6 +5,7 @@
   import { Effect } from "@tauri-apps/api/window";
 
   import { initializeAutotiler } from "$lib/autotiler.svelte";
+  import { initializeBindingModesObserver } from "$lib/binding_modes.svelte";
   import { config, configLoaded } from "$lib/config.svelte";
   import { initProviders, providers } from "$lib/providers.svelte";
   import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
@@ -16,6 +17,7 @@
 
   let glazewm = $derived(providers.glazewm);
   initializeAutotiler();
+  initializeBindingModesObserver();
 
   onMount(() => {
     initProviders();

@@ -76,6 +76,11 @@ export interface Config {
    */
   showFullDateByDefault: boolean;
 
+  /**
+   * Enable click-through by default.
+   */
+  clickThroughByDefault: boolean;
+
   // Individual section toggles
 
   showHeartButton: boolean;
