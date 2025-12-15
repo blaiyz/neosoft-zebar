@@ -20,7 +20,7 @@
     },
     "enableErrorLogging": false
   },
-  "backgroundEffect": "acrylic",
+  "backgroundEffect": "inherit",
   "enableAutoTiling": true,
   "clickThroughByDefault": false,
   "showFullDateByDefault": false,

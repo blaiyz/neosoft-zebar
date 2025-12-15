@@ -98,7 +98,7 @@ General configuration is defined in `config.json`, which ships together with the
     },
     "enableErrorLogging": false
   },
-  "backgroundEffect": "acrylic",
+  "backgroundEffect": "inherit",
   "enableAutoTiling": true,
   "clickThroughByDefault": false,
   "showFullDateByDefault": false,
@@ -341,50 +341,8 @@ In addition to colors, `config.css` provides variables that control other style 
 > Background effects do not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
 > Click-through works fine in all platforms, however note that it completely disables interactivity with the Zebar widget.
 
-To enable any of these two features, you need to recompile Zebar with a modification. You must have Rust and Node.js installed on your system.
-
-1. Clone the Zebar repository: `git clone https://github.com/glzr-io/zebar.git`
-2. Navigate to `packages/desktop/capabilities/widget.json` and add the following two permissions (don't forget the trailing commas!):
-
-```json
-{
-  ...,
-  "permissions": [
-    ...,
-    "core:window:allow-set-always-on-bottom",
-    "core:window:allow-set-always-on-top",
-    "core:window:allow-set-resizable",
-    "core:window:allow-set-position",
-    "core:window:allow-set-size",
-    "core:window:allow-set-title",
-    "core:window:allow-set-effects",             <--- ADD THIS
-    "core:window:allow-set-ignore-cursor-events" <--- AND THIS
-  ]
-}
-```
-
-3. Run the following:
-
-```bash
-# Install pnpm (package manager).
-npm i -g pnpm
-
-# Install dependencies.
-pnpm i
-
-# Build settings UI
-pnpm run --filter zebar --filter @zebar/settings-ui build
-
-# Build Zebar
-pnpm run build
-```
-
-4. Install the newly built Zebar from `target/release/bundle/msi/Zebar_..._x64_en-US.msi`
-
-> [!NOTE]
-> By default, Zebar uses the rust nightly channel. To install it properly, you need to run (after uninstalling nightly if you have it already installed) `rustup toolchain install nightly --allow-downgrade --profile minimal`, otherwise Zebar may not be able to build. If it still doesn't manage to build, try changing the channel in `rust-toolchain.toml` to `stable`.
-
-After installation, follow these instructions:
+> [!TIP] Update
+> The permissions needed to enable these features have been added to upstream Zebar, no need to recompile Zebar anymore!
 
 ### Enable Background Effects
 
