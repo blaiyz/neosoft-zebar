@@ -18,6 +18,7 @@
   import WifiZero from "@lucide/svelte/icons/wifi-zero";
   import Button from "./Button.svelte";
   import Meter from "./Meter.svelte";
+  import * as zebar from "zebar";
 
   import IconHeartFilled from "@tabler/icons-svelte/icons/heart-filled";
   // import Test from "./Test.svelte";
@@ -46,11 +47,11 @@
       ><IconHeartFilled
         class="text-zb-icon"
         onclick={() => {
-          // Opens in a new msedge webview window. Can't open in the default
-          // browser without additional ACL in tauri.
-          window
-            .open("https://github.com/blaiyz/neosoft-zebar", "_blank")
-            ?.focus();
+          zebar.shellExec("cmd", [
+            "/c",
+            "start",
+            "https://github.com/blaiyz/neosoft-zebar"
+          ]);
         }}
       /></Button
     >

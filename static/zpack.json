@@ -1,9 +1,20 @@
 {
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.1.1/resources/zpack-schema.json",
   "name": "neosoft-zebar",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A highly customizable (and smooooooth) Zebar build",
-  "tags": [],
+  "tags": [
+    "glazewm",
+    "media",
+    "customizable",
+    "rosé pine",
+    "catppuccin",
+    "weather",
+    "themes",
+    "system stats",
+    "autotiler",
+    "volume"
+  ],
   "previewImages": ["misc/fullscreen.png", "misc/taskbar-integration.png"],
   "repositoryUrl": "https://github.com/blaiyz/neosoft-zebar",
   "widgets": [
@@ -21,7 +32,12 @@
         "rules": []
       },
       "privileges": {
-        "shellCommands": []
+        "shellCommands": [
+          {
+            "program": "cmd",
+            "argsRegex": "\\/c start https:\\/\\/github\\.com\\/blaiyz\\/neosoft-zebar"
+          }
+        ]
       },
       "presets": [
         {

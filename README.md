@@ -341,7 +341,7 @@ In addition to colors, `config.css` provides variables that control other style 
 > Background effects do not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
 > Click-through works fine in all platforms, however note that it completely disables interactivity with the Zebar widget.
 
-> [!TIP] Update
+> [!TIP]
 > The permissions needed to enable these features have been added to upstream Zebar, no need to recompile Zebar anymore!
 
 ### Enable Background Effects
