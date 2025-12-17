@@ -35,7 +35,7 @@
         if (right) return "rounded-br-base";
         return "";
       case "floating":
-        if (left && right) return "rounded-l-base";
+        if (left && right) return "rounded-base";
         if (left) return "rounded-l-base";
         if (right) return "rounded-r-base";
         return "";
