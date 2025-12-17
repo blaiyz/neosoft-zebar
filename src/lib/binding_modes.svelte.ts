@@ -1,7 +1,7 @@
-import { currentWidget } from "zebar";
-import { providers } from "./providers.svelte";
 import { untrack } from "svelte";
+import { currentWidget } from "zebar";
 import { config, configLoaded } from "./config.svelte";
+import { providers } from "./providers.svelte";
 
 const bindingModes = $derived(providers.glazewm?.bindingModes || []);
 const clickThroughBindingMode = $derived(
@@ -13,6 +13,8 @@ const toggleModes = $state({
 });
 
 export function initializeBindingModesObserver() {
+  let prevTime = Date.now();
+
   $effect(() => {
     /* The click through binding mode needs to be configured to be toggled on and off
      * in the GlazeWM config.yaml file, and we just listen for its activation here as
@@ -36,6 +38,14 @@ export function initializeBindingModesObserver() {
     const currentToggle = untrack(() => toggleModes.clickThrough);
 
     if (clickThroughBindingMode) {
+      const currentTime = Date.now();
+      const timeDiff = currentTime - prevTime;
+
+      // throttle
+      if (timeDiff < 400) return;
+
+      console.log("Click-through binding mode toggled");
+      prevTime = currentTime;
       toggleModes.clickThrough = !currentToggle;
     }
   });
