@@ -11,7 +11,8 @@
   import "./VolumeControl.css";
   import { toggleModes } from "$lib/binding_modes.svelte";
   import { fly } from "svelte/transition";
-  import { config } from "$lib/config.svelte";
+  import { config, configLoaded } from "$lib/config.svelte";
+  import { onMount } from "svelte";
 
   let audio = $derived(providers.audio);
   let device = $derived(audio?.defaultPlaybackDevice);
@@ -28,6 +29,13 @@
     newVolume = Math.max(0, Math.min(100, newVolume));
     audio?.setVolume(newVolume);
   };
+
+  onMount(async () => {
+    await configLoaded;
+    if (config.enableVolumeSlider) {
+      sliderOpen = true;
+    }
+  });
 </script>
 
 {#if device}

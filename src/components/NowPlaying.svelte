@@ -105,7 +105,11 @@
           </span>
         </SmoothDiv>
       </button>
-      <SmoothDiv height={false} outerClass="flex justify-end" innerClass="flex justify-end">
+      <SmoothDiv
+        height={false}
+        outerClass="flex justify-end"
+        innerClass="flex justify-end"
+      >
         {#if !toggleModes.clickThrough}
           <button
             class="transition h-full hover:text-zb-accent hover:scale-125 relative flex items-center justify-end"

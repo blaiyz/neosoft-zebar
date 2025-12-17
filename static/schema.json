@@ -89,6 +89,10 @@
       "description": "Whether to enable built-in automatic tiling of windows.",
       "type": "boolean"
     },
+    "enableVolumeSlider": {
+      "description": "Enable volume slider by default.",
+      "type": "boolean"
+    },
     "gradient": {
       "$ref": "#/definitions/GradientDirection",
       "description": "The direction of the background gradient.\n\n`top`- From top to transparent bottom.\n\n`bottom`- From bottom to transparent top.\n\n`solid`- Solid color background.\n\n`disabled`- Background color is disabled."

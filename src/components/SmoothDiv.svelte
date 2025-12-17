@@ -49,11 +49,17 @@
       {@render children()}
     </div>
   {:else if width}
-    <div class="w-fit h-full {innerClass}" bind:clientWidth={widthSpring.target}>
+    <div
+      class="w-fit h-full {innerClass}"
+      bind:clientWidth={widthSpring.target}
+    >
       {@render children()}
     </div>
   {:else if height}
-    <div class="h-fit w-full {innerClass}" bind:clientHeight={heightSpring.target}>
+    <div
+      class="h-fit w-full {innerClass}"
+      bind:clientHeight={heightSpring.target}
+    >
       {@render children()}
     </div>
   {/if}

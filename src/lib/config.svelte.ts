@@ -81,6 +81,11 @@ export interface Config {
    */
   clickThroughByDefault: boolean;
 
+  /**
+   * Enable volume slider by default.
+   */
+  enableVolumeSlider: boolean;
+
   // Individual section toggles
 
   showHeartButton: boolean;

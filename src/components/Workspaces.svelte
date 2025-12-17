@@ -65,7 +65,7 @@
           <Button
             class="h-[2rem] box-border text-zb-ws-{globalIndex} {workspace.isDisplayed
               ? `border-zb-ws-${globalIndex} hover:border-blend-70 active:!border-blend-50`
-              : ''} {toggleModes.clickThrough 
+              : ''} {toggleModes.clickThrough
               ? 'aspect-square'
               : 'min-w-14 px-2'}"
             callback={() =>
