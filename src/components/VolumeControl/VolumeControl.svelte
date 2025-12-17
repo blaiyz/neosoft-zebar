@@ -9,6 +9,9 @@
   import RangeSlider from "svelte-range-slider-pips";
   import SmoothDiv from "../SmoothDiv.svelte";
   import "./VolumeControl.css";
+  import { toggleModes } from "$lib/binding_modes.svelte";
+  import { fly } from "svelte/transition";
+  import { config } from "$lib/config.svelte";
 
   let audio = $derived(providers.audio);
   let device = $derived(audio?.defaultPlaybackDevice);
@@ -30,11 +33,14 @@
 {#if device}
   <div class="flex items-stretch h-full mr-1" onwheel={onMouseWheel}>
     <div class="h-full overflow-hidden flex items-center">
-      <SmoothDiv outerClass="flex justify-end">
+      <SmoothDiv outerClass="flex justify-end" innerClass="flex justify-end">
         {#if sliderOpen}
+          {#if toggleModes.clickThrough}
+            <div class="w-2"></div>
+          {/if}
           <RangeSlider
             id="VolumeSlider"
-            class="w-24 mr-2"
+            class="w-24"
             float
             min={0}
             max={100}
@@ -48,31 +54,80 @@
         {/if}
       </SmoothDiv>
     </div>
-    <button
-      class="transition px-1 text-lg hover:text-zb-accent hover:scale-125 {sliderOpen
-        ? 'rotate-180'
-        : ''}"
-      aria-label="Open volume slider"
-      onclick={() => (sliderOpen = !sliderOpen)}><ChevronLeft /></button
+    <SmoothDiv
+      height={false}
+      outerClass="h-full flex justify-end"
+      innerClass="flex justify-end"
     >
-    <button
-      class="transition px-1 mr-1 text-lg stroke-2 hover:text-zb-accent hover:scale-125"
-      aria-label="Mute"
-      onclick={() => audio?.setMute(!muted)}
-    >
-      {#if device}
-        {#if muted || volume === 0}
-          <VolumeX />
-        {:else if volume <= 33}
-          <Volume />
-        {:else if volume > 33 && volume <= 66}
-          <Volume1 />
-        {:else}
-          <Volume2 />
-        {/if}
-      {:else}
-        <VolumeOff />
+      {#if !toggleModes.clickThrough}
+        <button
+          class="h-full flex items-center justify-end transition text-lg hover:text-zb-accent hover:scale-125 relative"
+          aria-label="Open volume slider"
+          onclick={() => (sliderOpen = !sliderOpen)}
+          transition:fly={{ y: 20, duration: config.transitionDuration }}
+        >
+          <ChevronLeft
+            class="{toggleModes.clickThrough ? 'absolute' : ''} {sliderOpen
+              ? 'rotate-180'
+              : ''} transition mx-1"
+          />
+        </button>
       {/if}
-    </button>
+    </SmoothDiv>
+    <SmoothDiv
+      height={false}
+      outerClass="h-full flex justify-end"
+      innerClass="flex justify-end"
+    >
+      {@const visible = !sliderOpen || !toggleModes.clickThrough}
+      {#if visible}
+        <button
+          class="h-full flex items-center justify-end transition text-lg stroke-2 hover:text-zb-accent hover:scale-125 relative"
+          aria-label="Mute"
+          onclick={() => audio?.setMute(!muted)}
+          transition:fly={{ y: 20, duration: config.transitionDuration }}
+        >
+          <!--
+            One might ask: Why does this guy repeat the same class logic for each icon?
+            For some reason, the conditional for 'absolute' doesn't work when I put it in a wrapper div, nor when I put 
+            it in the parent button. Might have something to do with svelte transitions? And why does it work just fine
+            with the icon components? Go figure. I've spent way too long on this.
+          -->
+          {#if device}
+            {#if muted || volume === 0}
+              <VolumeX
+                class="{!visible ? 'absolute' : ''} {toggleModes.clickThrough
+                  ? 'ml-2'
+                  : 'ml-1'} mr-2"
+              />
+            {:else if volume <= 33}
+              <Volume
+                class="{!visible ? 'absolute' : ''} {toggleModes.clickThrough
+                  ? 'ml-2'
+                  : 'ml-1'} mr-2"
+              />
+            {:else if volume > 33 && volume <= 66}
+              <Volume1
+                class="{!visible ? 'absolute' : ''} {toggleModes.clickThrough
+                  ? 'ml-2'
+                  : 'ml-1'} mr-2"
+              />
+            {:else}
+              <Volume2
+                class="{!visible ? 'absolute' : ''} {toggleModes.clickThrough
+                  ? 'ml-2'
+                  : 'ml-1'} mr-2"
+              />
+            {/if}
+          {:else}
+            <VolumeOff
+              class="{!visible ? 'absolute' : ''} {toggleModes.clickThrough
+                ? 'ml-2'
+                : 'ml-1'} mr-2"
+            />
+          {/if}
+        </button>
+      {/if}
+    </SmoothDiv>
   </div>
 {/if}

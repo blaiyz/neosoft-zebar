@@ -11,6 +11,7 @@
   import SmoothDiv from "./SmoothDiv.svelte";
   import type { MediaSession } from "zebar";
   import { untrack } from "svelte";
+  import { toggleModes } from "$lib/binding_modes.svelte";
 
   let media = $derived(providers.media);
   let mediaTimeout: number | null = null;
@@ -53,15 +54,18 @@
   {#if isOnPrimaryMonitor() && media && shownSession}
     <div
       transition:fly={{ y: 20, duration: config.transitionDuration }}
-      class="flex items-stretch"
+      class="flex items-stretch relative"
     >
-      <button
-        class="transition px-2 hover:text-zb-accent hover:scale-125"
-        aria-label="Previous"
-        onclick={() => media.previous()}
-      >
-        <SkipBack />
-      </button>
+      {#if !toggleModes.clickThrough}
+        <button
+          class="transition hover:text-zb-accent hover:scale-125 relative flex justify-end items-center"
+          aria-label="Previous"
+          onclick={() => media.previous()}
+          transition:fly={{ y: 20, duration: config.transitionDuration }}
+        >
+          <SkipBack class="{toggleModes.clickThrough ? 'absolute' : ''} mx-2" />
+        </button>
+      {/if}
       <button
         class="relative px-1 gap-x-2 overflow-hidden inline-flex items-center justify-center group transition hover:text-zb-accent"
         aria-label="Toggle"
@@ -101,13 +105,20 @@
           </span>
         </SmoothDiv>
       </button>
-      <button
-        class="transition px-2 hover:text-zb-accent hover:scale-125"
-        aria-label="Next"
-        onclick={() => media.next()}
-      >
-        <SkipForward />
-      </button>
+      <SmoothDiv height={false} outerClass="flex justify-end" innerClass="flex justify-end">
+        {#if !toggleModes.clickThrough}
+          <button
+            class="transition h-full hover:text-zb-accent hover:scale-125 relative flex items-center justify-end"
+            aria-label="Next"
+            onclick={() => media.next()}
+            transition:fly={{ y: 20, duration: config.transitionDuration }}
+          >
+            <SkipForward
+              class="{toggleModes.clickThrough ? 'absolute' : ''} mx-2"
+            />
+          </button>
+        {/if}
+      </SmoothDiv>
     </div>
   {/if}
 </SmoothDiv>

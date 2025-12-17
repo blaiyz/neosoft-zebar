@@ -3,25 +3,68 @@ name: Publish to Zebar Marketplace
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g., 1.0.0 or v1.0.0). Leave empty to use latest release."
+        type: string
+        required: false
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Get version
+        id: get-version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -n "${{ github.event.release.tag_name }}" ]; then
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            TAG=$(gh release view --json tagName -q '.tagName')
+            echo "version=$TAG" >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: get-version
     uses: ./.github/workflows/build.yml
     with:
-      version-number: ${{ github.event.release.tag_name }}
+      version-number: ${{ needs.get-version.outputs.version }}
 
   publish:
-    if: github.event.release.draft == false
+    if: github.event_name == 'workflow_dispatch' || github.event.release.draft == false
     runs-on: ubuntu-latest
-    needs: build
+    needs: [get-version, build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get release info
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ needs.get-version.outputs.version }}"
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "url=${{ github.event.release.html_url }}" >> $GITHUB_OUTPUT
+            echo "body=${{ github.event.release.body }}" >> $GITHUB_OUTPUT
+          else
+            RELEASE_JSON=$(gh release view "$TAG" --json body,url)
+            echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
+            echo "body=$(echo "$RELEASE_JSON" | jq -r '.body')" >> $GITHUB_OUTPUT
+          fi
+
       - name: Extract version from tag
         id: version
         run: |
-          TAG="${{ github.event.release.tag_name }}"
+          TAG="${{ needs.get-version.outputs.version }}"
           echo "version=${TAG#v}" >> $GITHUB_OUTPUT
 
       - name: Download build artifact
@@ -64,5 +107,5 @@ jobs:
           zebar publish --pack-config ./build/zpack.json \
           --version-override ${{ steps.version.outputs.version }} \
           --commit-sha $(git rev-parse --short ${{ github.sha }}) \
-          --release-notes "${{ github.event.release.body }}" \
-          --release-url ${{ github.event.release.html_url }}
+          --release-notes "${{ steps.release.outputs.body }}" \
+          --release-url ${{ steps.release.outputs.url }}

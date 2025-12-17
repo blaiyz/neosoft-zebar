@@ -31,7 +31,7 @@
   {#if config.showWeatherSection && weather}
     <div
       class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
-        ? 'pl-2'
+        ? 'pl-1'
         : ''}"
     >
       <span class="text-2xl">

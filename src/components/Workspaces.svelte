@@ -51,7 +51,7 @@
 </script>
 
 {#if glazewm}
-  <div class="flex items-center">
+  <div class="flex items-center h-full">
     <SmoothDiv outerClass="flex justify-end" innerClass="flex items-center">
       {#each glazewm.currentWorkspaces as workspace (workspace.id)}
         {@const globalIndex = glazewm.allWorkspaces.findIndex((ws) =>
@@ -63,9 +63,11 @@
           class="mr-2"
         >
           <Button
-            class="box-border min-w-14 px-2 text-zb-ws-{globalIndex} {workspace.isDisplayed
+            class="h-[2rem] box-border text-zb-ws-{globalIndex} {workspace.isDisplayed
               ? `border-zb-ws-${globalIndex} hover:border-blend-70 active:!border-blend-50`
-              : ''}"
+              : ''} {toggleModes.clickThrough 
+              ? 'aspect-square'
+              : 'min-w-14 px-2'}"
             callback={() =>
               glazewm!.runCommand(`focus --workspace ${workspace.name}`)}
           >
