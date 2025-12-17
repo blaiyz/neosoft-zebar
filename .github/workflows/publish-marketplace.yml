@@ -53,12 +53,12 @@ jobs:
         run: |
           TAG="${{ needs.get-version.outputs.version }}"
           if [ "${{ github.event_name }}" == "release" ]; then
-            echo "url=${{ github.event.release.html_url }}" >> $GITHUB_OUTPUT
-            echo "body=${{ github.event.release.body }}" >> $GITHUB_OUTPUT
+            echo "url='${{ github.event.release.html_url }}'" >> $GITHUB_OUTPUT
+            echo "body=$(echo ${{ github.event.release.body }} | base64 -w 0)" >> $GITHUB_OUTPUT
           else
             RELEASE_JSON=$(gh release view "$TAG" --json body,url)
             echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
-            echo "body=$(echo "$RELEASE_JSON" | jq -r '.body')" >> $GITHUB_OUTPUT
+            echo "body=$(echo "$RELEASE_JSON" | jq -r '.body' | base64 -w 0)" >> $GITHUB_OUTPUT
           fi
 
       - name: Extract version from tag
@@ -107,5 +107,5 @@ jobs:
           zebar publish --pack-config ./build/zpack.json \
           --version-override ${{ steps.version.outputs.version }} \
           --commit-sha $(git rev-parse --short ${{ github.sha }}) \
-          --release-notes "${{ steps.release.outputs.body }}" \
+          --release-notes "$(echo ${{ steps.release.outputs.body }} | base64 --decode)" \
           --release-url ${{ steps.release.outputs.url }}
