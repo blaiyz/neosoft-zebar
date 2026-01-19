@@ -15,7 +15,7 @@ async function release() {
 
     // Run build using static directory
     console.log("🏗️ Running release build...");
-    execSync("vite build", { stdio: "inherit" });
+    execSync("npx vite build", { stdio: "inherit" });
 
     console.log("✅ Release build completed successfully!");
   } catch (error) {
