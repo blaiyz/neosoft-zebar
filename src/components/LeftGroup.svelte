@@ -39,7 +39,7 @@
       return expanded.slice(0, 5);
     }
   }
-  
+
   // Shutdown handler
   let shuttingDown = $state(false);
   async function handlePowerOff() {
@@ -65,7 +65,7 @@
         class="text-zb-icon"
         onclick={() => {
           handlePowerOff();
-        }}  
+        }}
       />
     </Button>
   {/if}
@@ -73,9 +73,13 @@
     <Button class="text-zb-icon">
       <IconHeartFilled
         class="text-zb-icon"
-        onclick={() => { 
-          zebar.shellExec("cmd", ["/c", "start", "https://github.com/blaiyz/neosoft-zebar"]);
-        }}  
+        onclick={() => {
+          zebar.shellExec("cmd", [
+            "/c",
+            "start",
+            "https://github.com/blaiyz/neosoft-zebar"
+          ]);
+        }}
       />
     </Button>
   {/if}

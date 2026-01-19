@@ -22,13 +22,17 @@
   },
   "backgroundEffect": "inherit",
   "enableAutoTiling": true,
-  "showFullDateByDefault": false,
   "clickThroughByDefault": false,
-  "enableVolumeSlider": false,
+  "showShutdownButton": true,
   "showHeartButton": true,
   "showCpuSection": true,
   "showMemorySection": true,
   "showBatterySection": true,
   "showNetworkSection": true,
-  "showWeatherSection": true
+  "extendVolumeSliderByDefault": false,
+  "showWeatherSection": true,
+  "useCelsiusByDefault": true,
+  "showFullDateByDefault": false,
+  "use24hClock": "auto",
+  "showSeconds": false
 }

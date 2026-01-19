@@ -89,7 +89,7 @@
       "description": "Whether to enable built-in automatic tiling of windows.",
       "type": "boolean"
     },
-    "enableVolumeSlider": {
+    "extendVolumeSliderByDefault": {
       "description": "Enable volume slider by default.",
       "type": "boolean"
     },
@@ -120,6 +120,12 @@
     "showNetworkSection": {
       "type": "boolean"
     },
+    "showSeconds": {
+      "type": "boolean"
+    },
+    "showShutdownButton": {
+      "type": "boolean"
+    },
     "showWeatherSection": {
       "type": "boolean"
     },
@@ -130,6 +136,12 @@
     "transitionDuration": {
       "description": "The duration of transitions in milliseconds.",
       "type": "number"
+    },
+    "use24hClock": {
+      "enum": ["auto", false, true]
+    },
+    "useCelsiusByDefault": {
+      "type": "boolean"
     }
   },
   "type": "object"

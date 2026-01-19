@@ -9,7 +9,7 @@
 
   let date = $derived(providers.date);
   let weather = $derived(providers.weather);
-  let useCelsius = $derived(config.showCelsiusByDefault);
+  let useCelsius = $derived(config.useCelsiusByDefault);
 
   let fullDate = $derived(config.showFullDateByDefault);
   const getDate = (date: Date) => {
@@ -17,12 +17,16 @@
     const shortDay = days[date.getDay()];
     return shortDay + " " + date.toLocaleDateString();
   };
- 
- let timeOptions = $derived({
+
+  let timeOptions: Intl.DateTimeFormatOptions = $derived({
     hour: "numeric",
     minute: "2-digit",
-    ...(config.showTimeWith24hClock ? { hour12: false } : {}),
-    ...(config.showTimeWithSeconds ? { second: "numeric" } : {})
+    ...(config.use24hClock === "auto"
+      ? {}
+      : config.use24hClock
+        ? { hour12: false }
+        : { hour12: true }),
+    ...(config.showSeconds ? { second: "numeric" } : {})
   });
 </script>
 
@@ -37,7 +41,9 @@
       onclick={() => (useCelsius = !useCelsius)}
     >
       <div
-        class="truncate flex items-center pr-2 {!isOnPrimaryMonitor() ? 'pl-1' : ''}"
+        class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
+          ? 'pl-1'
+          : ''}"
       >
         <span class="text-2xl">
           {#if weather.status === "clear_day"}
@@ -81,8 +87,8 @@
         class="hover:text-zb-accent"
         onclick={() => (fullDate = !fullDate)}
       >
-        <p class="whitespace-nowrap clock">
-          {date?.new.toLocaleTimeString(undefined, timeOptions)}
+        <p class="whitespace-nowrap tabular-nums">
+          {date?.new.toLocaleTimeString(undefined, timeOptions).toUpperCase()}
           {#if fullDate}
             -
             {date && getDate(date?.new)}

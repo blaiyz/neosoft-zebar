@@ -59,8 +59,3 @@
   --bg-focused: var(--tau-highlight-high) / 0.4;
   --bg-unfocused: var(--tau-overlay) / 0.5;
 }
-
-/* Prevent width jitter when seconds update */
-.clock {
-  font-variant-numeric: tabular-nums;
-}
