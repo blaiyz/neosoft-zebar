@@ -1,6 +1,6 @@
 {
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.1.1/resources/zpack-schema.json",
-  "name": "neosoft-nebar",
+  "name": "neosoft-zebar",
   "version": "1.2.6",
   "description": "A highly customizable (and smooooooth) Zebar build",
   "tags": [
@@ -15,7 +15,7 @@
     "volume"
   ],
   "previewImages": ["misc/fullscreen.png", "misc/taskbar-integration.png"],
-  "repositoryUrl": "https://github.com/blaiyz/zeosoft-nebar",
+  "repositoryUrl": "https://github.com/blaiyz/neosoft-zebar",
   "widgets": [
     {
       "name": "Default",
