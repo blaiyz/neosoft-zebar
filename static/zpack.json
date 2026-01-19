@@ -1,8 +1,8 @@
 {
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.1.1/resources/zpack-schema.json",
-  "name": "neosoft-zebar",
-  "version": "1.2.5",
-  "description": "A highly customizable (and smooooooth) Zebar build",
+  "name": "zeosoft-nebar",
+  "version": "0.6.9",
+  "description": "Silly fork of a highly customizable (and smooooooth) Zebar build",
   "tags": [
     "glazewm",
     "media",
@@ -15,10 +15,10 @@
     "volume"
   ],
   "previewImages": ["misc/fullscreen.png", "misc/taskbar-integration.png"],
-  "repositoryUrl": "https://github.com/blaiyz/neosoft-zebar",
+  "repositoryUrl": "https://github.com/tylerdotrar/zeosoft-nebar",
   "widgets": [
     {
-      "name": "default",
+      "name": "Default",
       "htmlPath": "./index.html",
       "zOrder": "normal",
       "shownInTaskbar": false,
@@ -35,12 +35,16 @@
           {
             "program": "cmd",
             "argsRegex": "\\/c start https:\\/\\/github\\.com\\/blaiyz\\/neosoft-zebar"
+          },
+          {
+            "program": "shutdown",
+            "argsRegex": ".*"
           }
         ]
       },
       "presets": [
         {
-          "name": "default",
+          "name": "Default",
           "anchor": "top_left",
           "offsetX": "0px",
           "offsetY": "0px",

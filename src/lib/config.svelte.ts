@@ -94,6 +94,10 @@ export interface Config {
   showBatterySection: boolean;
   showNetworkSection: boolean;
   showWeatherSection: boolean;
+  showShutdownButton: boolean; // Enable computer shutdown handler.
+  showCelsiusByDefault: boolean; // Toggle temperature unit.
+  showTimeWith24hClock: boolean; // Use military time.
+  showTimeWithSeconds: boolean; // Show seconds in the clock.
 }
 
 export type AttachmentDirection = "top" | "bottom" | "floating";
