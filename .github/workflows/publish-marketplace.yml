@@ -50,11 +50,12 @@ jobs:
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_BODY: ${{ github.event.release.body }}
         run: |
           TAG="${{ needs.get-version.outputs.version }}"
           if [ "${{ github.event_name }}" == "release" ]; then
             echo "url='${{ github.event.release.html_url }}'" >> $GITHUB_OUTPUT
-            echo "body=$(echo ${{ github.event.release.body }} | base64 -w 0)" >> $GITHUB_OUTPUT
+            echo "body=$(echo "$RELEASE_BODY" | base64 -w 0)" >> $GITHUB_OUTPUT
           else
             RELEASE_JSON=$(gh release view "$TAG" --json body,url)
             echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
