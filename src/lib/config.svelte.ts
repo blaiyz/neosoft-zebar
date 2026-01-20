@@ -84,7 +84,7 @@ export interface Config {
   /**
    * Enable volume slider by default.
    */
-  enableVolumeSlider: boolean;
+  extendVolumeSliderByDefault: boolean;
 
   // Individual section toggles
 
@@ -94,6 +94,10 @@ export interface Config {
   showBatterySection: boolean;
   showNetworkSection: boolean;
   showWeatherSection: boolean;
+  showShutdownButton: boolean;
+  useCelsiusByDefault: boolean;
+  use24hClock: true | false | "auto";
+  showSeconds: boolean;
 }
 
 export type AttachmentDirection = "top" | "bottom" | "floating";

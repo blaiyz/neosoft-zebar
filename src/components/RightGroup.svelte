@@ -9,6 +9,7 @@
 
   let date = $derived(providers.date);
   let weather = $derived(providers.weather);
+  let useCelsius = $derived(config.useCelsiusByDefault);
 
   let fullDate = $derived(config.showFullDateByDefault);
   const getDate = (date: Date) => {
@@ -17,10 +18,16 @@
     return shortDay + " " + date.toLocaleDateString();
   };
 
-  const timeOptions: Intl.DateTimeFormatOptions = {
+  let timeOptions: Intl.DateTimeFormatOptions = $derived({
     hour: "numeric",
-    minute: "2-digit"
-  };
+    minute: "2-digit",
+    ...(config.use24hClock === "auto"
+      ? {}
+      : config.use24hClock
+        ? { hour12: false }
+        : { hour12: true }),
+    ...(config.showSeconds ? { second: "numeric" } : {})
+  });
 </script>
 
 <div class="flex flex-row items-center h-full">
@@ -29,40 +36,49 @@
     <VolumeControl />
   {/if}
   {#if config.showWeatherSection && weather}
-    <div
-      class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
-        ? 'pl-1'
-        : ''}"
+    <button
+      class="hover:text-zb-accent"
+      onclick={() => (useCelsius = !useCelsius)}
     >
-      <span class="text-2xl">
-        {#if weather.status === "clear_day"}
-          <i class="nf nf-weather-day_sunny"></i>
-        {:else if weather.status === "clear_night"}
-          <i class="nf nf-weather-night_clear"></i>
-        {:else if weather.status === "cloudy_day"}
-          <i class="nf nf-weather-day_cloudy"></i>
-        {:else if weather.status === "cloudy_night"}
-          <i class="nf nf-weather-night_alt_cloudy"></i>
-        {:else if weather.status === "light_rain_day"}
-          <i class="nf nf-weather-day_sprinkle"></i>
-        {:else if weather.status === "light_rain_night"}
-          <i class="nf nf-weather-night_alt_sprinkle"></i>
-        {:else if weather.status === "heavy_rain_day"}
-          <i class="nf nf-weather-day_rain"></i>
-        {:else if weather.status === "heavy_rain_night"}
-          <i class="nf nf-weather-night_alt_rain"></i>
-        {:else if weather.status === "snow_day"}
-          <i class="nf nf-weather-day_snow"></i>
-        {:else if weather.status === "snow_night"}
-          <i class="nf nf-weather-night_alt_snow"></i>
-        {:else if weather.status === "thunder_day"}
-          <i class="nf nf-weather-day_lightning"></i>
-        {:else if weather.status === "thunder_night"}
-          <i class="nf nf-weather-night_alt_lightning"></i>
+      <div
+        class="truncate flex items-center pr-2 {!isOnPrimaryMonitor()
+          ? 'pl-1'
+          : ''}"
+      >
+        <span class="text-2xl">
+          {#if weather.status === "clear_day"}
+            <i class="nf nf-weather-day_sunny"></i>
+          {:else if weather.status === "clear_night"}
+            <i class="nf nf-weather-night_clear"></i>
+          {:else if weather.status === "cloudy_day"}
+            <i class="nf nf-weather-day_cloudy"></i>
+          {:else if weather.status === "cloudy_night"}
+            <i class="nf nf-weather-night_alt_cloudy"></i>
+          {:else if weather.status === "light_rain_day"}
+            <i class="nf nf-weather-day_sprinkle"></i>
+          {:else if weather.status === "light_rain_night"}
+            <i class="nf nf-weather-night_alt_sprinkle"></i>
+          {:else if weather.status === "heavy_rain_day"}
+            <i class="nf nf-weather-day_rain"></i>
+          {:else if weather.status === "heavy_rain_night"}
+            <i class="nf nf-weather-night_alt_rain"></i>
+          {:else if weather.status === "snow_day"}
+            <i class="nf nf-weather-day_snow"></i>
+          {:else if weather.status === "snow_night"}
+            <i class="nf nf-weather-night_alt_snow"></i>
+          {:else if weather.status === "thunder_day"}
+            <i class="nf nf-weather-day_lightning"></i>
+          {:else if weather.status === "thunder_night"}
+            <i class="nf nf-weather-night_alt_lightning"></i>
+          {/if}
+        </span>
+        {#if useCelsius}
+          {Math.round(weather.celsiusTemp)}°C
+        {:else}
+          {Math.round(weather.fahrenheitTemp)}°F
         {/if}
-      </span>
-      {Math.round(weather.celsiusTemp)}°
-    </div>
+      </div>
+    </button>
   {/if}
   {#if !isOnPrimaryMonitor() || !config.taskbarIntegration.enabled}
     <PointFilled class="mr-2" />
@@ -71,8 +87,8 @@
         class="hover:text-zb-accent"
         onclick={() => (fullDate = !fullDate)}
       >
-        <p class="whitespace-nowrap">
-          {date?.new.toLocaleTimeString(undefined, timeOptions)}
+        <p class="whitespace-nowrap tabular-nums">
+          {date?.new.toLocaleTimeString(undefined, timeOptions).toUpperCase()}
           {#if fullDate}
             -
             {date && getDate(date?.new)}

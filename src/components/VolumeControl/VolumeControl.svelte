@@ -1,18 +1,18 @@
 <script lang="ts">
+  import { toggleModes } from "$lib/binding_modes.svelte";
+  import { config, configLoaded } from "$lib/config.svelte";
   import { providers } from "$lib/providers.svelte";
-  import VolumeX from "@lucide/svelte/icons/volume-x";
+  import ChevronLeft from "@lucide/svelte/icons/chevron-left";
   import Volume from "@lucide/svelte/icons/volume";
   import Volume1 from "@lucide/svelte/icons/volume-1";
   import Volume2 from "@lucide/svelte/icons/volume-2";
   import VolumeOff from "@lucide/svelte/icons/volume-off";
-  import ChevronLeft from "@lucide/svelte/icons/chevron-left";
+  import VolumeX from "@lucide/svelte/icons/volume-x";
+  import { onMount } from "svelte";
   import RangeSlider from "svelte-range-slider-pips";
+  import { fly } from "svelte/transition";
   import SmoothDiv from "../SmoothDiv.svelte";
   import "./VolumeControl.css";
-  import { toggleModes } from "$lib/binding_modes.svelte";
-  import { fly } from "svelte/transition";
-  import { config, configLoaded } from "$lib/config.svelte";
-  import { onMount } from "svelte";
 
   let audio = $derived(providers.audio);
   let device = $derived(audio?.defaultPlaybackDevice);
@@ -32,7 +32,7 @@
 
   onMount(async () => {
     await configLoaded;
-    if (config.enableVolumeSlider) {
+    if (config.extendVolumeSliderByDefault) {
       sliderOpen = true;
     }
   });

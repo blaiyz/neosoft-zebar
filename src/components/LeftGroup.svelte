@@ -21,7 +21,7 @@
   import * as zebar from "zebar";
 
   import IconHeartFilled from "@tabler/icons-svelte/icons/heart-filled";
-  // import Test from "./Test.svelte";
+  import IconPowerButton from "@tabler/icons-svelte/icons/power";
   import { config } from "$lib/config.svelte";
   import { providers } from "$lib/providers.svelte";
 
@@ -39,12 +39,39 @@
       return expanded.slice(0, 5);
     }
   }
+
+  // Shutdown handler
+  let shuttingDown = $state(false);
+  async function handlePowerOff() {
+    try {
+      if (shuttingDown) {
+        await zebar.shellExec("shutdown", ["/a"]);
+        shuttingDown = false;
+      } else {
+        await zebar.shellExec("shutdown", ["/s"]);
+        shuttingDown = true;
+      }
+    } catch (err) {
+      console.error("Shutdown command failed", err);
+      shuttingDown = false;
+    }
+  }
 </script>
 
 <div class="flex flex-row gap-3 items-center">
+  {#if config.showShutdownButton}
+    <Button class="text-zb-icon">
+      <IconPowerButton
+        class="text-zb-icon"
+        onclick={() => {
+          handlePowerOff();
+        }}
+      />
+    </Button>
+  {/if}
   {#if config.showHeartButton}
-    <Button class="text-zb-icon"
-      ><IconHeartFilled
+    <Button class="text-zb-icon">
+      <IconHeartFilled
         class="text-zb-icon"
         onclick={() => {
           zebar.shellExec("cmd", [
@@ -53,8 +80,13 @@
             "https://github.com/blaiyz/neosoft-zebar"
           ]);
         }}
-      /></Button
-    >
+      />
+    </Button>
+  {/if}
+  {#if config.showCpuSection}
+    <Meter class="stroke-zb-cpu h-8" percent={Math.round(cpu?.usage ?? 0)}>
+      <Cpu />
+    </Meter>
   {/if}
   {#if config.showMemorySection}
     <Meter
@@ -62,11 +94,6 @@
       percent={Math.round(memory?.usage ?? 0)}
     >
       <MemoryStick />
-    </Meter>
-  {/if}
-  {#if config.showCpuSection}
-    <Meter class="stroke-zb-cpu h-8" percent={Math.round(cpu?.usage ?? 0)}>
-      <Cpu />
     </Meter>
   {/if}
   {#if config.showBatterySection && battery?.state}
@@ -139,10 +166,4 @@
       </div>
     {/if}
   {/if}
-  <!-- <Test /> -->
-  <!-- <div class="max-w-72 text-sm max-h-4">
-    <div class="overflow-scroll">
-      config: {JSON.stringify(config)}
-    </div>
-  </div> -->
 </div>
