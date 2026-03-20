@@ -101,13 +101,19 @@ General configuration is defined in `config.json`, which ships together with the
   "backgroundEffect": "inherit",
   "enableAutoTiling": true,
   "clickThroughByDefault": false,
-  "showFullDateByDefault": false,
+  "showShutdownButton": true,
   "showHeartButton": true,
   "showCpuSection": true,
   "showMemorySection": true,
   "showBatterySection": true,
   "showNetworkSection": true,
-  "showWeatherSection": true
+  "extendVolumeSliderByDefault": false,
+  "showWeatherSection": true,
+  "useCelsiusByDefault": true,
+  "showFullDateByDefault": false,
+  "use24hClock": "auto",
+  "showSeconds": false,
+  "useThinnerWorkspaceButtons": false
 }
 ```
 

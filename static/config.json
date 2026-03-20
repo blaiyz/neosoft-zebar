@@ -34,5 +34,6 @@
   "useCelsiusByDefault": true,
   "showFullDateByDefault": false,
   "use24hClock": "auto",
-  "showSeconds": false
+  "showSeconds": false,
+  "useThinnerWorkspaceButtons": false
 }

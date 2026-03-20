@@ -97,18 +97,17 @@
       <Group
         leftCurve={!config.attachSides}
         outerClass="h-full justify-self-start"
-        innerClass="h-full px-4 {isOnPrimaryMonitor() ? 'pl-zlby' : ''}"
+        innerClass="h-full px-4 flex items-center {isOnPrimaryMonitor()
+          ? 'pl-zlby'
+          : ''}"
       >
         <LeftGroup />
       </Group>
-      <div
-        class="h-full {config.taskbarIntegration.enabled
-          ? 'grid grid-cols-[1fr_auto_1fr] grid-rows-1'
-          : 'flex justify-center'} items-center"
-      >
+      <div class="h-full flex items-center">
         <Group
           rightCurve={!config.taskbarIntegration.enabled}
-          outerClass="h-full justify-self-end"
+          outerClass="h-full justify-self-end{config.taskbarIntegration
+            .enabled && ' [&&]:absolute translate-x-[-99%]'}"
           innerClass="h-full {config.taskbarIntegration.enabled
             ? 'pl-3'
             : 'px-3'}"

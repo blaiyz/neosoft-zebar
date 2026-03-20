@@ -14,8 +14,9 @@
   import Wifi from "@lucide/svelte/icons/wifi";
   import WifiHigh from "@lucide/svelte/icons/wifi-high";
   import WifiLow from "@lucide/svelte/icons/wifi-low";
-  import WifiOff from "@lucide/svelte/icons/wifi-off";
+  import GlobeOff from "@lucide/svelte/icons/globe-off";
   import WifiZero from "@lucide/svelte/icons/wifi-zero";
+  import CircleQuestionMark from "@lucide/svelte/icons/circle-question-mark";
   import Button from "./Button.svelte";
   import Meter from "./Meter.svelte";
   import * as zebar from "zebar";
@@ -117,25 +118,29 @@
     </Meter>
   {/if}
   {#if config.showNetworkSection && isOnPrimaryMonitor()}
-    <div class="flex flex-row pl-2 items-center gap-1">
-      {#if network?.defaultInterface?.type === "ethernet"}
-        <EthernetPort />
-      {:else if network?.defaultInterface!.type === "wifi"}
-        {#if network.defaultGateway!.signalStrength! >= 75}
-          <Wifi />
-        {:else if network.defaultGateway!.signalStrength! >= 50}
-          <WifiHigh />
-        {:else if network.defaultGateway!.signalStrength! >= 25}
-          <WifiLow />
+    {#if config.showNetworkSection !== "statistics"}
+      <div class="flex flex-row pl-2 items-center gap-1">
+        {#if network?.defaultInterface?.type === "ethernet"}
+          <EthernetPort />
+        {:else if network?.defaultInterface?.type === "wifi"}
+          {#if network.defaultGateway!.signalStrength! >= 75}
+            <Wifi />
+          {:else if network.defaultGateway!.signalStrength! >= 50}
+            <WifiHigh />
+          {:else if network.defaultGateway!.signalStrength! >= 25}
+            <WifiLow />
+          {:else}
+            <WifiZero />
+          {/if}
+          {network.defaultGateway?.ssid}
+        {:else if network?.defaultInterface!.type}
+          <CircleQuestionMark />
         {:else}
-          <WifiZero />
+          <GlobeOff />
         {/if}
-        {network.defaultGateway?.ssid}
-      {:else}
-        <WifiOff />
-      {/if}
-    </div>
-    {#if network?.traffic}
+      </div>
+    {/if}
+    {#if config.showNetworkSection !== "interface" && network?.traffic}
       <div class="flex flex-row items-center gap-2 font-mono">
         {#if network.traffic.received}
           <div class="flex flex-row items-center">

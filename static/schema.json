@@ -118,7 +118,7 @@
       "type": "boolean"
     },
     "showNetworkSection": {
-      "type": "boolean"
+      "enum": [false, "interface", "statistics", true]
     },
     "showSeconds": {
       "type": "boolean"
@@ -141,6 +141,9 @@
       "enum": ["auto", false, true]
     },
     "useCelsiusByDefault": {
+      "type": "boolean"
+    },
+    "useThinnerWorkspaceButtons": {
       "type": "boolean"
     }
   },

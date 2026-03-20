@@ -92,12 +92,14 @@ export interface Config {
   showCpuSection: boolean;
   showMemorySection: boolean;
   showBatterySection: boolean;
-  showNetworkSection: boolean;
+  showNetworkSection: boolean | "interface" | "statistics";
   showWeatherSection: boolean;
   showShutdownButton: boolean;
   useCelsiusByDefault: boolean;
   use24hClock: true | false | "auto";
   showSeconds: boolean;
+
+  useThinnerWorkspaceButtons: boolean;
 }
 
 export type AttachmentDirection = "top" | "bottom" | "floating";

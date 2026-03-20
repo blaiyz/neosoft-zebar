@@ -14,6 +14,9 @@
 @layer custom-base {
   body {
     overflow: hidden;
+  }
+
+  :root {
     font-size: var(--font-size);
   }
 }

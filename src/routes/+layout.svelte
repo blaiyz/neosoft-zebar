@@ -10,6 +10,9 @@
   });
 </script>
 
-<div style="--transition-duration: {config.transitionDuration}ms;">
+<div
+  class="h-full"
+  style="--transition-duration: {config.transitionDuration}ms;"
+>
   {@render children()}
 </div>
