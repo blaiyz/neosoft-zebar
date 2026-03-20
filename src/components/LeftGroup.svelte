@@ -24,6 +24,7 @@
   import IconPowerButton from "@tabler/icons-svelte/icons/power";
   import { config } from "$lib/config.svelte";
   import { providers } from "$lib/providers.svelte";
+  import Test from "./Test.svelte";
 
   let memory = $derived(providers.memory);
   let cpu = $derived(providers.cpu);
@@ -166,4 +167,7 @@
       </div>
     {/if}
   {/if}
+  <!-- {#if isOnPrimaryMonitor() }
+    <Test />
+  {/if} -->
 </div>

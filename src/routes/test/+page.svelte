@@ -1,18 +1,12 @@
 <script lang="ts">
-  import { RemoteState } from "$lib/remote_state.svelte";
+  import { RemoteState } from "$lib/widgets/remote_state.svelte";
   import { onDestroy, onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import Button from "$comp/Button.svelte";
+  import * as zebar from "zebar";
 
-  let counter = RemoteState("counter", 0, onMount, onDestroy);
-  let enabled = RemoteState("enabled", true, onMount, onDestroy);
-  let shown = RemoteState("shown", true, onMount, onDestroy);
-
-  $effect(() => {
-    const window = getCurrentWindow();
-    console.log(enabled.value);
-    window.setEnabled(enabled.value);
-  });
+  let counter = RemoteState("counter", 0, onMount, onDestroy, true);
+  let shown = RemoteState("shown", true, onMount, onDestroy, true);
 
   $effect(() => {
     const window = getCurrentWindow();
