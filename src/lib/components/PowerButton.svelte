@@ -21,10 +21,12 @@
   }
 </script>
 
-<Button class="text-zb-icon">
-  <IconPowerButton
-    onclick={() => {
-      void togglePowerOff();
-    }}
-  />
+<Button
+  class="text-zb-icon"
+  label="Shut down"
+  callback={() => {
+    void togglePowerOff();
+  }}
+>
+  <IconPowerButton />
 </Button>

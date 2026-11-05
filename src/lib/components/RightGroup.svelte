@@ -1,6 +1,6 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import Clock from "./Clock.svelte";
   import NowPlaying from "./NowPlaying.svelte";
   import VolumeControl from "./VolumeControl/VolumeControl.svelte";

@@ -3,7 +3,7 @@
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
   import { config } from "#lib/state/config.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
-  import { getWindows } from "#lib/utils/glaze_wm_utils.svelte.ts";
+  import { getWindows } from "#lib/utils/glaze_wm_utils.ts";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
   import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
   import { TilingDirection } from "glazewm";

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import BatteryMeter from "./BatteryMeter.svelte";
   import HeartButton from "./HeartButton.svelte";
   import NetworkStatus from "./NetworkStatus.svelte";

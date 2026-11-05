@@ -1,7 +1,7 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import type { WeatherStatus } from "zebar";
 
   const STATUS_ICONS: Record<WeatherStatus, string> = {

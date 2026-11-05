@@ -14,7 +14,7 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 
 - Module-level state in `src/lib/` exists once per monitor. `providers.glazewm` reports from that monitor's point of view (`currentMonitor`, `currentWorkspaces`).
 - `src/lib/state/autotiler.svelte.ts` ignores focus changes on other monitors, so exactly one instance reacts to each one.
-- `isOnPrimaryMonitor()` treats the monitor at (0, 0) as primary.
+- `isOnPrimaryMonitor()` compares Tauri's current and primary monitors the way Zebar does, by name, position and size, so it works without GlazeWM. It starts as `false` and rechecks when the window moves or resizes.
 - Each instance sets its own click-through state.
 - `RemoteState` (`src/lib/state/remote_state.svelte.ts`) wraps a value in a proxy that broadcasts writes through Tauri events, for state shared between windows. Only the `test` route uses it.
 
@@ -23,7 +23,7 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 `src/app.html` links `config.css` and preloads `config.json`, both relative to the page. Then:
 
 1. `src/routes/+page.svelte` runs `initAutotiler()` and `initBindingModes()` during component init. These only register `$effect`s, which don't run during prerender.
-2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group, and copies each output into the `providers` `$state`.
+2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group with only the providers its sections need, and copies each output into the `providers` `$state`.
 3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it with the Zod schema, which fills in the defaults, and assigns the result to the `config` `$state`. On any failure it logs to the console and leaves the defaults in place. `configLoaded` resolves either way and never rejects.
 
 The UI renders before all of this finishes, with defaults and `null` providers, so components guard with `{#if}` or optional chaining.
@@ -37,6 +37,7 @@ Shared state is in `.svelte.ts` modules in `src/lib/state/`, so it can use runes
 - `config.svelte.ts`: `config`, `configLoaded`, `loadConfig`.
 - `providers.svelte.ts`: `providers`, `initProviders`. Components take what they need with `$derived(providers.x)`.
 - `binding_modes.svelte.ts`: `toggleModes`.
+- `monitor.svelte.ts`: `initMonitor`, `isOnPrimaryMonitor`.
 
 Local UI state stays in components. `SmoothDiv` animates size changes using a `Spring` driven by `transitionDuration`.
 

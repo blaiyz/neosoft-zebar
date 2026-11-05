@@ -4,10 +4,19 @@
  * `vite.config.ts` aliases `zebar` to this file in the `mock` mode, so the bar
  * renders in a normal browser with fixed data and hot reload. Nothing here runs
  * in a real build. It covers only what the bar uses, and the controls change
- * this fake state rather than the system.
+ * this fake state rather than the system. Tauri's own calls are answered here too,
+ * so the bar believes it is on the primary monitor.
  */
 import zpack from "#static/zpack.json";
+import { mockIPC } from "@tauri-apps/api/mocks";
 import { ContainerType } from "glazewm";
+
+const MONITOR = {
+  name: "Mock monitor",
+  scaleFactor: 1,
+  position: { x: 0, y: 0 },
+  size: { width: 1920, height: 1080 }
+};
 
 const WORKSPACE_NAMES = ["1", "2", "3"];
 const windows = ["firefox", "code", "windowsterminal"].map(
@@ -134,7 +143,9 @@ export function currentWidget() {
     tauriWindow: {
       setEffects: async () => {},
       clearEffects: async () => {},
-      setIgnoreCursorEvents: async () => {}
+      setIgnoreCursorEvents: async () => {},
+      onMoved: async () => {},
+      onResized: async () => {}
     }
   };
 }
@@ -146,6 +157,9 @@ export function shellExec(program: string, args: string[]) {
 
 // In Zebar the page fills a window with the preset's height, over the desktop.
 if (typeof document !== "undefined") {
+  mockIPC(<T>(command: string) =>
+    Promise.resolve((command.endsWith("_monitor") ? MONITOR : null) as T)
+  );
   document.body.style.height = zpack.widgets[0]?.presets[0]?.height ?? "100%";
   document.documentElement.style.background = "#1e4f8a";
 }
