@@ -24,3 +24,9 @@ vite.config.ts.timestamp-*
 dev_static
 static/misc
 static/README.md
+
+# Private working notes, see CLAUDE.md
+/notes/
+
+# Local Claude Code settings
+.claude/settings.local.json
