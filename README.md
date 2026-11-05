@@ -18,7 +18,7 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 
 ## 🖼️ Showcase
 
-![fullscreen](./misc/fullscreen.png)
+![fullscreen](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/fullscreen.png)
 
 https://github.com/user-attachments/assets/f1c8f09f-aa07-4077-890b-8d1162ef65af
 
@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/47b0a9ae-4f7d-4784-a224-cdf0b10943aa
 
 ### Taskbar Integration
 
-![Taskbar Integration](./misc/taskbar-integration.png)
+![Taskbar Integration](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/taskbar-integration.png)
 
 ## 🚀 Getting Started
 

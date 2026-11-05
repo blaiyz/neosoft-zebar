@@ -79,12 +79,13 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 - `pnpm dev` runs `vite build --watch` in the `dev` mode. `vite.config.ts` wraps the adapter in that mode, so each build ends by copying `dev_static/` over `build/`. A developer's personal configuration ends up there, and anything missing from it keeps the `static/` version. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
 - The last step of a `dev` build writes `dev-build.txt`. `src/lib/dev_reload.ts`, which only exists in that mode, polls the file and reloads the page when it changes. Being a file in the pack, it needs no server, port or CORS.
 - `pnpm dev:once` runs the same build once.
-- `scripts/build.js` (`pnpm build`) copies `README.md` and `misc/` into `static/` for marketplace preview images, then builds.
+- `scripts/build.js` (`pnpm build`) copies `README.md` and `LICENSE` into `static/`, because `zebar publish` only packs them from the root of the pack, then builds. Marketplace preview images are small copies in `static/preview/`. The full-size screenshots stay in `misc/`, outside the package, and the README links to them on GitHub.
 - `pnpm dev:mock` runs the Vite dev server in the `mock` mode, where `vite.config.ts` aliases `zebar` to `src/lib/mock/zebar.ts`. The real package throws outside Zebar, so this is what lets the UI run in a browser. Its data is fixed, and it's never part of a build.
 
 ## CI and releases
 
 - `ci.yml` runs `pnpm lint`, `pnpm check` and the build on pushes to `main` and on pull requests. The build is `build.yml`, a reusable workflow, so CI, `release.yml` and `publish-marketplace.yml` all build the same way. The composite action in `.github/actions/setup` installs pnpm, Node and the locked dependencies.
+- `publish-rehearsal.yml` runs on pull requests that touch packaging, or by hand. It runs `zebar publish` from the CLI build in `.github/actions/zebar-cli` against `scripts/publish_stub.ts`, a local stand-in that checks the form fields and the tarball. Nothing reaches the marketplace, and the marketplace's own validation isn't covered.
 - `release.yml` is started by hand. It builds, zips `build/` and creates a GitHub release.
 - `publish-marketplace.yml` runs when a release is published, or by hand. It downloads a pinned Zebar build and runs `zebar publish` with `ZEBAR_PUBLISH_TOKEN`, passing the version from the tag.
 

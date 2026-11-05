@@ -1,0 +1,31 @@
+name: Set up the Zebar CLI
+description: Install a pinned Zebar build and start the virtual display it needs to run
+
+runs:
+  using: composite
+  steps:
+    - name: Download Zebar
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: gh release download v3.1.1 --repo glzr-io/zebar --pattern '*x64.deb' --dir "$RUNNER_TEMP/zebar"
+      shell: bash
+
+    - name: Install Zebar dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libappindicator3-1 libwebkit2gtk-4.1-0 xvfb
+      shell: bash
+
+    - name: Extract Zebar CLI
+      run: |
+        dpkg-deb -x "$RUNNER_TEMP"/zebar/*x64.deb "$RUNNER_TEMP/zebar/extracted"
+        sudo install -m 755 "$RUNNER_TEMP/zebar/extracted/usr/bin/zebar" /usr/local/bin/zebar
+      shell: bash
+
+    - name: Start the display
+      run: |
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 2
+        echo "DISPLAY=:99" >> "$GITHUB_ENV"
+        DISPLAY=:99 zebar --version
+      shell: bash
