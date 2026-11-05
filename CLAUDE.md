@@ -17,7 +17,7 @@ The package manager is pnpm. There is no test suite.
 - `pnpm install`: install dependencies, then `svelte-kit sync` generates the base `tsconfig.json` that type checking and linting need.
 - `pnpm dev`: watches and rebuilds into `build/` using `dev_static/` instead of `static/`. The widget reloads itself after each build. Changes to `zpack.json` still need a Zebar reload.
 - `pnpm dev:once`: the same build, once.
-- `pnpm dev:mock`: Vite dev server with hot reload, for working on the UI in a normal browser. `src/lib/mock/zebar.ts` replaces the `zebar` package with fixed fake data, and it uses `static/`, not `dev_static/`. Nothing it does reaches GlazeWM or the system.
+- `pnpm dev:mock`: Vite dev server with hot reload, for working on the UI in a normal browser. `src/lib/mock/zebar.ts` replaces the `zebar` package with fixed fake data and answers Tauri's monitor calls, and it uses `static/`, not `dev_static/`. Nothing it does reaches GlazeWM or the system.
 - `pnpm build`: release build into `build/` using `static/`. Also copies `README.md` and `misc/` into `static/` (both gitignored there).
 - `pnpm lint`: `prettier --check .` and `eslint .`. This is what CI enforces, and Prettier covers Markdown too, including `CLAUDE.md`, `docs/` and `.claude/`.
 - `pnpm format`: `prettier --write .`, which also sorts Tailwind classes, in `class` and `innerClass`.

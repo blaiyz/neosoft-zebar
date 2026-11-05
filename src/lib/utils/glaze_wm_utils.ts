@@ -4,18 +4,6 @@ import {
   type Window,
   type Workspace
 } from "glazewm";
-import { providers } from "#lib/state/providers.svelte.ts";
-
-const isOnPrimaryMonitorState = $derived.by(() => {
-  const glazewm = providers.glazewm;
-  const currentMonitor = glazewm?.currentMonitor;
-
-  return !!currentMonitor && currentMonitor.x === 0 && currentMonitor.y === 0;
-});
-
-export function isOnPrimaryMonitor(): boolean {
-  return isOnPrimaryMonitorState;
-}
 
 /**
  * Returns all windows in the given workspace

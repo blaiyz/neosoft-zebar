@@ -1,9 +1,9 @@
 <script lang="ts">
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
   import { config } from "#lib/state/config.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { secondsToHms } from "#lib/utils/format.ts";
-  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import Pause from "@lucide/svelte/icons/pause";
   import Play from "@lucide/svelte/icons/play";
   import SkipBack from "@lucide/svelte/icons/skip-back";

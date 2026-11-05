@@ -7,8 +7,11 @@
   import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
   import { config, configLoaded } from "#lib/state/config.svelte.ts";
+  import {
+    initMonitor,
+    isOnPrimaryMonitor
+  } from "#lib/state/monitor.svelte.ts";
   import { initProviders, providers } from "#lib/state/providers.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import { applyBackgroundEffect } from "#lib/window_effects.ts";
   import { onMount } from "svelte";
 
@@ -21,6 +24,7 @@
   initBindingModes();
 
   onMount(() => {
+    initMonitor();
     void initProviders();
     void configLoaded.then(({ backgroundEffect }) =>
       applyBackgroundEffect(backgroundEffect)

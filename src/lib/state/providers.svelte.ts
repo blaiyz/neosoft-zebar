@@ -6,23 +6,46 @@ import {
   type ProviderGroupConfig
 } from "zebar";
 
-type RefreshIntervals = Config["providersConfig"]["refreshIntervals"];
+/** Sections that can be turned off take their providers with them. */
+function createProviderConfig(config: Config) {
+  const { refreshIntervals } = config.providersConfig;
 
-function createProviderConfig(refreshIntervals: RefreshIntervals) {
   return {
-    battery: { type: "battery", refreshInterval: refreshIntervals.battery },
-    cpu: { type: "cpu", refreshInterval: refreshIntervals.cpu },
     date: { type: "date" },
     glazewm: { type: "glazewm" },
-    memory: { type: "memory", refreshInterval: refreshIntervals.memory },
-    network: { type: "network", refreshInterval: refreshIntervals.network },
-    weather: { type: "weather", refreshInterval: refreshIntervals.weather },
     media: { type: "media" },
-    audio: { type: "audio" }
+    audio: { type: "audio" },
+    ...(config.showBatterySection && {
+      battery: {
+        type: "battery" as const,
+        refreshInterval: refreshIntervals.battery
+      }
+    }),
+    ...(config.showCpuSection && {
+      cpu: { type: "cpu" as const, refreshInterval: refreshIntervals.cpu }
+    }),
+    ...(config.showMemorySection && {
+      memory: {
+        type: "memory" as const,
+        refreshInterval: refreshIntervals.memory
+      }
+    }),
+    ...(config.showNetworkSection !== false && {
+      network: {
+        type: "network" as const,
+        refreshInterval: refreshIntervals.network
+      }
+    }),
+    ...(config.showWeatherSection && {
+      weather: {
+        type: "weather" as const,
+        refreshInterval: refreshIntervals.weather
+      }
+    })
   } satisfies ProviderGroupConfig;
 }
 
-type ProviderConfig = ReturnType<typeof createProviderConfig>;
+type ProviderConfig = Required<ReturnType<typeof createProviderConfig>>;
 
 const providers: ProviderGroup<ProviderConfig>["outputMap"] = $state({
   battery: null,
@@ -37,16 +60,14 @@ const providers: ProviderGroup<ProviderConfig>["outputMap"] = $state({
 });
 
 async function initProviders() {
-  const { providersConfig } = await configLoaded;
-  const providerGroup = createProviderGroup(
-    createProviderConfig(providersConfig.refreshIntervals)
-  );
+  const config = await configLoaded;
+  const providerGroup = createProviderGroup(createProviderConfig(config));
 
   providerGroup.onOutput((outputMap) => {
     Object.assign(providers, outputMap);
   });
 
-  if (providersConfig.enableErrorLogging) {
+  if (config.providersConfig.enableErrorLogging) {
     providerGroup.onError((error) => {
       console.error("Provider error:", error);
     });
