@@ -61,12 +61,11 @@ Download `neosoft-zebar.zip` from the latest release. Extract the contents into 
    ```bash
    pnpm install
    ```
-5. Make any desired edits
-6. Build the project:
+5. Start the dev build, which rebuilds on every change:
    ```bash
    pnpm run dev
    ```
-7. Reload Zebar
+6. Reload Zebar once. After that the widget reloads itself after each rebuild.
 
 > [!NOTE]
 > `pnpm run dev` creates a local static folder called `dev_static`. This folder is not committed. Use this folder for your custom configurations without affecting the original files. In general, don't use `pnpm run build` unless you are making production changes.

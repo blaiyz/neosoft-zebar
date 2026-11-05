@@ -15,16 +15,18 @@ Write for a reader who has never seen the conversation behind a change. Comments
 The package manager is pnpm. There is no test suite.
 
 - `pnpm install`: install dependencies, then `svelte-kit sync` generates the base `tsconfig.json` that type checking and linting need.
-- `pnpm dev`: one-shot build into `build/` using `dev_static/` instead of `static/`. Not a watcher. Reload Zebar to see the result.
+- `pnpm dev`: watches and rebuilds into `build/` using `dev_static/` instead of `static/`. The widget reloads itself after each build. Changes to `zpack.json` still need a Zebar reload.
+- `pnpm dev:once`: the same build, once.
 - `pnpm dev:mock`: Vite dev server with hot reload, for working on the UI in a normal browser. `src/lib/mock/zebar.ts` replaces the `zebar` package with fixed fake data, and it uses `static/`, not `dev_static/`. Nothing it does reaches GlazeWM or the system.
 - `pnpm build`: release build into `build/` using `static/`. Also copies `README.md` and `misc/` into `static/` (both gitignored there).
 - `pnpm lint`: `prettier --check .` and `eslint .`. This is what CI enforces, and Prettier covers Markdown too, including `CLAUDE.md`, `docs/` and `.claude/`.
 - `pnpm format`: `prettier --write .`
 - `pnpm check`: `svelte-check` type checking. CI runs this too.
 - `pnpm schema`: regenerate `static/schema.json` from the `Config` interface. Run `pnpm format` afterwards, because the generated file is not Prettier-clean.
+- `pnpm verify`: `pnpm lint`, `pnpm check` and `pnpm dev:once`.
 - One file: `pnpm exec prettier --check <file>`, `pnpm exec eslint <file>`.
 
-Use `pnpm dev`, not `pnpm build`, to confirm a change compiles: `build/` is the live widget on a development machine and `dev_static/` holds that machine's configuration. Don't run two builds at once. `pnpm dev` works by renaming `static/` to `temp_static/` and `dev_static/` to `static/`, then renaming them back. A build killed partway leaves them swapped, and `git status` shows it as deleted or changed `static/` files alongside an untracked `temp_static/`. Restore the names before doing anything else.
+Use `pnpm dev:once`, not `pnpm build`, to confirm a change compiles: `build/` is the live widget on a development machine and `dev_static/` holds that machine's configuration. Don't run two builds at once, and that includes a running `pnpm dev`.
 
 ## Architecture
 
@@ -40,7 +42,7 @@ Use `pnpm dev`, not `pnpm build`, to confirm a change compiles: `build/` is the 
 - **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.
 
-Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` (which holds `dev_static` during `pnpm dev`). They are subpath imports from `package.json`, so they need the file extension (`#lib/config.svelte.ts`). SvelteKit is configured through `sveltekit()` in `vite.config.ts`. Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
+Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mode. They are subpath imports from `package.json`, so they need the file extension (`#lib/config.svelte.ts`). SvelteKit is configured through `sveltekit()` in `vite.config.ts`. Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
 
 The `test` route and `src/components/Test.svelte` are a sandbox for multi-window experiments, not part of the bar.
 
@@ -53,7 +55,7 @@ The `test` route and `src/components/Test.svelte` are a sandbox for multi-window
 - Don't let docs go stale. Prefer pointing at the source over copying a list into a doc. The README repeats the default `config.json` and the theme presets, so update it in the same change, and `grep -rn` `README.md`, `docs/` and `.claude/` for anything added, renamed or removed. Files under `docs/research/` are dated snapshots and stay as written.
 - Test by risk and say which tier ran:
   - **Docs only:** `pnpm exec prettier --check <files>`.
-  - **Code:** `pnpm lint`, `pnpm check`, `pnpm dev`.
+  - **Code:** `pnpm verify`.
   - **Risky** (`zpack.json` privileges, config loading or schema, provider wiring, the autotiler, CI workflows, dependency bumps): the same checks, plus a specific list for the owner to try. Include multiple monitors, GlazeWM stopped and an invalid `config.json` where they apply.
 - Claude can't see the widget in Zebar. `pnpm dev:mock` shows the UI in a browser, but not docking, click-through, Tauri calls or several monitors. Say what is unverified, and give the owner concrete things to check after reloading.
 
