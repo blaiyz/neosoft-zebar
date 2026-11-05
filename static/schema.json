@@ -1,151 +1,165 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "AttachmentDirection": {
-      "enum": ["bottom", "floating", "top"],
-      "type": "string"
+  "type": "object",
+  "properties": {
+    "direction": {
+      "default": "top",
+      "description": "The visual direction of the widget.\n\n`top`- The top of the widget has inverted corner radius, and the bottom has normal corner radius.\n\n`bottom`- The bottom of the widget has inverted corner radius, and the top has normal corner radius.\n\n`floating`- All corners of the widget have normal corner radius.",
+      "type": "string",
+      "enum": ["top", "bottom", "floating"]
     },
-    "BackgroundEffect": {
-      "enum": ["acrylic", "blur", "inherit", "mica"],
-      "type": "string"
+    "gradient": {
+      "default": "top",
+      "description": "The direction of the background gradient.\n\n`top`- From top to transparent bottom.\n\n`bottom`- From bottom to transparent top.\n\n`solid`- Solid color background.\n\n`disabled`- Background color is disabled.",
+      "type": "string",
+      "enum": ["top", "bottom", "solid", "disabled"]
     },
-    "GradientDirection": {
-      "enum": ["bottom", "disabled", "solid", "top"],
-      "type": "string"
+    "attachSides": {
+      "default": true,
+      "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`--bar-margin-x` in `config.css`)",
+      "type": "boolean"
     },
-    "ProvidersConfig": {
-      "properties": {
-        "enableErrorLogging": {
-          "description": "Whether to enable error logging for providers.",
-          "type": "boolean"
-        },
-        "refreshIntervals": {
-          "description": "The refresh intervals for some providers.",
-          "properties": {
-            "battery": {
-              "type": "number"
-            },
-            "cpu": {
-              "type": "number"
-            },
-            "memory": {
-              "type": "number"
-            },
-            "network": {
-              "type": "number"
-            },
-            "weather": {
-              "type": "number"
-            }
-          },
-          "type": "object"
-        }
-      },
-      "type": "object"
-    },
-    "TaskbarIntegration": {
+    "taskbarIntegration": {
+      "description": "Whether to integrate with the windows taskbar.\n\nRight now, this feature only adds an area at the center of the widget that contains the window icons. Please see README for more information.",
+      "default": {},
+      "type": "object",
       "properties": {
         "enabled": {
+          "default": false,
           "description": "Whether to integrate with the windows taskbar.",
           "type": "boolean"
         },
         "extraIcons": {
+          "default": 0,
           "description": "The number of additional icons that appear in the taskbar (like windows logo or search).",
           "type": "number"
         },
         "primaryMonitorSelection": {
-          "$ref": "#/definitions/WindowSelection",
-          "description": "Which windows to include in the number of taskbar icons."
+          "default": "all",
+          "description": "Which windows to include in the number of taskbar icons.",
+          "type": "string",
+          "enum": ["workspace", "monitor", "all"]
         },
         "secondaryMonitorSelection": {
-          "$ref": "#/definitions/WindowSelection"
+          "default": "monitor",
+          "type": "string",
+          "enum": ["workspace", "monitor", "all"]
         }
-      },
-      "type": "object"
-    },
-    "WindowSelection": {
-      "enum": ["all", "monitor", "workspace"],
-      "type": "string"
-    }
-  },
-  "properties": {
-    "attachSides": {
-      "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`--bar-margin-x` in `config.css`)",
-      "type": "boolean"
-    },
-    "backgroundEffect": {
-      "$ref": "#/definitions/BackgroundEffect",
-      "description": "The background effect to use for the widget.\n\nNOTE: In order to use anything other than inherit, you must recompile zebar with an extra permission. More details in the README.\n\n`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).\n`acrylic`- Use an acrylic background effect. Windows 10, 11.\n`blur`- Use a blur background effect. Windows 10, 11.\n`mica`- Use a mica background effect. Windows 11 only."
-    },
-    "clickThroughByDefault": {
-      "description": "Enable click-through by default.",
-      "type": "boolean"
-    },
-    "direction": {
-      "$ref": "#/definitions/AttachmentDirection",
-      "description": "The visual direction of the widget.\n\n`top`- The top of the widget has inverted corner radius, and the bottom has normal corner radius.\n\n`bottom`- The bottom of the widget has inverted corner radius, and the top has normal corner radius.\n\n`floating`- All corners of the widget have normal corner radius."
-    },
-    "enableAutoTiling": {
-      "description": "Whether to enable built-in automatic tiling of windows.",
-      "type": "boolean"
-    },
-    "extendVolumeSliderByDefault": {
-      "description": "Enable volume slider by default.",
-      "type": "boolean"
-    },
-    "gradient": {
-      "$ref": "#/definitions/GradientDirection",
-      "description": "The direction of the background gradient.\n\n`top`- From top to transparent bottom.\n\n`bottom`- From bottom to transparent top.\n\n`solid`- Solid color background.\n\n`disabled`- Background color is disabled."
-    },
-    "providersConfig": {
-      "$ref": "#/definitions/ProvidersConfig",
-      "description": "Options for the providers, including refresh intervals and error logging."
-    },
-    "showBatterySection": {
-      "type": "boolean"
-    },
-    "showCpuSection": {
-      "type": "boolean"
-    },
-    "showFullDateByDefault": {
-      "description": "Whether to show the full date by default instead of just the time.\n\n(This can be toggled in the UI by clicking the date/time)",
-      "type": "boolean"
-    },
-    "showHeartButton": {
-      "type": "boolean"
-    },
-    "showMemorySection": {
-      "type": "boolean"
-    },
-    "showNetworkSection": {
-      "enum": [false, "interface", "statistics", true]
-    },
-    "showSeconds": {
-      "type": "boolean"
-    },
-    "showShutdownButton": {
-      "type": "boolean"
-    },
-    "showWeatherSection": {
-      "type": "boolean"
-    },
-    "taskbarIntegration": {
-      "$ref": "#/definitions/TaskbarIntegration",
-      "description": "Whether to integrate with the windows taskbar.\n\nRight now, this feature only adds an area at the center of the widget that contains the window icons. Please see README for more information."
+      }
     },
     "transitionDuration": {
+      "default": 400,
       "description": "The duration of transitions in milliseconds.",
       "type": "number"
     },
-    "use24hClock": {
-      "enum": ["auto", false, true]
+    "providersConfig": {
+      "description": "Options for the providers, including refresh intervals and error logging.",
+      "default": {},
+      "type": "object",
+      "properties": {
+        "refreshIntervals": {
+          "description": "The refresh intervals for some providers.",
+          "default": {},
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "default": 2000,
+              "type": "number"
+            },
+            "memory": {
+              "default": 5000,
+              "type": "number"
+            },
+            "battery": {
+              "default": 60000,
+              "type": "number"
+            },
+            "weather": {
+              "default": 900000,
+              "type": "number"
+            },
+            "network": {
+              "default": 2000,
+              "type": "number"
+            }
+          }
+        },
+        "enableErrorLogging": {
+          "default": false,
+          "description": "Whether to enable error logging for providers.",
+          "type": "boolean"
+        }
+      }
+    },
+    "backgroundEffect": {
+      "default": "inherit",
+      "description": "The background effect to use for the widget.\n\nNOTE: In order to use anything other than inherit, you must recompile zebar with an extra permission. More details in the README.\n\n`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).\n`acrylic`- Use an acrylic background effect. Windows 10, 11.\n`blur`- Use a blur background effect. Windows 10, 11.\n`mica`- Use a mica background effect. Windows 11 only.",
+      "type": "string",
+      "enum": ["inherit", "acrylic", "blur", "mica"]
+    },
+    "enableAutoTiling": {
+      "default": true,
+      "description": "Whether to enable built-in automatic tiling of windows.",
+      "type": "boolean"
+    },
+    "showFullDateByDefault": {
+      "default": false,
+      "description": "Whether to show the full date by default instead of just the time.\n\n(This can be toggled in the UI by clicking the date/time)",
+      "type": "boolean"
+    },
+    "clickThroughByDefault": {
+      "default": false,
+      "description": "Enable click-through by default.",
+      "type": "boolean"
+    },
+    "extendVolumeSliderByDefault": {
+      "default": false,
+      "description": "Enable volume slider by default.",
+      "type": "boolean"
+    },
+    "showHeartButton": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showCpuSection": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showMemorySection": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showBatterySection": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showNetworkSection": {
+      "default": true,
+      "enum": [true, false, "interface", "statistics"]
+    },
+    "showWeatherSection": {
+      "default": true,
+      "type": "boolean"
+    },
+    "showShutdownButton": {
+      "default": true,
+      "type": "boolean"
     },
     "useCelsiusByDefault": {
+      "default": true,
+      "type": "boolean"
+    },
+    "use24hClock": {
+      "default": "auto",
+      "enum": [true, false, "auto"]
+    },
+    "showSeconds": {
+      "default": false,
       "type": "boolean"
     },
     "useThinnerWorkspaceButtons": {
+      "default": false,
       "type": "boolean"
     }
-  },
-  "type": "object"
+  }
 }

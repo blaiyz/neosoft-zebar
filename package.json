@@ -14,11 +14,11 @@
     "dev:once": "vite build --mode dev",
     "dev:mock": "vite dev --mode mock",
     "build": "node scripts/build.js",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && node scripts/config_schema.ts --check",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
-    "schema": "typescript-json-schema ./tsconfig.json Config -o ./static/schema.json",
+    "schema": "node scripts/config_schema.ts && prettier --write static/schema.json",
     "verify": "pnpm lint && pnpm check && pnpm dev:once"
   },
   "dependencies": {
@@ -27,9 +27,9 @@
     "@tauri-apps/api": "2.0.2",
     "glazewm": "^1.7.0",
     "json5": "^2.2.3",
-    "jsonschema": "^1.5.0",
     "svelte-range-slider-pips": "^4.1.1",
-    "zebar": "^3.3.1"
+    "zebar": "^3.3.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -49,7 +49,6 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.41.0",
-    "typescript-json-schema": "^0.67.1",
     "vite": "^8.3.5"
   }
 }

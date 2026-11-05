@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { config, type TaskbarIntegration } from "#lib/config.svelte.ts";
+  import { config } from "#lib/config.svelte.ts";
+  import type { TaskbarIntegration } from "#lib/config_schema.ts";
   import { providers } from "#lib/providers.svelte.ts";
   import {
     getWindows,
