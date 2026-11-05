@@ -1,4 +1,5 @@
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
@@ -7,7 +8,7 @@ const mockZebar = fileURLToPath(
 );
 
 export default defineConfig(({ mode }) => ({
-  plugins: [sveltekit()],
+  plugins: [tailwindcss(), sveltekit()],
   resolve: {
     alias: mode === "mock" ? [{ find: "zebar", replacement: mockZebar }] : []
   },

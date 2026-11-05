@@ -48,6 +48,22 @@
   const workspaceEquals = (ws1: Workspace, ws2: Workspace) => {
     return ws1.id === ws2.id;
   };
+
+  // Written out in full so that Tailwind finds and generates them.
+  const workspaceTextColors = [
+    "text-zb-ws-0",
+    "text-zb-ws-1",
+    "text-zb-ws-2",
+    "text-zb-ws-3",
+    "text-zb-ws-4"
+  ];
+  const workspaceBorderColors = [
+    "border-zb-ws-0",
+    "border-zb-ws-1",
+    "border-zb-ws-2",
+    "border-zb-ws-3",
+    "border-zb-ws-4"
+  ];
 </script>
 
 {#if glazewm}
@@ -63,8 +79,9 @@
           class="mr-2"
         >
           <Button
-            class="h-[2rem] box-border text-zb-ws-{globalIndex} {workspace.isDisplayed
-              ? `border-zb-ws-${globalIndex} hover:border-blend-70 active:!border-blend-50`
+            class="h-8 box-border {workspaceTextColors[globalIndex] ??
+              ''} {workspace.isDisplayed
+              ? `${workspaceBorderColors[globalIndex] ?? ''} hover:border-current/70 active:border-current/50!`
               : ''} {toggleModes.clickThrough ||
             config.useThinnerWorkspaceButtons
               ? 'aspect-square'
@@ -83,7 +100,7 @@
       onclick={() => glazewm!.runCommand("toggle-tiling-direction")}
     >
       <ArrowRightLeft
-        class="transition transform {glazewm?.tilingDirection === 'vertical'
+        class="transition {glazewm?.tilingDirection === 'vertical'
           ? 'rotate-90'
           : 'rotate-0'}"
       />
@@ -107,7 +124,7 @@
         <button
           transition:fly={{ y: 20, duration: config.transitionDuration }}
           animate:flip={{ duration: config.transitionDuration }}
-          class="mx-[0.5rem]"
+          class="mx-2"
           onclick={() => {
             glazewm!.runCommand(
               `wm-disable-binding-mode --name ${bindingMode.name}`

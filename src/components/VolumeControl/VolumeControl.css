@@ -1,5 +1,4 @@
 #VolumeSlider {
-  @apply transition-colors;
   --pip-height: 0.4rem;
   --track-width: 0.4rem;
   --handle-rotate: 0deg;
@@ -27,7 +26,7 @@
 #VolumeSlider.rangeSlider {
   margin: 0;
   margin-inline: 0.5rem;
-  @apply transition-[margin];
+  transition: margin var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #VolumeSlider.rangeSlider:hover,
@@ -36,7 +35,7 @@
 }
 
 #VolumeSlider .rangeBar {
-  @apply bg-gradient-to-r from-[var(--range-low)] to-[var(--range)];
+  background-image: linear-gradient(to right, var(--range-low), var(--range));
 }
 
 #VolumeSlider .rangePips .rsPip {
@@ -52,7 +51,9 @@
   grid-template: 1fr / 1fr;
   align-items: center;
   overflow: hidden;
-  @apply transition-[width,height];
+  transition-property: width, height;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #VolumeSlider.rangeSlider:hover .rangeHandle,
