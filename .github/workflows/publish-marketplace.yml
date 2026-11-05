@@ -10,103 +10,40 @@ on:
         type: string
         required: false
 
-jobs:
-  get-version:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get-version.outputs.version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Get version
-        id: get-version
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          elif [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            TAG=$(gh release view --json tagName -q '.tagName')
-            echo "version=$TAG" >> $GITHUB_OUTPUT
-          fi
+permissions:
+  contents: read
 
+jobs:
   build:
-    needs: get-version
     uses: ./.github/workflows/build.yml
-    with:
-      version-number: ${{ needs.get-version.outputs.version }}
 
   publish:
     if: github.event_name == 'workflow_dispatch' || github.event.release.draft == false
+    needs: build
     runs-on: ubuntu-24.04
-    needs: [get-version, build]
+    timeout-minutes: 15
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Get release info
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-        run: |
-          TAG="${{ needs.get-version.outputs.version }}"
-          if [ "${{ github.event_name }}" == "release" ]; then
-            echo "url='${{ github.event.release.html_url }}'" >> $GITHUB_OUTPUT
-            echo "body=$(echo "$RELEASE_BODY" | base64 -w 0)" >> $GITHUB_OUTPUT
-          else
-            RELEASE_JSON=$(gh release view "$TAG" --json body,url)
-            echo "url=$(echo "$RELEASE_JSON" | jq -r '.url')" >> $GITHUB_OUTPUT
-            echo "body=$(echo "$RELEASE_JSON" | jq -r '.body' | base64 -w 0)" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Extract version from tag
-        id: version
-        run: |
-          TAG="${{ needs.get-version.outputs.version }}"
-          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: build
           path: build/
 
-      - name: Download Zebar
-        uses: robinraju/release-downloader@v1
-        with:
-          repository: glzr-io/zebar
-          tag: "v3.1.1"
-          fileName: "*x64.deb"
-          out-file-path: "."
+      - uses: ./.github/actions/zebar-cli
 
-      - name: Install Zebar dependencies
+      - name: Get release info
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VERSION: ${{ github.event.release.tag_name || inputs.version }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libappindicator3-1 libwebkit2gtk-4.1-0 xvfb
-
-      - name: Extract Zebar CLI
-        run: |
-          dpkg-deb -x *x64.deb ./zebar-extracted
-          sudo cp ./zebar-extracted/usr/bin/zebar /usr/local/bin/
-          sudo chmod +x /usr/local/bin/zebar
-
-      - name: Test Zebar Installation
-        run: |
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          sleep 2
-          zebar --version
+          # With no version, gh picks the latest release.
+          gh release view ${VERSION:+"v${VERSION#v}"} --json tagName,body,url > "$RUNNER_TEMP/release.json"
 
       - name: Publish to Zebar marketplace
         env:
           ZEBAR_PUBLISH_TOKEN: ${{ secrets.ZEBAR_PUBLISH_TOKEN }}
-        run: |
-          export DISPLAY=:99
-          zebar publish --pack-config ./build/zpack.json \
-          --version-override ${{ steps.version.outputs.version }} \
-          --commit-sha $(git rev-parse --short ${{ github.sha }}) \
-          --release-notes "$(echo ${{ steps.release.outputs.body }} | base64 --decode)" \
-          --release-url ${{ steps.release.outputs.url }}
+        run: bash scripts/publish.sh "$RUNNER_TEMP/release.json"

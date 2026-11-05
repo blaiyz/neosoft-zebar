@@ -1,0 +1,5 @@
+rules:
+  # The `$/` form guards against actions cloned at runtime, and no workflow here
+  # does that, so the `./` paths stay.
+  self-repository:
+    disable: true
