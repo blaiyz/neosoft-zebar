@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
-
 :root {
   /* sizes */
   --height: 100%;
@@ -15,7 +13,8 @@
 
   /* fonts */
   --font-family:
-    Montserrat, "SF Pro Display", Roboto, Helvetica, Arial, sans-serif;
+    "Montserrat Variable", Montserrat, "SF Pro Display", Roboto, Helvetica,
+    Arial, sans-serif;
   --font-size: 14px;
   --font-weight: 500;
 

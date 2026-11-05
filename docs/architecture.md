@@ -60,6 +60,8 @@ Three layers of CSS variables, all HSL triplets without commas:
 2. `static/config.css` maps semantic names to a palette (`--text: var(--tau-text)`) and sets sizes, fonts and radii. It isn't bundled, so editing it needs no rebuild. A color may carry an alpha (`--bg-focused: ... / 0.4`).
 3. `@theme inline` in `src/app.css` exposes the semantic names as `zb-*` utilities through `hsl(var(--name))`. Being inline, the values go straight into the utilities, as `--transition-duration` is set below `:root` and a theme variable there couldn't resolve it.
 
+Fonts are bundled, so the bar needs no network to look right. `src/app.css` imports Montserrat from `@fontsource-variable/montserrat` and loads `src/lib/fonts/weather.woff2`, a subset holding only the glyphs in `Weather.svelte`. A new glyph means subsetting again. `static/font-licenses.txt` ships their licenses with the pack.
+
 `src/app.css` also applies a global transition to color-like properties on `*`, with its duration set from `transitionDuration` on the root element of `+layout.svelte`. Sizes derive from `--font-size`, so scaling the bar means raising the font size and the height in `zpack.json` together.
 
 ## GlazeWM integration
