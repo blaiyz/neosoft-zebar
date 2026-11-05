@@ -6,7 +6,7 @@ How the widget pack works today. How Zebar itself works is in `research/zebar.md
 
 SvelteKit compiles `src/` with `@sveltejs/adapter-static` into `build/`, one HTML file per route, with everything in `static/` copied alongside. `build/` is a complete Zebar widget pack: `zpack.json` declares the `default` widget, its window preset and its privileges.
 
-Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace packs under `%AppData%\zebar\downloads\`. For each widget instance it opens a Tauri window pointing at a local server that serves the pack directory. Rebuilding changes nothing on screen until Zebar reloads, through the tray's "Empty cache & reload configs".
+Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace packs under `%AppData%\zebar\downloads\`. For each widget instance it opens a Tauri window pointing at a local server that serves the pack directory. A new build reaches the screen when Zebar reloads, through the tray's "Empty cache & reload configs", or by itself under `pnpm dev`.
 
 ## One app per monitor
 
@@ -73,7 +73,9 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 ## Builds
 
-- `scripts/dev_build.js` (`pnpm dev`) swaps `dev_static/` into the place of `static/` for the length of `vite build`, so a developer's personal configuration ends up in `build/` and in the `#static` imports. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
+- `pnpm dev` runs `vite build --watch` in the `dev` mode. `vite.config.ts` wraps the adapter in that mode, so each build ends by copying `dev_static/` over `build/`. A developer's personal configuration ends up there, and anything missing from it keeps the `static/` version. `dev_static/` is created from `static/` on first use and isn't refreshed after that. `#static` imports read `static/` in every mode.
+- The last step of a `dev` build writes `dev-build.txt`. `src/lib/dev_reload.ts`, which only exists in that mode, polls the file and reloads the page when it changes. Being a file in the pack, it needs no server, port or CORS.
+- `pnpm dev:once` runs the same build once.
 - `scripts/build.js` (`pnpm build`) copies `README.md` and `misc/` into `static/` for marketplace preview images, then builds.
 - `pnpm dev:mock` runs the Vite dev server in the `mock` mode, where `vite.config.ts` aliases `zebar` to `src/lib/mock/zebar.ts`. The real package throws outside Zebar, so this is what lets the UI run in a browser. Its data is fixed, and it's never part of a build.
 

@@ -35,7 +35,7 @@ Request: $ARGUMENTS
 pnpm format       # or prettier --write on the changed files
 pnpm lint
 pnpm check
-pnpm dev          # confirms it compiles; never pnpm build for this
+pnpm dev:once     # confirms it compiles; never pnpm build for this
 ```
 
 - Docs only: `pnpm exec prettier --check <files>`.

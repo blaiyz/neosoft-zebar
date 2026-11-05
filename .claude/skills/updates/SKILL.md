@@ -20,7 +20,7 @@ CI builds, lints and type checks, but it can't exercise the widget. For anything
 
 - Read the release notes or changelog for the jump. Pay attention to `svelte`, `@sveltejs/*`, `zebar`, `glazewm`, `tailwindcss` and `vite`.
 - A major Tailwind, SvelteKit or Vite bump is a migration: handle them as a change of their own through `/change`, not as a merge.
-- To test locally, the owner checks out the PR branch; then `pnpm install`, `pnpm check`, `pnpm dev`, and the owner reloads Zebar.
+- To test locally, the owner checks out the PR branch; then `pnpm install`, `pnpm verify`, and the owner reloads Zebar.
 
 Tell the owner: merge, or what blocks it.
 

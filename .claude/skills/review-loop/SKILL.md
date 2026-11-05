@@ -66,7 +66,7 @@ Merge duplicates (same place, same mechanism). Then for each:
 
 ## 4. Fix and check
 
-- Fix all accepted findings of the round together, then the cheap checks: `pnpm lint`, `pnpm check`, `pnpm dev`.
+- Fix all accepted findings of the round together, then the cheap checks: `pnpm verify`.
 - Fixes stay uncommitted, like the rest of the change. Nothing is committed or pushed; if the target is a branch or PR that isn't checked out, report instead of fixing.
 - Next round if the round had must-fix or should-fix findings and rounds are left; otherwise stop.
 

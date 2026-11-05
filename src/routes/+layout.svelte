@@ -1,5 +1,6 @@
 <script lang="ts">
   import { config, loadConfig } from "#lib/config.svelte.ts";
+  import { reloadOnRebuild } from "#lib/dev_reload.ts";
   import { onMount, type Snippet } from "svelte";
   import "../app.css";
 
@@ -7,6 +8,7 @@
 
   onMount(() => {
     loadConfig();
+    if (import.meta.env.MODE === "dev") reloadOnRebuild();
   });
 </script>
 
