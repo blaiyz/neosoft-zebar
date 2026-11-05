@@ -7,7 +7,7 @@ description: Keep dependencies and CI healthy - review Dependabot PRs, fix a red
 
 ## Dependabot PRs
 
-Dependabot opens weekly npm PRs (`.github/dependabot.yml`). The owner merges them.
+Dependabot opens weekly PRs for npm packages and GitHub Actions (`.github/dependabot.yml`), with minor and patch updates grouped. It waits 7 days after a release, like `minimumReleaseAge`, and skips the versions that follow Zebar. The owner merges them.
 
 ```sh
 gh pr list --author "app/dependabot"

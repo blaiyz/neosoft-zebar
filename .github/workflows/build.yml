@@ -1,9 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches:
-      - main
   workflow_call:
     inputs:
       version-number:
@@ -13,47 +10,24 @@ on:
       version-number:
         type: string
         required: true
-  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
-      # Set up Node.js environment
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .node-version
-          cache: "pnpm"
+          persist-credentials: false
 
-      # Install dependencies
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
-      # Cache build folder based on commit SHA
-      - name: Cache build folder
-        id: cache-build
-        uses: actions/cache@v4
-        with:
-          path: build/
-          key: ${{ runner.os }}-build-${{ github.sha }}
+      - run: pnpm run build
 
-      # Run build only if cache miss
-      - name: Build project
-        if: steps.cache-build.outputs.cache-hit != 'true'
-        run: pnpm run build
-
-      # Upload the build folder as an artifact after the build (keeping this for reference)
-      - name: Upload build folder
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: build
           path: build/

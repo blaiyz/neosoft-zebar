@@ -84,7 +84,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 ## CI and releases
 
-- `lint.yml` runs `pnpm lint` and `pnpm check`, and `build.yml` runs `pnpm build`, on pushes to `main` and on pull requests.
+- `ci.yml` runs `pnpm lint`, `pnpm check` and the build on pushes to `main` and on pull requests. The build is `build.yml`, a reusable workflow, so CI, `release.yml` and `publish-marketplace.yml` all build the same way. The composite action in `.github/actions/setup` installs pnpm, Node and the locked dependencies.
 - `release.yml` is started by hand. It builds, zips `build/` and creates a GitHub release.
 - `publish-marketplace.yml` runs when a release is published, or by hand. It downloads a pinned Zebar build and runs `zebar publish` with `ZEBAR_PUBLISH_TOKEN`, passing the version from the tag.
 
