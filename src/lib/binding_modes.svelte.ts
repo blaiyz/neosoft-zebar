@@ -54,15 +54,15 @@ export function initializeBindingModesObserver() {
     // Here we use our custom state derived from the binding mode flip-flops
     const window = currentWidget().tauriWindow;
     if (toggleModes.clickThrough) {
-      window.setIgnoreCursorEvents(true);
+      void window.setIgnoreCursorEvents(true);
       console.log("Set window to click-through");
     } else {
-      window.setIgnoreCursorEvents(false);
+      void window.setIgnoreCursorEvents(false);
       console.log("Unset window to click-through");
     }
   });
 
-  configLoaded.then(() => {
+  void configLoaded.then(() => {
     toggleModes.clickThrough = config.clickThroughByDefault;
   });
 }

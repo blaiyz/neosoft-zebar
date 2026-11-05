@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { toggleModes } from "$lib/binding_modes.svelte";
-  import { config, configLoaded } from "$lib/config.svelte";
-  import { providers } from "$lib/providers.svelte";
+  import { toggleModes } from "#lib/binding_modes.svelte.ts";
+  import { config, configLoaded } from "#lib/config.svelte.ts";
+  import { providers } from "#lib/providers.svelte.ts";
   import ChevronLeft from "@lucide/svelte/icons/chevron-left";
   import Volume from "@lucide/svelte/icons/volume";
   import Volume1 from "@lucide/svelte/icons/volume-1";
@@ -27,7 +27,7 @@
     const increment = 5;
     let newVolume = volume + (e.deltaY < 0 ? increment : -increment);
     newVolume = Math.max(0, Math.min(100, newVolume));
-    audio?.setVolume(newVolume);
+    void audio?.setVolume(newVolume);
   };
 
   onMount(async () => {
@@ -57,7 +57,8 @@
             pips
             pipstep={10}
             bind:values
-            on:change={(e) => audio?.setVolume(e.detail.value)}
+            on:change={(e: CustomEvent<{ value: number }>) =>
+              audio?.setVolume(e.detail.value)}
           />
         {/if}
       </SmoothDiv>

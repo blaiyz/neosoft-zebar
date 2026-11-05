@@ -3,8 +3,13 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "imports": {
+    "#lib/*": "./src/lib/*",
+    "#static/*": "./static/*"
+  },
   "packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1",
   "scripts": {
+    "prepare": "svelte-kit sync",
     "dev": "node scripts/dev_build.js",
     "dev:mock": "vite dev --mode mock",
     "build": "node scripts/build.js",
@@ -26,13 +31,13 @@
     "zebar": "^3.3.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.34.0",
-    "@sveltejs/adapter-static": "^3.0.9",
-    "@sveltejs/kit": "^2.31.1",
-    "@sveltejs/vite-plugin-svelte": "^6.1.2",
+    "@eslint/js": "^10.0.1",
+    "@sveltejs/adapter-static": "^4.0.0",
+    "@sveltejs/kit": "^3.1.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.0.0",
-    "eslint": "^9.34.0",
+    "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.11.0",
     "fs-extra": "^11.3.1",
@@ -42,9 +47,9 @@
     "svelte": "^5.38.6",
     "svelte-check": "^4.3.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.2",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.41.0",
     "typescript-json-schema": "^0.67.1",
-    "vite": "^7.1.3"
+    "vite": "^8.3.5"
   }
 }

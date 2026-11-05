@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { config, loadConfig } from "$lib/config.svelte";
-  import { onMount } from "svelte";
+  import { config, loadConfig } from "#lib/config.svelte.ts";
+  import { onMount, type Snippet } from "svelte";
   import "../app.css";
 
-  let { children } = $props();
+  let { children }: { children: Snippet } = $props();
 
   onMount(() => {
     loadConfig();

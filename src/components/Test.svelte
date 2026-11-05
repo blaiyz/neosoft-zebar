@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { RemoteState } from "$lib/remote_state.svelte";
+  import { RemoteState } from "#lib/remote_state.svelte.ts";
   import { onDestroy, onMount } from "svelte";
   import Button from "./Button.svelte";
   import { startWidget } from "zebar";
@@ -12,7 +12,7 @@
 <Button
   class="rounded-full bg-zb-muted"
   callback={() => {
-    startWidget("test", {
+    void startWidget("test", {
       anchor: "bottom_left",
       offsetX: "250px",
       offsetY: "-50px",

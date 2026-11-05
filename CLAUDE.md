@@ -14,7 +14,7 @@ Write for a reader who has never seen the conversation behind a change. Comments
 
 The package manager is pnpm. There is no test suite.
 
-- `pnpm install`: install dependencies.
+- `pnpm install`: install dependencies, then `svelte-kit sync` generates the base `tsconfig.json` that type checking and linting need.
 - `pnpm dev`: one-shot build into `build/` using `dev_static/` instead of `static/`. Not a watcher. Reload Zebar to see the result.
 - `pnpm dev:mock`: Vite dev server with hot reload, for working on the UI in a normal browser. `src/lib/mock/zebar.ts` replaces the `zebar` package with fixed fake data, and it uses `static/`, not `dev_static/`. Nothing it does reaches GlazeWM or the system.
 - `pnpm build`: release build into `build/` using `static/`. Also copies `README.md` and `misc/` into `static/` (both gitignored there).
@@ -33,14 +33,14 @@ Use `pnpm dev`, not `pnpm build`, to confirm a change compiles: `build/` is the 
 - **One app per monitor.** Zebar opens a separate webview for each widget instance, and `monitorSelection: all` means one per monitor. Module state is therefore per monitor, which is why `src/lib/autotiler.svelte.ts` only acts while its own monitor is focused. Sharing state between windows needs Tauri events (`src/lib/remote_state.svelte.ts`).
 - **Static output, prerendered.** `@sveltejs/adapter-static` with `prerender = true` in `src/routes/+layout.ts`. Component scripts also run in Node at build time, so anything touching `zebar`, Tauri or `window` goes in `onMount` or `$effect`. Keep URLs relative (`fetch("config.json")`), since Zebar serves the pack directory as the site root.
 - **State lives in `src/lib/*.svelte.ts` modules.** `config` (`config.svelte.ts`) and `providers` (`providers.svelte.ts`) are module-level `$state` objects that components read directly. `configLoaded` is a promise for code that must wait for the user's config. `providers.*` fields are `null` until the first output, and `providers.glazewm` stays `null` when GlazeWM isn't running.
-- **Configuration has two runtime files.** `config.json` and `config.css` ship in `static/`, are fetched and linked at runtime, and are meant to be edited by users. The defaults are also compiled in through the `$static` alias.
+- **Configuration has two runtime files.** `config.json` and `config.css` ship in `static/`, are fetched and linked at runtime, and are meant to be edited by users. The defaults are also compiled in through the `#static` import.
   - The `Config` interface in `src/lib/config.svelte.ts` is the source of truth, and its JSDoc becomes the editor hints in `schema.json`.
   - `deepMergeObjects` only walks keys present in the defaults, so a key missing from the default `config.json` is silently ignored.
   - Use `/add-config` for a new option; it spans several files, including the README.
 - **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.
 
-Import paths: `$lib` is `src/lib`, `$comp` is `src/components`, `$static` is `static` (or `dev_static` during `pnpm dev`). Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
+Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` (which holds `dev_static` during `pnpm dev`). They are subpath imports from `package.json`, so they need the file extension (`#lib/config.svelte.ts`). SvelteKit is configured through `sveltekit()` in `vite.config.ts`. Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
 
 The `test` route and `src/components/Test.svelte` are a sandbox for multi-window experiments, not part of the bar.
 

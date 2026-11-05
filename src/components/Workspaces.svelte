@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { Window, Workspace } from "glazewm";
+  import { TilingDirection, type Window, type Workspace } from "glazewm";
 
-  import { config } from "$lib/config.svelte";
-  import iconMap from "$lib/icon_loader";
-  import ignoredApps from "$lib/ignored_apps.json";
-  import { providers } from "$lib/providers.svelte";
-  import { getWindows } from "$lib/utils/glaze_wm_utils.svelte";
+  import { config } from "#lib/config.svelte.ts";
+  import iconMap from "#lib/icon_loader.ts";
+  import ignoredApps from "#lib/ignored_apps.json";
+  import { providers } from "#lib/providers.svelte.ts";
+  import { getWindows } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
   import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
   import type { Icon as IconType } from "@tabler/icons-svelte";
@@ -14,7 +14,7 @@
   import { fly } from "svelte/transition";
   import Button from "./Button.svelte";
   import SmoothDiv from "./SmoothDiv.svelte";
-  import { toggleModes } from "$lib/binding_modes.svelte";
+  import { toggleModes } from "#lib/binding_modes.svelte.ts";
 
   const getProcessIcon = (child: Window): IconType => {
     const possibleAppNames = [
@@ -87,7 +87,7 @@
               ? 'aspect-square'
               : 'min-w-14 px-2'}"
             callback={() =>
-              glazewm!.runCommand(`focus --workspace ${workspace.name}`)}
+              glazewm.runCommand(`focus --workspace ${workspace.name}`)}
           >
             {workspace.name}
           </Button>
@@ -97,10 +97,10 @@
     <button
       aria-label="tiling-direction"
       class="flex items-center justify-center mx-1 text-zb-tiling-direction"
-      onclick={() => glazewm!.runCommand("toggle-tiling-direction")}
+      onclick={() => glazewm.runCommand("toggle-tiling-direction")}
     >
       <ArrowRightLeft
-        class="transition {glazewm?.tilingDirection === 'vertical'
+        class="transition {glazewm?.tilingDirection === TilingDirection.VERTICAL
           ? 'rotate-90'
           : 'rotate-0'}"
       />
@@ -126,7 +126,7 @@
           animate:flip={{ duration: config.transitionDuration }}
           class="mx-2"
           onclick={() => {
-            glazewm!.runCommand(
+            void glazewm.runCommand(
               `wm-disable-binding-mode --name ${bindingMode.name}`
             );
           }}
@@ -142,7 +142,7 @@
         innerClass="flex items-center h-full"
       >
         {#each getWindows(glazewm.displayedWorkspace) as child (child.id)}
-          {@const icon = getProcessIcon(child as Window)}
+          {@const icon = getProcessIcon(child)}
           <span
             transition:fly|global={{
               y: 20,

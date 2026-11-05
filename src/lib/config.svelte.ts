@@ -1,6 +1,8 @@
-import deepMergeObjects from "$lib/utils/deepmerge";
-import defaultConfig from "$static/config.json";
-import schema from "$static/schema.json";
+import deepMergeObjects, {
+  type RecursivePartial
+} from "#lib/utils/deepmerge.ts";
+import defaultConfig from "#static/config.json";
+import schema from "#static/schema.json";
 import JSON5 from "json5";
 import { Validator } from "jsonschema";
 
@@ -151,7 +153,7 @@ const config = $state(defaultConfig as Config);
 const validator = new Validator();
 
 let configLoadedResolve: (value: Config) => void;
-let configLoadedReject: (reason?: Error) => void;
+let configLoadedReject: (reason: unknown) => void;
 
 const configLoaded = new Promise<Config>((resolve, reject) => {
   configLoadedResolve = resolve;
@@ -163,7 +165,7 @@ function loadConfig() {
   fetch("config.json")
     .then((response) => response.text())
     .then((data) => {
-      const newConfig = JSON5.parse(data);
+      const newConfig = JSON5.parse<RecursivePartial<Config>>(data);
       const result = validator.validate(newConfig, schema);
       if (!result.valid) {
         console.error("Config validation failed:", result.errors);
@@ -173,7 +175,7 @@ function loadConfig() {
       console.log("Config loaded:", data);
       configLoadedResolve(config);
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
       console.error("Error loading config:", error);
       configLoadedReject(error);
     });

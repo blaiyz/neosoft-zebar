@@ -24,8 +24,8 @@ export function getWindows(workspace: Workspace | SplitContainer): Window[] {
   const allWindows: Window[] = [];
   for (const child of workspace.children) {
     if (child.type === ContainerType.WINDOW) {
-      allWindows.push(child as Window);
-    } else if (child.type === ContainerType.SPLIT) {
+      allWindows.push(child);
+    } else {
       allWindows.push(...getWindows(child));
     }
   }

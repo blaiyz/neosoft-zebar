@@ -1,4 +1,5 @@
-type RecursivePartial<T> = {
+/* eslint-disable @typescript-eslint/no-generated-empty-object-type -- the mapped type is only used on config objects */
+export type RecursivePartial<T> = {
   [P in keyof T]?: RecursivePartial<T[P]>;
 };
 
@@ -6,7 +7,7 @@ export default function deepMergeObjects<T>(
   obj1: T,
   obj2: RecursivePartial<T>
 ): T {
-  const result = { ...obj1 } as T;
+  const result = { ...obj1 };
 
   for (const key in obj1) {
     if (!Object.hasOwnProperty.call(obj2, key)) {
