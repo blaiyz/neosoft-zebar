@@ -34,7 +34,7 @@ https://github.com/user-attachments/assets/47b0a9ae-4f7d-4784-a224-cdf0b10943aa
 
 ### Simple Installation
 
-For both installtion methods, you can adjust `config.css` and `config.json` as needed (see [Configuration](#-configuration) and [CSS & Themes](#-css--themes))
+For both installation methods, you can adjust `config.css` and `config.json` as needed (see [Configuration](#-configuration) and [CSS & Themes](#-css--themes))
 
 #### Marketplace
 
@@ -50,14 +50,15 @@ Download `neosoft-zebar.zip` from the latest release. Extract the contents into 
 
 #### Prerequisites
 
-- Package manager/runtime of your choice (`pnpm` (recommended), `npm`, `bun`, `yarn`, etc.). We use `pnpm`, so the following instructions will demonstrate its usage.
+- [Node.js](https://nodejs.org), the version in `.node-version`.
+- [pnpm](https://pnpm.io/installation), the version in the `packageManager` field of `package.json`. The repository is set up for pnpm only.
 
 #### Instructions
 
 1. Download the repository and extract it anywhere
 2. To avoid copying files on each rebuild, create a symlink in the Zebar config directory that points to `path/to/repo/neosoft-zebar/build`
 3. Navigate to the root directory of neosoft-zebar
-4. Install dependencies using your selected package manager:
+4. Install dependencies:
    ```bash
    pnpm install
    ```
@@ -69,6 +70,8 @@ Download `neosoft-zebar.zip` from the latest release. Extract the contents into 
 
 > [!NOTE]
 > `pnpm run dev` creates a local static folder called `dev_static`. This folder is not committed. Use this folder for your custom configurations without affecting the original files. In general, don't use `pnpm run build` unless you are making production changes.
+
+To work on the look of the bar in a normal browser, `pnpm run dev:mock` starts a dev server with hot reload and fake data.
 
 ## 🔧 Configuration
 
@@ -127,7 +130,7 @@ Some settings might need to be configured in `zpack.json`, which is the configur
 
 Style and color configuration is defined in `config.css`. After making changes there, reload Zebar.
 
-Neosoft Zebar currently ships with 5 different themes: Tau (custom), Rosé Pine, Catppuccin, Nord, and Material. These themes are provided as palletes, with the colors represented by CSS variables. You can see the variables of each theme in [this directory](src/themes). At the moment, I've provided presets for 2 (+2 flavors) themes which are available below. In order to use them, replace the color variables (variables under `/* colors */`) in `config.css` with the corresponding variables from the desired theme. There are additional themes without presets which you can experiment with on your own, contributions for these themes are welcome!
+Neosoft Zebar currently ships with 5 different themes: Tau (custom), Rosé Pine, Catppuccin, Nord, and Material. These themes are provided as palettes, with the colors represented by CSS variables. You can see the variables of each theme in [this directory](src/themes). At the moment, I've provided presets for 2 (+2 flavors) themes which are available below. In order to use them, replace the color variables (variables under `/* colors */`) in `config.css` with the corresponding variables from the desired theme. There are additional themes without presets which you can experiment with on your own, contributions for these themes are welcome!
 
 In order to use custom colors, you need to replace the color variables with HSL-encoded colors without commas. For example, to change the text and accent colors modify the first lines:
 
@@ -174,7 +177,6 @@ In addition to colors, `config.css` provides variables that control other style 
 --ws-4: var(--tau-mid);
 --ws-5: var(--tau-strong);
 --tiling-direction: var(--tau-weak);
---not-playing: var(--tau-love);
 --network: var(--tau-text);
 --weather: var(--tau-text);
 --volume-start: var(--tau-strong);
@@ -310,8 +312,9 @@ In addition to colors, `config.css` provides variables that control other style 
 --text: var(--ctp-mocha-text);
 --accent: var(--ctp-mocha-lavender);
 --bg: var(--ctp-mocha-base);
+--muted: var(--ctp-mocha-subtext0);
 --border: var(--ctp-mocha-overlay0);
---shadow: var(--cpt-mocha-crust);
+--shadow: var(--ctp-mocha-crust);
 --icon: var(--ctp-mocha-red);
 --memory: var(--ctp-mocha-sky);
 --cpu: var(--ctp-mocha-blue);
@@ -328,8 +331,7 @@ In addition to colors, `config.css` provides variables that control other style 
 --ws-4: var(--ctp-mocha-green);
 --ws-5: var(--ctp-mocha-peach);
 --tiling-direction: var(--ctp-mocha-rosewater);
---not-playing: var(--ctp-mocha-red);
---now-playing: var(--ctp-mocha-teal);
+--network: var(--ctp-mocha-text);
 --weather: var(--ctp-mocha-text);
 --volume-start: var(--ctp-mocha-mauve);
 --volume-end: var(--ctp-mocha-flamingo);
@@ -346,8 +348,8 @@ In addition to colors, `config.css` provides variables that control other style 
 > Background effects do not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
 > Click-through works fine in all platforms, however note that it completely disables interactivity with the Zebar widget.
 
-> [!TIP]
-> The permissions needed to enable these features have been added to upstream Zebar, no need to recompile Zebar anymore!
+> [!NOTE]
+> Background effects and click-through need Zebar 3.2 or newer.
 
 ### Enable Background Effects
 
@@ -435,3 +437,5 @@ This hasn't been tested. If you find a way to achieve the same taskbar effect as
 Contributions are welcome! If you have suggestions, improvements, or bug fixes, please open an issue or submit a pull request.
 
 An easy way to contribute is by creating theme presets, or by adding additional themes. You can also help with the process icon map in [`src/lib/icon_loader.ts`](src/lib/icon_loader.ts).
+
+Before opening a pull request, run `pnpm verify`, which runs the linters, the type check and a build.
