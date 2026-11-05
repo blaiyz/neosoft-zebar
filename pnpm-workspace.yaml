@@ -1,0 +1,16 @@
+# Supply-chain policy. Settings live here because pnpm reads only auth and
+# registry options from .npmrc.
+engineStrict: true
+minimumReleaseAge: 10080 # minutes: a release must be 7 days old to be installed
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+strictDepBuilds: true
+overrides:
+  # Keeps one copy, at the version pinned in package.json.
+  "@tauri-apps/api": "$@tauri-apps/api"
+allowBuilds:
+  esbuild: false # ships its binary as an optional package
+trustPolicyExclude:
+  # Same maintainer and dependencies as 4.0.1, published without provenance.
+  # svelte-check requires ^4.0.1.
+  - chokidar@4.0.3
