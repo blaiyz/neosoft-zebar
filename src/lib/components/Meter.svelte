@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
+  import type { ClassValue } from "svelte/elements";
 
   type Props = {
     percent: number;
-    class?: string;
+    class?: ClassValue;
     children?: Snippet;
     animate?: boolean;
   };
@@ -22,11 +23,13 @@
   );
 </script>
 
-<div class="relative group {className}">
+<div class={["group relative", className]}>
   <div
-    class="flex justify-center items-center aspect-square h-full {animate
-      ? 'transition-all group-hover:translate-y-full group-hover:opacity-0'
-      : ''}"
+    class={[
+      "flex aspect-square h-full items-center justify-center",
+      animate &&
+        "transition-all group-hover:translate-y-full group-hover:opacity-0"
+    ]}
   >
     <svg
       class="h-full transition-all"
@@ -44,7 +47,7 @@
       ></circle>
       <!-- Progress circle -->
       <circle
-        class="transition-all {className}"
+        class={["transition-all", className]}
         stroke-width={strokeWidth}
         stroke-linecap="round"
         r={radius}
@@ -65,7 +68,7 @@
 
   {#if animate}
     <span
-      class="absolute inset-0 flex items-center justify-center -translate-y-full opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100"
+      class="absolute inset-0 flex -translate-y-full items-center justify-center opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100"
     >
       {normalizedPercent}%
     </span>

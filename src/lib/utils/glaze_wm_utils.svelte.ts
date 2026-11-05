@@ -4,7 +4,7 @@ import {
   type Window,
   type Workspace
 } from "glazewm";
-import { providers } from "../providers.svelte";
+import { providers } from "#lib/state/providers.svelte.ts";
 
 const isOnPrimaryMonitorState = $derived.by(() => {
   const glazewm = providers.glazewm;

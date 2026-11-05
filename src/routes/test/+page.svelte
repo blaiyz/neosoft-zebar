@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { RemoteState } from "#lib/remote_state.svelte.ts";
-  import { onDestroy, onMount } from "svelte";
+  import Button from "#lib/components/Button.svelte";
+  import { RemoteState } from "#lib/state/remote_state.svelte.ts";
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import Button from "../../components/Button.svelte";
 
-  let counter = RemoteState("counter", 0, onMount, onDestroy);
-  let enabled = RemoteState("enabled", true, onMount, onDestroy);
-  let shown = RemoteState("shown", true, onMount, onDestroy);
+  let counter = RemoteState("counter", 0);
+  let enabled = RemoteState("enabled", true);
+  let shown = RemoteState("shown", true);
 
   $effect(() => {
     const window = getCurrentWindow();
@@ -27,7 +26,7 @@
 </script>
 
 <div
-  class="bg-zb-base border-8 border-red-600 h-screen w-screen font-zb text-zb-text text-lg"
+  class="h-screen w-screen border-8 border-red-600 bg-zb-base font-zb text-lg text-zb-text"
 >
   Counter: {JSON.stringify(counter, null, 2)}
   Derived: {derivedTest}

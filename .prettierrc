@@ -3,6 +3,8 @@
   "tabWidth": 2,
   "semi": true,
   "trailingComma": "none",
-  "plugins": ["prettier-plugin-svelte"],
+  "plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/app.css",
+  "tailwindAttributes": ["innerClass"],
   "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
 }

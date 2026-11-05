@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { RemoteState } from "#lib/remote_state.svelte.ts";
-  import { onDestroy, onMount } from "svelte";
-  import Button from "./Button.svelte";
+  import Button from "#lib/components/Button.svelte";
+  import { RemoteState } from "#lib/state/remote_state.svelte.ts";
   import { startWidget } from "zebar";
 
-  let counter = RemoteState("counter", 0, onMount, onDestroy);
-  let enabled = RemoteState("enabled", true, onMount, onDestroy);
-  let shown = RemoteState("shown", true, onMount, onDestroy);
+  let counter = RemoteState("counter", 0);
+  let enabled = RemoteState("enabled", true);
+  let shown = RemoteState("shown", true);
 </script>
 
 <Button

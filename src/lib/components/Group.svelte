@@ -1,18 +1,20 @@
 <script lang="ts">
   import type { AttachmentDirection } from "#lib/config_schema.ts";
-  import { config } from "#lib/config.svelte.ts";
+  import { config } from "#lib/state/config.svelte.ts";
   import type { Snippet } from "svelte";
+  import type { ClassValue } from "svelte/elements";
+
   type Props = {
     children: Snippet;
-    outerClass?: string;
-    innerClass?: string;
+    class?: ClassValue;
+    innerClass?: ClassValue;
     leftCurve?: boolean;
     rightCurve?: boolean;
   };
 
   let {
     children,
-    outerClass,
+    class: className,
     innerClass,
     leftCurve = true,
     rightCurve = true
@@ -41,36 +43,40 @@
         return "";
     }
   };
+
+  let rounding = $derived(curve(leftCurve, rightCurve, config.direction));
 </script>
 
 <div
-  class="relative flex items-center h-full bg-zb-base border-zb-border {curve(
-    leftCurve,
-    rightCurve,
-    config.direction
-  )} {outerClass}"
+  class={[
+    "relative flex h-full items-center border-zb-border bg-zb-base",
+    rounding,
+    className
+  ]}
 >
   {#if leftCurve && config.direction !== "floating"}
     <div
-      class="absolute {config.direction === 'bottom'
-        ? 'bottom-0 rounded-br-base'
-        : 'top-0 rounded-tr-base'} -left-[calc(var(--radius)*2)] h-radius w-[calc(var(--radius)*2)] bg-transparent shadow-inverted-l"
+      class={[
+        "absolute",
+        config.direction === "bottom"
+          ? "bottom-0 rounded-br-base"
+          : "top-0 rounded-tr-base",
+        "-left-[calc(var(--radius)*2)] h-radius w-[calc(var(--radius)*2)] bg-transparent shadow-inverted-l"
+      ]}
     ></div>
   {/if}
-  <div
-    class="overflow-hidden z-10 {curve(
-      leftCurve,
-      rightCurve,
-      config.direction
-    )} py-1 {innerClass}"
-  >
+  <div class={["z-10 overflow-hidden", rounding, "py-1", innerClass]}>
     {@render children()}
   </div>
   {#if rightCurve && config.direction !== "floating"}
     <div
-      class="absolute {config.direction === 'bottom'
-        ? 'bottom-0 rounded-bl-base'
-        : 'top-0 rounded-tl-base'} -right-[calc(var(--radius)*2)] h-radius w-[calc(var(--radius)*2)] bg-transparent shadow-inverted-r"
+      class={[
+        "absolute",
+        config.direction === "bottom"
+          ? "bottom-0 rounded-bl-base"
+          : "top-0 rounded-tl-base",
+        "-right-[calc(var(--radius)*2)] h-radius w-[calc(var(--radius)*2)] bg-transparent shadow-inverted-r"
+      ]}
     ></div>
   {/if}
 </div>

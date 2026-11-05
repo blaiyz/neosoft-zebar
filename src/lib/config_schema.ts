@@ -100,7 +100,7 @@ export const configSchema = z.object({
     .describe(
       [
         "The background effect to use for the widget.",
-        "NOTE: In order to use anything other than inherit, you must recompile zebar with an extra permission. More details in the README.",
+        "NOTE: Anything other than inherit needs Zebar 3.2 or later. More details in the README.",
         [
           "`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).",
           "`acrylic`- Use an acrylic background effect. Windows 10, 11.",
@@ -148,5 +148,6 @@ export const configSchema = z.object({
 export type Config = z.infer<typeof configSchema>;
 export type AttachmentDirection = Config["direction"];
 export type TaskbarIntegration = Config["taskbarIntegration"];
+export type BackgroundEffect = Config["backgroundEffect"];
 
 export const defaultConfig = configSchema.parse({});

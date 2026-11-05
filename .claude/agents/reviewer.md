@@ -32,7 +32,7 @@ A JSON array, most severe first, at most as many entries as your brief allows:
 ```json
 [
   {
-    "file": "src/components/Example.svelte",
+    "file": "src/lib/components/Example.svelte",
     "line": 42,
     "angle": "runtime",
     "severity": "must-fix | should-fix | cleanup",

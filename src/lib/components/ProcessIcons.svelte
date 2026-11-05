@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { config } from "#lib/config.svelte.ts";
   import type { TaskbarIntegration } from "#lib/config_schema.ts";
-  import { providers } from "#lib/providers.svelte.ts";
+  import { config } from "#lib/state/config.svelte.ts";
+  import { providers } from "#lib/state/providers.svelte.ts";
   import {
     getWindows,
     isOnPrimaryMonitor
@@ -9,19 +9,8 @@
   import type { Window } from "glazewm";
   import type { GlazeWmOutput } from "zebar";
   import SmoothDiv from "./SmoothDiv.svelte";
-  import { SvelteSet } from "svelte/reactivity";
 
   let glazewm = $derived(providers.glazewm);
-
-  const uniqueWindows = (windows: Window[]) => {
-    const seen = new SvelteSet();
-    return windows.filter((window) => {
-      const key = window.processName;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  };
 
   const getIconCount = (
     glazewm: GlazeWmOutput,
@@ -33,7 +22,9 @@
       : integrationConfig.secondaryMonitorSelection;
     switch (selection) {
       case "workspace":
-        windows = getWindows(glazewm.displayedWorkspace);
+        if (glazewm.displayedWorkspace) {
+          windows = getWindows(glazewm.displayedWorkspace);
+        }
         break;
       case "monitor":
         for (const workspace of glazewm.currentMonitor.children) {
@@ -45,7 +36,7 @@
         break;
     }
 
-    return uniqueWindows(windows).length;
+    return new Set(windows.map((window) => window.processName)).size;
   };
 </script>
 

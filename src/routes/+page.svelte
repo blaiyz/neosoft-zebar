@@ -1,131 +1,105 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import * as zebar from "zebar";
-
-  import { Effect } from "@tauri-apps/api/window";
-
-  import { initializeAutotiler } from "#lib/autotiler.svelte.ts";
-  import { initializeBindingModesObserver } from "#lib/binding_modes.svelte.ts";
-  import { config, configLoaded } from "#lib/config.svelte.ts";
-  import { initProviders, providers } from "#lib/providers.svelte.ts";
+  import Group from "#lib/components/Group.svelte";
+  import LeftGroup from "#lib/components/LeftGroup.svelte";
+  import ProcessIcons from "#lib/components/ProcessIcons.svelte";
+  import RightGroup from "#lib/components/RightGroup.svelte";
+  import Workspaces from "#lib/components/Workspaces.svelte";
+  import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
+  import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
+  import { config, configLoaded } from "#lib/state/config.svelte.ts";
+  import { initProviders, providers } from "#lib/state/providers.svelte.ts";
   import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
-  import Group from "../components/Group.svelte";
-  import LeftGroup from "../components/LeftGroup.svelte";
-  import ProcessIcons from "../components/ProcessIcons.svelte";
-  import RightGroup from "../components/RightGroup.svelte";
-  import Workspaces from "../components/Workspaces.svelte";
+  import { applyBackgroundEffect } from "#lib/window_effects.ts";
+  import { onMount } from "svelte";
 
   let glazewm = $derived(providers.glazewm);
-  initializeAutotiler();
-  initializeBindingModesObserver();
+  let gradientDirection = $derived(
+    config.gradient === "bottom" ? "bg-linear-to-t/srgb" : "bg-linear-to-b/srgb"
+  );
+
+  initAutotiler();
+  initBindingModes();
 
   onMount(() => {
     void initProviders();
-
-    /*     
-    Found a way to set window effects
-    Requires adding the following line to packages/desktop/capabilities/widget.json under permissions (zebar source code):
-        "core:window:allow-set-effects"
-    Then rebuild and install zebar.
-    
-    It is then possible to set window effects like so:
-    const window = zebar?.currentWidget()?.tauriWindow;
-    window.setEffects({ effects: [Effect.Acrylic] });
-
-    This is a temporary solution while waiting for https://github.com/glzr-io/zebar/pull/133 (one might say it's even better)
- */
-    configLoaded
-      .then((config) => {
-        const effect = config.backgroundEffect;
-        const window = zebar.currentWidget().tauriWindow;
-        switch (effect) {
-          case "acrylic":
-            void window.setEffects({ effects: [Effect.Acrylic] });
-            console.log("Set window effect to acrylic");
-            break;
-          case "blur":
-            void window.setEffects({ effects: [Effect.Blur] });
-            console.log("Set window effect to blur");
-            break;
-          case "mica":
-            void window.setEffects({ effects: [Effect.Mica] });
-            console.log("Set window effect to mica");
-            break;
-          case "inherit":
-            void window.clearEffects();
-            console.log("Set window effect to inherit");
-            break;
-        }
-      })
-      .catch((error: unknown) => {
-        console.error("Error setting window effects:", error);
-      });
+    void configLoaded.then(({ backgroundEffect }) =>
+      applyBackgroundEffect(backgroundEffect)
+    );
   });
 </script>
 
-<div class="flex items-center h-full w-full">
+<div class="flex h-full w-full items-center">
   <div
-    class="relative flex items-stretch h-bar w-full font-zb text-zb-text text-zb-size font-base"
+    class="relative flex h-bar w-full items-stretch font-zb text-zb-size font-base text-zb-text"
   >
     {#if config.gradient !== "solid" && config.gradient !== "disabled"}
       <div
-        class="absolute inset-0 {config.gradient === 'bottom'
-          ? 'bg-linear-to-t/srgb'
-          : 'bg-linear-to-b/srgb'} from-zb-bg-focused to-transparent {!glazewm
-          ?.currentMonitor.hasFocus
-          ? 'opacity-0'
-          : ''}"
+        class={[
+          "absolute inset-0",
+          gradientDirection,
+          "from-zb-bg-focused to-transparent",
+          !glazewm?.currentMonitor.hasFocus && "opacity-0"
+        ]}
       ></div>
       <div
-        class="absolute inset-0 {config.gradient === 'bottom'
-          ? 'bg-linear-to-t/srgb'
-          : 'bg-linear-to-b/srgb'} from-zb-bg-unfocused to-transparent {glazewm
-          ?.currentMonitor.hasFocus
-          ? 'opacity-0'
-          : ''}"
+        class={[
+          "absolute inset-0",
+          gradientDirection,
+          "from-zb-bg-unfocused to-transparent",
+          glazewm?.currentMonitor.hasFocus && "opacity-0"
+        ]}
       ></div>
     {:else if config.gradient === "solid"}
       <div
-        class="absolute inset-0 {glazewm?.currentMonitor.hasFocus
-          ? 'bg-zb-bg-focused'
-          : 'bg-zb-bg-unfocused'}"
+        class={[
+          "absolute inset-0",
+          glazewm?.currentMonitor.hasFocus
+            ? "bg-zb-bg-focused"
+            : "bg-zb-bg-unfocused"
+        ]}
       ></div>
     {/if}
     <div
-      class="relative z-10 my-zby mx-zbx h-full w-full grid grid-cols-[1fr_auto_1fr] grid-rows-1 items-center"
+      class="relative z-10 mx-zbx my-zby grid h-full w-full grid-cols-[1fr_auto_1fr] grid-rows-1 items-center"
     >
       <Group
         leftCurve={!config.attachSides}
-        outerClass="h-full justify-self-start"
-        innerClass="h-full px-4 flex items-center {isOnPrimaryMonitor()
-          ? 'pl-zlby'
-          : ''}"
+        class="h-full justify-self-start"
+        innerClass={[
+          "flex h-full items-center px-4",
+          isOnPrimaryMonitor() && "pl-zlby"
+        ]}
       >
         <LeftGroup />
       </Group>
-      <div class="h-full flex items-center">
+      <div class="flex h-full items-center">
         <Group
           rightCurve={!config.taskbarIntegration.enabled}
-          outerClass="h-full justify-self-end{config.taskbarIntegration
-            .enabled && ' [&&]:absolute translate-x-[-99%]'}"
-          innerClass="h-full {config.taskbarIntegration.enabled
-            ? 'pl-3'
-            : 'px-3'}"
+          class={[
+            "h-full",
+            config.taskbarIntegration.enabled &&
+              "translate-x-[-99%] justify-self-end [&&]:absolute"
+          ]}
+          innerClass={[
+            "h-full",
+            config.taskbarIntegration.enabled ? "pl-3" : "px-3"
+          ]}
         >
           <Workspaces />
         </Group>
         {#if config.taskbarIntegration.enabled}
-          <Group leftCurve={false} outerClass="px-2">
+          <Group leftCurve={false} class="px-2">
             <ProcessIcons />
           </Group>
         {/if}
       </div>
       <Group
         rightCurve={!config.attachSides}
-        outerClass="h-full justify-self-end"
-        innerClass="h-full pl-2 pr-4 flex items-center {isOnPrimaryMonitor()
-          ? 'pr-zrby'
-          : ''}"
+        class="h-full justify-self-end"
+        innerClass={[
+          "flex h-full items-center pr-4 pl-2",
+          isOnPrimaryMonitor() && "pr-zrby"
+        ]}
       >
         <RightGroup />
       </Group>

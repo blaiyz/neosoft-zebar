@@ -1,27 +1,35 @@
 <script lang="ts">
-  import { config } from "#lib/config.svelte.ts";
   // This component is used to create a smooth size transition
   // when the content changes size or added/deleted. (otherwise, the size change is abrupt)
+  import { config } from "#lib/state/config.svelte.ts";
   import type { Snippet } from "svelte";
+  import type { ClassValue } from "svelte/elements";
   import { Spring } from "svelte/motion";
 
   type Props = {
-    innerClass?: string;
-    outerClass?: string;
+    class?: ClassValue;
+    innerClass?: ClassValue;
     width?: boolean;
     height?: boolean;
     children: Snippet;
   };
 
   let {
+    class: className,
     innerClass,
-    outerClass,
     width = true,
     height = true,
     children
   }: Props = $props();
   const widthSpring = new Spring(0);
   const heightSpring = new Spring(0);
+
+  const setWidth = (value: number | null | undefined) => {
+    if (width && value != null) widthSpring.target = value;
+  };
+  const setHeight = (value: number | null | undefined) => {
+    if (height && value != null) heightSpring.target = value;
+  };
 
   $effect(() => {
     const duration = config.transitionDuration;
@@ -35,33 +43,20 @@
 </script>
 
 <div
-  class="relative {outerClass}"
+  class={["relative", className]}
   style="{width ? `width: ${widthSpring.current}px;` : ''} {height
     ? `height: ${heightSpring.current}px;`
     : ''}"
 >
-  {#if width && height}
-    <div
-      class="w-fit h-fit {innerClass}"
-      bind:clientWidth={widthSpring.target}
-      bind:clientHeight={heightSpring.target}
-    >
-      {@render children()}
-    </div>
-  {:else if width}
-    <div
-      class="w-fit h-full {innerClass}"
-      bind:clientWidth={widthSpring.target}
-    >
-      {@render children()}
-    </div>
-  {:else if height}
-    <div
-      class="h-fit w-full {innerClass}"
-      bind:clientHeight={heightSpring.target}
-    >
-      {@render children()}
-    </div>
-  {/if}
-  <!-- At least one dimension should be true, otherwise no point using this component instead of div -->
+  <div
+    class={[
+      width ? "w-fit" : "w-full",
+      height ? "h-fit" : "h-full",
+      innerClass
+    ]}
+    bind:clientWidth={null, setWidth}
+    bind:clientHeight={null, setHeight}
+  >
+    {@render children()}
+  </div>
 </div>

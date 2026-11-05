@@ -1,7 +1,7 @@
 import { untrack } from "svelte";
 import { currentWidget } from "zebar";
-import { config, configLoaded } from "./config.svelte";
-import { providers } from "./providers.svelte";
+import { config, configLoaded } from "#lib/state/config.svelte.ts";
+import { providers } from "#lib/state/providers.svelte.ts";
 
 const bindingModes = $derived(providers.glazewm?.bindingModes || []);
 const clickThroughBindingMode = $derived(
@@ -12,7 +12,7 @@ const toggleModes = $state({
   clickThrough: false
 });
 
-export function initializeBindingModesObserver() {
+export function initBindingModes() {
   let prevTime = Date.now();
 
   $effect(() => {
@@ -44,7 +44,6 @@ export function initializeBindingModesObserver() {
       // throttle
       if (timeDiff < 400) return;
 
-      console.log("Click-through binding mode toggled");
       prevTime = currentTime;
       toggleModes.clickThrough = !currentToggle;
     }
@@ -53,13 +52,7 @@ export function initializeBindingModesObserver() {
   $effect(() => {
     // Here we use our custom state derived from the binding mode flip-flops
     const window = currentWidget().tauriWindow;
-    if (toggleModes.clickThrough) {
-      void window.setIgnoreCursorEvents(true);
-      console.log("Set window to click-through");
-    } else {
-      void window.setIgnoreCursorEvents(false);
-      console.log("Unset window to click-through");
-    }
+    void window.setIgnoreCursorEvents(toggleModes.clickThrough);
   });
 
   void configLoaded.then(() => {

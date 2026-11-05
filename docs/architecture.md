@@ -13,16 +13,16 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 `monitorSelection: all` starts one instance per monitor, each in its own webview with its own JavaScript heap. There is no shared process:
 
 - Module-level state in `src/lib/` exists once per monitor. `providers.glazewm` reports from that monitor's point of view (`currentMonitor`, `currentWorkspaces`).
-- `src/lib/autotiler.svelte.ts` ignores focus changes on other monitors, so exactly one instance reacts to each one.
+- `src/lib/state/autotiler.svelte.ts` ignores focus changes on other monitors, so exactly one instance reacts to each one.
 - `isOnPrimaryMonitor()` treats the monitor at (0, 0) as primary.
 - Each instance sets its own click-through state.
-- `RemoteState` (`src/lib/remote_state.svelte.ts`) wraps a value in a proxy that broadcasts writes through Tauri events, for state shared between windows. Only the `test` route uses it.
+- `RemoteState` (`src/lib/state/remote_state.svelte.ts`) wraps a value in a proxy that broadcasts writes through Tauri events, for state shared between windows. Only the `test` route uses it.
 
 ## Startup
 
 `src/app.html` links `config.css` and preloads `config.json`, both relative to the page. Then:
 
-1. `src/routes/+page.svelte` runs `initializeAutotiler()` and `initializeBindingModesObserver()` during component init. These only register `$effect`s, which don't run during prerender.
+1. `src/routes/+page.svelte` runs `initAutotiler()` and `initBindingModes()` during component init. These only register `$effect`s, which don't run during prerender.
 2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group, and copies each output into the `providers` `$state`.
 3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it with the Zod schema, which fills in the defaults, and assigns the result to the `config` `$state`. On any failure it logs to the console and leaves the defaults in place. `configLoaded` resolves either way and never rejects.
 
@@ -32,10 +32,9 @@ Prerendering runs component scripts in Node at build time, which is why every ca
 
 ## Reactive state
 
-Shared state is in `.svelte.ts` modules so it can use runes outside components:
+Shared state is in `.svelte.ts` modules in `src/lib/state/`, so it can use runes outside components:
 
 - `config.svelte.ts`: `config`, `configLoaded`, `loadConfig`.
-- `config_schema.ts`: `configSchema`, `defaultConfig` and the `Config` type. No `$state`, so scripts can import it too.
 - `providers.svelte.ts`: `providers`, `initProviders`. Components take what they need with `$derived(providers.x)`.
 - `binding_modes.svelte.ts`: `toggleModes`.
 
@@ -47,7 +46,7 @@ Users configure the pack through three files that ship in the build: `config.jso
 
 `config.json` flows like this:
 
-- The Zod schema in `src/lib/config_schema.ts` is the source of truth: `Config`, the defaults and validation all come from it. `pnpm schema` turns it, with its descriptions, into `static/schema.json`, which the user's editor picks up through `$schema`.
+- The Zod schema in `src/lib/config_schema.ts` has no `$state`, so scripts can import it too, and it is the source of truth: `Config`, the defaults and validation all come from it. `pnpm schema` turns it, with its descriptions, into `static/schema.json`, which the user's editor picks up through `$schema`.
 - `static/config.json` is the file users edit. It repeats the defaults, and `pnpm check` fails if it drifts from them or if `schema.json` is out of date.
 - Every key has a default, so partial files are valid, and nested objects are filled in key by key. Unknown keys are dropped rather than rejected.
 - Validation is all or nothing: one invalid value leaves the whole file unused and the bar on its defaults.

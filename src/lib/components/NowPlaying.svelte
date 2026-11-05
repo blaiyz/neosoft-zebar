@@ -1,30 +1,32 @@
 <script lang="ts">
-  import { config } from "#lib/config.svelte.ts";
-  import { providers } from "#lib/providers.svelte.ts";
+  import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
+  import { config } from "#lib/state/config.svelte.ts";
+  import { providers } from "#lib/state/providers.svelte.ts";
+  import { secondsToHms } from "#lib/utils/format.ts";
   import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import Pause from "@lucide/svelte/icons/pause";
   import Play from "@lucide/svelte/icons/play";
   import SkipBack from "@lucide/svelte/icons/skip-back";
   import SkipForward from "@lucide/svelte/icons/skip-forward";
+  import { onDestroy, untrack } from "svelte";
   import { fly } from "svelte/transition";
+  import type { MediaSession } from "zebar";
   import Meter from "./Meter.svelte";
   import SmoothDiv from "./SmoothDiv.svelte";
-  import type { MediaSession } from "zebar";
-  import { untrack } from "svelte";
-  import { toggleModes } from "#lib/binding_modes.svelte.ts";
 
   let media = $derived(providers.media);
-  let mediaTimeout: ReturnType<typeof setTimeout> | null = null;
+  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
   let shownSession = $state<MediaSession | null>(null);
+
+  // The buttons only exist while click-through is off, so this applies during their outro.
+  let leavingClass = $derived(toggleModes.clickThrough && "absolute");
 
   $effect(() => {
     const session = media?.currentSession;
     const prevSession: MediaSession | null = untrack(() => shownSession);
     if (session) {
-      if (mediaTimeout) {
-        clearTimeout(mediaTimeout);
-        mediaTimeout = null;
-      }
+      clearTimeout(mediaTimeout);
+      mediaTimeout = undefined;
       shownSession = session;
       return;
     }
@@ -33,6 +35,7 @@
         return;
       }
       mediaTimeout = setTimeout(() => {
+        mediaTimeout = undefined;
         shownSession = null;
       }, 2000);
     } else {
@@ -40,39 +43,33 @@
     }
   });
 
-  const secondsToHms = (d: number) => {
-    const h = Math.floor(d / 3600);
-    const m = Math.floor((d % 3600) / 60);
-    const s = Math.floor((d % 3600) % 60);
-
-    return `${h > 0 ? h + ":" : ""}${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`;
-  };
+  onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
-<SmoothDiv outerClass="flex justify-end">
+<SmoothDiv class="flex justify-end">
   {#if isOnPrimaryMonitor() && media && shownSession}
     <div
       transition:fly={{ y: 20, duration: config.transitionDuration }}
-      class="flex items-stretch relative"
+      class="relative flex items-stretch"
     >
       {#if !toggleModes.clickThrough}
         <button
-          class="transition hover:text-zb-accent hover:scale-125 relative flex justify-end items-center"
+          class="relative flex items-center justify-end transition hover:scale-125 hover:text-zb-accent"
           aria-label="Previous"
           onclick={() => media.previous()}
           transition:fly={{ y: 20, duration: config.transitionDuration }}
         >
-          <SkipBack class="{toggleModes.clickThrough ? 'absolute' : ''} mx-2" />
+          <SkipBack class={[leavingClass, "mx-2"]} />
         </button>
       {/if}
       <button
-        class="relative px-1 gap-x-2 overflow-hidden inline-flex items-center justify-center group transition hover:text-zb-accent"
+        class="group relative inline-flex items-center justify-center gap-x-2 overflow-hidden px-1 transition hover:text-zb-accent"
         aria-label="Toggle"
         onclick={() => media.togglePlayPause()}
       >
         <Meter
           animate={false}
-          class="stroke-zb-accent h-8"
+          class="h-8 stroke-zb-accent"
           percent={Math.round(
             (shownSession.position / shownSession.endTime) * 100
           )}
@@ -84,19 +81,21 @@
           {/if}
         </Meter>
         <SmoothDiv
-          innerClass="relative flex items-center justify-center min-w-24 max-w-24 sm:max-w-48 md:max-w-64 lg:max-w-xs xl:max-w-sm"
+          innerClass="relative flex max-w-24 min-w-24 items-center justify-center sm:max-w-48 md:max-w-64 lg:max-w-xs xl:max-w-sm"
         >
           <span
-            class="transition truncate group-hover:translate-y-full group-hover:opacity-0"
+            class="truncate transition group-hover:translate-y-full group-hover:opacity-0"
           >
             <p class="truncate">
               {shownSession.title}
             </p>
           </span>
           <span
-            class="absolute inset-0 inline-flex items-center justify-center -translate-y-full {shownSession.title
-              ? 'opacity-0'
-              : ''} transition-all group-hover:translate-y-0 group-hover:opacity-100"
+            class={[
+              "absolute inset-0 inline-flex -translate-y-full items-center justify-center",
+              shownSession.title && "opacity-0",
+              "transition-all group-hover:translate-y-0 group-hover:opacity-100"
+            ]}
           >
             {secondsToHms(shownSession.position)}/{secondsToHms(
               shownSession.endTime
@@ -106,19 +105,17 @@
       </button>
       <SmoothDiv
         height={false}
-        outerClass="flex justify-end"
+        class="flex justify-end"
         innerClass="flex justify-end"
       >
         {#if !toggleModes.clickThrough}
           <button
-            class="transition h-full hover:text-zb-accent hover:scale-125 relative flex items-center justify-end"
+            class="relative flex h-full items-center justify-end transition hover:scale-125 hover:text-zb-accent"
             aria-label="Next"
             onclick={() => media.next()}
             transition:fly={{ y: 20, duration: config.transitionDuration }}
           >
-            <SkipForward
-              class="{toggleModes.clickThrough ? 'absolute' : ''} mx-2"
-            />
+            <SkipForward class={[leavingClass, "mx-2"]} />
           </button>
         {/if}
       </SmoothDiv>
