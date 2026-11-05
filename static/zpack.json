@@ -14,7 +14,10 @@
     "autotiler",
     "volume"
   ],
-  "previewImages": ["misc/fullscreen.png", "misc/taskbar-integration.png"],
+  "previewImages": [
+    "preview/fullscreen.jpg",
+    "preview/taskbar-integration.jpg"
+  ],
   "repositoryUrl": "https://github.com/blaiyz/neosoft-zebar",
   "widgets": [
     {
@@ -34,11 +37,11 @@
         "shellCommands": [
           {
             "program": "cmd",
-            "argsRegex": "\\/c start https:\\/\\/github\\.com\\/blaiyz\\/neosoft-zebar"
+            "argsRegex": "^/c start https://github\\.com/blaiyz/neosoft-zebar$"
           },
           {
             "program": "shutdown",
-            "argsRegex": ".*"
+            "argsRegex": "^/(a|s)$"
           }
         ]
       },

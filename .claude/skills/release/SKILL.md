@@ -18,7 +18,7 @@ git log --oneline $(git describe --tags --abbrev=0)..origin/main
 gh run list --branch main -L 5
 ```
 
-- Local `main` matches `origin/main`, and the latest CI run is green.
+- Local `main` matches `origin/main`, and the latest CI run is green, along with **Publish rehearsal** if packaging changed since the last release.
 - `pnpm lint` and `pnpm check` pass locally.
 - Anything in the range that needs a README update has one.
 

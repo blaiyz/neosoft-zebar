@@ -22,7 +22,7 @@ vite.config.ts.timestamp-*
 
 # Dev environment
 dev_static
-static/misc
+static/LICENSE
 static/README.md
 
 # Private working notes, see CLAUDE.md
