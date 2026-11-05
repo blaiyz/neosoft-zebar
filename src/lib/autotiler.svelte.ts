@@ -1,6 +1,6 @@
 import { untrack } from "svelte";
 import { providers } from "./providers.svelte";
-import { ContainerType, type Window } from "glazewm";
+import { ContainerType, TilingDirection, type Window } from "glazewm";
 import { config } from "./config.svelte";
 
 // Each autotiler is only responsible for one monitor
@@ -18,7 +18,7 @@ const focusedWindow: Window | null = $derived.by(() => {
     return null;
   }
   if (focusedContainer.type === ContainerType.WINDOW) {
-    return focusedContainer as Window;
+    return focusedContainer;
   }
   return null;
 });
@@ -49,13 +49,16 @@ export function initializeAutotiler() {
     if (!glazewm) {
       return;
     }
-    if (aspectRatio < MIN_RATIO && glazewm.tilingDirection !== "vertical") {
-      glazewm.runCommand("set-tiling-direction vertical");
+    if (
+      aspectRatio < MIN_RATIO &&
+      glazewm.tilingDirection !== TilingDirection.VERTICAL
+    ) {
+      void glazewm.runCommand("set-tiling-direction vertical");
     } else if (
       aspectRatio >= MIN_RATIO &&
-      glazewm.tilingDirection !== "horizontal"
+      glazewm.tilingDirection !== TilingDirection.HORIZONTAL
     ) {
-      glazewm.runCommand("set-tiling-direction horizontal");
+      void glazewm.runCommand("set-tiling-direction horizontal");
     }
   });
 }

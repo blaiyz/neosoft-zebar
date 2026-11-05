@@ -47,7 +47,7 @@ Users configure the pack through three files that ship in the build: `config.jso
 `config.json` flows like this:
 
 - `Config` in `src/lib/config.svelte.ts` is the source of truth. `pnpm schema` turns it, with its JSDoc, into `static/schema.json`, which the user's editor picks up through `$schema` and which is also bundled for runtime validation.
-- `static/config.json` is both the compiled-in defaults (through `$static`) and the file users edit.
+- `static/config.json` is both the compiled-in defaults (through `#static`) and the file users edit.
 - `deepMergeObjects` walks only the keys of the defaults, so a key absent from the defaults has no effect. Arrays replace rather than merge.
 - The schema has no required fields, so partial files are valid. It doesn't reject unknown keys either.
 
@@ -73,7 +73,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 ## Builds
 
-- `scripts/dev_build.js` (`pnpm dev`) swaps `dev_static/` into the place of `static/` for the length of `vite build`, so a developer's personal configuration ends up in `build/` and in the `$static` imports. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
+- `scripts/dev_build.js` (`pnpm dev`) swaps `dev_static/` into the place of `static/` for the length of `vite build`, so a developer's personal configuration ends up in `build/` and in the `#static` imports. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
 - `scripts/build.js` (`pnpm build`) copies `README.md` and `misc/` into `static/` for marketplace preview images, then builds.
 - `pnpm dev:mock` runs the Vite dev server in the `mock` mode, where `vite.config.ts` aliases `zebar` to `src/lib/mock/zebar.ts`. The real package throws outside Zebar, so this is what lets the UI run in a browser. Its data is fixed, and it's never part of a build.
 

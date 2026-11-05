@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { config } from "$lib/config.svelte";
+  import { config } from "#lib/config.svelte.ts";
   // This component is used to create a smooth size transition
   // when the content changes size or added/deleted. (otherwise, the size change is abrupt)
   import type { Snippet } from "svelte";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
+  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import Battery from "@lucide/svelte/icons/battery";
   import BatteryCharging from "@lucide/svelte/icons/battery-charging";
   import BatteryFull from "@lucide/svelte/icons/battery-full";
@@ -23,8 +23,8 @@
 
   import IconHeartFilled from "@tabler/icons-svelte/icons/heart-filled";
   import IconPowerButton from "@tabler/icons-svelte/icons/power";
-  import { config } from "$lib/config.svelte";
-  import { providers } from "$lib/providers.svelte";
+  import { config } from "#lib/config.svelte.ts";
+  import { providers } from "#lib/providers.svelte.ts";
 
   let memory = $derived(providers.memory);
   let cpu = $derived(providers.cpu);
@@ -65,7 +65,7 @@
       <IconPowerButton
         class="text-zb-icon"
         onclick={() => {
-          handlePowerOff();
+          void handlePowerOff();
         }}
       />
     </Button>
@@ -75,7 +75,7 @@
       <IconHeartFilled
         class="text-zb-icon"
         onclick={() => {
-          zebar.shellExec("cmd", [
+          void zebar.shellExec("cmd", [
             "/c",
             "start",
             "https://github.com/blaiyz/neosoft-zebar"
@@ -123,17 +123,18 @@
         {#if network?.defaultInterface?.type === "ethernet"}
           <EthernetPort />
         {:else if network?.defaultInterface?.type === "wifi"}
-          {#if network.defaultGateway!.signalStrength! >= 75}
+          {@const signal = network.defaultGateway?.signalStrength ?? 0}
+          {#if signal >= 75}
             <Wifi />
-          {:else if network.defaultGateway!.signalStrength! >= 50}
+          {:else if signal >= 50}
             <WifiHigh />
-          {:else if network.defaultGateway!.signalStrength! >= 25}
+          {:else if signal >= 25}
             <WifiLow />
           {:else}
             <WifiZero />
           {/if}
           {network.defaultGateway?.ssid}
-        {:else if network?.defaultInterface!.type}
+        {:else if network?.defaultInterface?.type}
           <CircleQuestionMark />
         {:else}
           <GlobeOff />

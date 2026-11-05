@@ -23,7 +23,7 @@ export function RemoteState<T>(
     // console.log(`Mounted remote state for ${name}`);
 
     onDestroy(() => {
-      unlistenPromise.then((unlisten) => {
+      void unlistenPromise.then((unlisten) => {
         unlisten();
         // console.log(`Unmounted remote state for ${name}`);
       });
@@ -46,7 +46,7 @@ export function RemoteState<T>(
       //   value
       // );
       target[prop] = value;
-      currentWindow?.emit(`remote-state:${stateIdentifier}`, state);
+      void currentWindow?.emit(`remote-state:${stateIdentifier}`, state);
       return true;
     }
   };

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { config } from "$lib/config.svelte";
-  import { providers } from "$lib/providers.svelte";
-  import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
+  import { config } from "#lib/config.svelte.ts";
+  import { providers } from "#lib/providers.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import PointFilled from "@tabler/icons-svelte/icons/point-filled";
   import NowPlaying from "./NowPlaying.svelte";
   import SmoothDiv from "./SmoothDiv.svelte";
@@ -14,7 +14,7 @@
   let fullDate = $derived(config.showFullDateByDefault);
   const getDate = (date: Date) => {
     const days = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
-    const shortDay = days[date.getDay()];
+    const shortDay = days[date.getDay()] ?? "";
     return shortDay + " " + date.toLocaleDateString();
   };
 

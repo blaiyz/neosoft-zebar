@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { RemoteState } from "$lib/remote_state.svelte";
+  import { RemoteState } from "#lib/remote_state.svelte.ts";
   import { onDestroy, onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import Button from "$comp/Button.svelte";
+  import Button from "../../components/Button.svelte";
 
   let counter = RemoteState("counter", 0, onMount, onDestroy);
   let enabled = RemoteState("enabled", true, onMount, onDestroy);
@@ -11,15 +11,15 @@
   $effect(() => {
     const window = getCurrentWindow();
     console.log(enabled.value);
-    window.setEnabled(enabled.value);
+    void window.setEnabled(enabled.value);
   });
 
   $effect(() => {
     const window = getCurrentWindow();
     if (shown.value) {
-      window.show();
+      void window.show();
     } else {
-      window.hide();
+      void window.hide();
     }
   });
 

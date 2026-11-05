@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { config, type TaskbarIntegration } from "$lib/config.svelte";
-  import { providers } from "$lib/providers.svelte";
+  import { config, type TaskbarIntegration } from "#lib/config.svelte.ts";
+  import { providers } from "#lib/providers.svelte.ts";
   import {
     getWindows,
     isOnPrimaryMonitor
-  } from "$lib/utils/glaze_wm_utils.svelte";
+  } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import type { Window } from "glazewm";
   import type { GlazeWmOutput } from "zebar";
   import SmoothDiv from "./SmoothDiv.svelte";

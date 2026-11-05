@@ -4,11 +4,11 @@
 
   import { Effect } from "@tauri-apps/api/window";
 
-  import { initializeAutotiler } from "$lib/autotiler.svelte";
-  import { initializeBindingModesObserver } from "$lib/binding_modes.svelte";
-  import { config, configLoaded } from "$lib/config.svelte";
-  import { initProviders, providers } from "$lib/providers.svelte";
-  import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
+  import { initializeAutotiler } from "#lib/autotiler.svelte.ts";
+  import { initializeBindingModesObserver } from "#lib/binding_modes.svelte.ts";
+  import { config, configLoaded } from "#lib/config.svelte.ts";
+  import { initProviders, providers } from "#lib/providers.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import Group from "../components/Group.svelte";
   import LeftGroup from "../components/LeftGroup.svelte";
   import ProcessIcons from "../components/ProcessIcons.svelte";
@@ -20,7 +20,7 @@
   initializeBindingModesObserver();
 
   onMount(() => {
-    initProviders();
+    void initProviders();
 
     /*     
     Found a way to set window effects
@@ -40,24 +40,24 @@
         const window = zebar.currentWidget().tauriWindow;
         switch (effect) {
           case "acrylic":
-            window.setEffects({ effects: [Effect.Acrylic] });
+            void window.setEffects({ effects: [Effect.Acrylic] });
             console.log("Set window effect to acrylic");
             break;
           case "blur":
-            window.setEffects({ effects: [Effect.Blur] });
+            void window.setEffects({ effects: [Effect.Blur] });
             console.log("Set window effect to blur");
             break;
           case "mica":
-            window.setEffects({ effects: [Effect.Mica] });
+            void window.setEffects({ effects: [Effect.Mica] });
             console.log("Set window effect to mica");
             break;
           case "inherit":
-            window.clearEffects();
+            void window.clearEffects();
             console.log("Set window effect to inherit");
             break;
         }
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         console.error("Error setting window effects:", error);
       });
   });

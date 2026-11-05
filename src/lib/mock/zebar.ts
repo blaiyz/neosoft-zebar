@@ -6,7 +6,7 @@
  * in a real build. It covers only what the bar uses, and the controls change
  * this fake state rather than the system.
  */
-import zpack from "$static/zpack.json";
+import zpack from "#static/zpack.json";
 import { ContainerType } from "glazewm";
 
 const WORKSPACE_NAMES = ["1", "2", "3"];
@@ -106,7 +106,7 @@ function update(changes: Partial<typeof state>) {
   outputListeners.forEach((listener) => listener(outputMap));
 }
 
-async function runCommand(command: string) {
+function runCommand(command: string) {
   const workspace = command.match(/^focus --workspace (.+)$/)?.[1];
   if (workspace) {
     update({ displayedWorkspace: workspace });
@@ -116,6 +116,7 @@ async function runCommand(command: string) {
   } else {
     console.log("[mock] GlazeWM command:", command);
   }
+  return Promise.resolve();
 }
 
 export function createProviderGroup() {
@@ -138,12 +139,13 @@ export function currentWidget() {
   };
 }
 
-export async function shellExec(program: string, args: string[]) {
+export function shellExec(program: string, args: string[]) {
   console.log("[mock] shell command:", program, ...args);
+  return Promise.resolve();
 }
 
 // In Zebar the page fills a window with the preset's height, over the desktop.
 if (typeof document !== "undefined") {
-  document.body.style.height = zpack.widgets[0].presets[0].height;
+  document.body.style.height = zpack.widgets[0]?.presets[0]?.height ?? "100%";
   document.documentElement.style.background = "#1e4f8a";
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { config } from "$lib/config.svelte";
-  import { providers } from "$lib/providers.svelte";
-  import { isOnPrimaryMonitor } from "$lib/utils/glaze_wm_utils.svelte";
+  import { config } from "#lib/config.svelte.ts";
+  import { providers } from "#lib/providers.svelte.ts";
+  import { isOnPrimaryMonitor } from "#lib/utils/glaze_wm_utils.svelte.ts";
   import Pause from "@lucide/svelte/icons/pause";
   import Play from "@lucide/svelte/icons/play";
   import SkipBack from "@lucide/svelte/icons/skip-back";
@@ -11,7 +11,7 @@
   import SmoothDiv from "./SmoothDiv.svelte";
   import type { MediaSession } from "zebar";
   import { untrack } from "svelte";
-  import { toggleModes } from "$lib/binding_modes.svelte";
+  import { toggleModes } from "#lib/binding_modes.svelte.ts";
 
   let media = $derived(providers.media);
   let mediaTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -41,7 +41,6 @@
   });
 
   const secondsToHms = (d: number) => {
-    d = Number(d);
     const h = Math.floor(d / 3600);
     const m = Math.floor((d % 3600) / 60);
     const s = Math.floor((d % 3600) % 60);
