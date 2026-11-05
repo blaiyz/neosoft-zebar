@@ -162,7 +162,7 @@ In addition to colors, `config.css` provides variables that control other style 
 --border: var(--tau-highlight-low);
 --shadow: var(--tau-highlight-low);
 --icon: var(--tau-love);
---memory: var(--tau-weak);
+--memory: var(--tau-low);
 --cpu: var(--tau-accent);
 --cpu-high-usage: var(--tau-strong);
 --battery-good: var(--tau-weak);

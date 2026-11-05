@@ -22,8 +22,8 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 
 `src/app.html` links `config.css` and preloads `config.json`, both relative to the page. Then:
 
-1. `src/routes/+page.svelte` runs `initAutotiler()` and `initBindingModes()` during component init. These only register `$effect`s, which don't run during prerender.
-2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group with only the providers its sections need, and copies each output into the `providers` `$state`.
+1. `src/routes/+page.svelte` runs `initAutotiler()` and `initBindingModes()` during component init. These register `$effect`s, which don't run during prerender. `initBindingModes()` also waits for `configLoaded`, which can't settle there, because `loadConfig()` only runs on mount.
+2. On mount, `+page.svelte` calls `initMonitor()`, which works out whether this is the primary monitor, then `initProviders()`, and queues the `backgroundEffect` setup. The last two wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group with only the providers its sections need, and copies each output into the `providers` `$state`.
 3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it with the Zod schema, which fills in the defaults, and assigns the result to the `config` `$state`. On any failure it logs to the console and leaves the defaults in place. `configLoaded` resolves either way and never rejects.
 
 The UI renders before all of this finishes, with defaults and `null` providers, so components guard with `{#if}` or optional chaining.
@@ -79,7 +79,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 - `pnpm dev` runs `vite build --watch` in the `dev` mode. `vite.config.ts` wraps the adapter in that mode, so each build ends by copying `dev_static/` over `build/`. A developer's personal configuration ends up there, and anything missing from it keeps the `static/` version. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
 - The last step of a `dev` build writes `dev-build.txt`. `src/lib/dev_reload.ts`, which only exists in that mode, polls the file and reloads the page when it changes. Being a file in the pack, it needs no server, port or CORS.
 - `pnpm dev:once` runs the same build once.
-- `scripts/build.js` (`pnpm build`) copies `README.md` and `LICENSE` into `static/`, because `zebar publish` only packs them from the root of the pack, then builds. Marketplace preview images are small copies in `static/preview/`. The full-size screenshots stay in `misc/`, outside the package, and the README links to them on GitHub.
+- `scripts/build.js` (`pnpm build`) builds, then copies `README.md` and `LICENSE` into `build/`, because `zebar publish` only packs them from the root of the pack. Marketplace preview images are small copies in `static/preview/`. The full-size screenshots stay in `misc/`, outside the package, and the README links to them on GitHub.
 - `pnpm dev:mock` runs the Vite dev server in the `mock` mode, where `vite.config.ts` aliases `zebar` to `src/lib/mock/zebar.ts`. The real package throws outside Zebar, so this is what lets the UI run in a browser. Its data is fixed, and it's never part of a build.
 
 ## CI and releases
@@ -87,6 +87,6 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 - `ci.yml` runs `pnpm lint`, `pnpm check`, actionlint, zizmor and the build on pushes to `main` and on pull requests. The build is `build.yml`, a reusable workflow, so CI, `release.yml` and `publish-marketplace.yml` all build the same way. The composite action in `.github/actions/setup` installs pnpm, Node and the locked dependencies.
 - `publish-rehearsal.yml` runs on pull requests that touch packaging, or by hand. It runs `scripts/publish.sh`, the same script as a real publish, against `scripts/publish_stub.ts`, a local stand-in that checks the form fields and the tarball. Nothing reaches the marketplace, and the marketplace's own validation isn't covered.
 - `release.yml` is started by hand. It builds, zips `build/` and creates a GitHub release with `gh release create`.
-- `publish-marketplace.yml` runs when a release is published, or by hand. `.github/actions/zebar-cli` installs a pinned Zebar build, and `scripts/publish.sh` runs `zebar publish` with `ZEBAR_PUBLISH_TOKEN`, passing the version from the tag.
+- `publish-marketplace.yml` runs when a release is published, building its tag, or by hand, building the ref it's started on. `.github/actions/zebar-cli` installs a pinned Zebar build, and `scripts/publish.sh` runs `zebar publish` with `ZEBAR_PUBLISH_TOKEN`, passing the version from the tag.
 
 The steps are in `.claude/skills/release/SKILL.md`.

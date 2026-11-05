@@ -4,10 +4,15 @@ description: Install a pinned Zebar build and start the virtual display it needs
 runs:
   using: composite
   steps:
+    # Pinned apart from the zebar package: this build only has to publish, and it
+    # receives the marketplace token, so a change is its own decision. See the
+    # updates skill.
     - name: Download Zebar
       env:
         GH_TOKEN: ${{ github.token }}
-      run: gh release download v3.1.1 --repo glzr-io/zebar --pattern '*x64.deb' --dir "$RUNNER_TEMP/zebar"
+      run: |
+        gh release download v3.1.1 --repo glzr-io/zebar --pattern zebar-v3.1.1-opt4-x64.deb --dir "$RUNNER_TEMP/zebar"
+        echo "cba5c8f8deb38d5838f15ce017a17dd5b518ee2e32a5584bd9206c272bba4567  $RUNNER_TEMP/zebar/zebar-v3.1.1-opt4-x64.deb" | sha256sum -c -
       shell: bash
 
     - name: Install Zebar dependencies

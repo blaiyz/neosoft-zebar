@@ -12,12 +12,12 @@ updates:
           - minor
           - patch
     ignore:
+      # Moved by hand, with the versions that follow it. See the updates skill.
+      - dependency-name: zebar
       # Follows the version zebar depends on. See the updates skill.
       - dependency-name: "@tauri-apps/api"
-      # Follows the GlazeWM client that zebar depends on.
+      # Follows the version zebar depends on. See the updates skill.
       - dependency-name: glazewm
-        update-types:
-          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directories:

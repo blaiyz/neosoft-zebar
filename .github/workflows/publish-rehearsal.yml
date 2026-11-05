@@ -9,10 +9,14 @@ on:
       - .github/workflows/publish-rehearsal.yml
       - LICENSE
       - README.md
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - scripts/build.js
       - scripts/publish.sh
       - scripts/publish_stub.ts
       - static/**
+      - vite.config.ts
   workflow_dispatch:
 
 concurrency:
