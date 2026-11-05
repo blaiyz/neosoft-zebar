@@ -49,7 +49,6 @@
   --ws-4: var(--tau-mid);
   --ws-5: var(--tau-strong);
   --tiling-direction: var(--tau-weak);
-  --not-playing: var(--tau-love);
   --network: var(--tau-text);
   --weather: var(--tau-text);
   --volume-start: var(--tau-strong);

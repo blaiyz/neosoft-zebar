@@ -34,7 +34,7 @@ A user keeping an older `config.css` won't define the variable. Give it a fallba
 
 ## Dev setup
 
-`pnpm dev` builds from `dev_static/`, which is created once and never refreshed, so a new option doesn't exist there until it's added:
+`pnpm dev` copies `dev_static/` over the build, and that folder is created once and never refreshed, so a new option doesn't exist there until it's added:
 
 - [ ] Copy `static/schema.json` over `dev_static/schema.json`. The schema is generated, so this replaces nothing of the owner's.
 - [ ] Add the new key to `dev_static/config.json` or the new variable to `dev_static/config.css`, without touching anything else in those files, and tell the owner you did.
