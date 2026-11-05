@@ -7,7 +7,7 @@
   let { children }: { children: Snippet } = $props();
 
   onMount(() => {
-    loadConfig();
+    void loadConfig();
     if (import.meta.env.MODE === "dev") reloadOnRebuild();
   });
 </script>

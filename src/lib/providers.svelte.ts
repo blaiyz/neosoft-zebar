@@ -3,7 +3,7 @@ import {
   type ProviderGroup,
   type ProviderGroupConfig
 } from "zebar";
-import { configLoaded, type Config } from "./config.svelte";
+import { configLoaded } from "./config.svelte";
 
 const providerConfig = {
   battery: { type: "battery", refreshInterval: 1000 * 60 * 1 }, // 1 minute
@@ -30,19 +30,13 @@ const providers: ProviderGroup<typeof providerConfig>["outputMap"] = $state({
 });
 
 async function initProviders() {
-  let config: Config | null = null;
-  try {
-    config = await configLoaded;
-    const refreshIntervals = config.providersConfig.refreshIntervals;
-    providerConfig.cpu.refreshInterval = refreshIntervals.cpu;
-    providerConfig.memory.refreshInterval = refreshIntervals.memory;
-    providerConfig.battery.refreshInterval = refreshIntervals.battery;
-    providerConfig.weather.refreshInterval = refreshIntervals.weather;
-    providerConfig.network.refreshInterval = refreshIntervals.network;
-  } catch (error) {
-    console.error("Error initializing providers:", error);
-    // Can continue with default config
-  }
+  const { providersConfig } = await configLoaded;
+  const refreshIntervals = providersConfig.refreshIntervals;
+  providerConfig.cpu.refreshInterval = refreshIntervals.cpu;
+  providerConfig.memory.refreshInterval = refreshIntervals.memory;
+  providerConfig.battery.refreshInterval = refreshIntervals.battery;
+  providerConfig.weather.refreshInterval = refreshIntervals.weather;
+  providerConfig.network.refreshInterval = refreshIntervals.network;
 
   const providerGroup = createProviderGroup(providerConfig);
 
@@ -50,7 +44,7 @@ async function initProviders() {
     Object.assign(providers, outputMap);
   });
 
-  if (config?.providersConfig.enableErrorLogging) {
+  if (providersConfig.enableErrorLogging) {
     providerGroup.onError((error) => {
       console.error("Provider error:", error);
     });

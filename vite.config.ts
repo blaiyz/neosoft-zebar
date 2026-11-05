@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
       alias: mode === "mock" ? [{ find: "zebar", replacement: mockZebar }] : []
     },
     server: {
-      // The default config and its schema are imported from `static/`.
+      // The mock imports `zpack.json` from `static/`.
       fs: { allow: ["static"] }
     }
   };

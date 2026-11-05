@@ -21,8 +21,8 @@ The package manager is pnpm. There is no test suite.
 - `pnpm build`: release build into `build/` using `static/`. Also copies `README.md` and `misc/` into `static/` (both gitignored there).
 - `pnpm lint`: `prettier --check .` and `eslint .`. This is what CI enforces, and Prettier covers Markdown too, including `CLAUDE.md`, `docs/` and `.claude/`.
 - `pnpm format`: `prettier --write .`
-- `pnpm check`: `svelte-check` type checking. CI runs this too.
-- `pnpm schema`: regenerate `static/schema.json` from the `Config` interface. Run `pnpm format` afterwards, because the generated file is not Prettier-clean.
+- `pnpm check`: `svelte-check` type checking, then a check that `static/config.json` and `static/schema.json` match `src/lib/config_schema.ts`. CI runs this too.
+- `pnpm schema`: regenerate `static/schema.json` from the Zod schema.
 - `pnpm verify`: `pnpm lint`, `pnpm check` and `pnpm dev:once`.
 - One file: `pnpm exec prettier --check <file>`, `pnpm exec eslint <file>`.
 
@@ -35,9 +35,9 @@ Use `pnpm dev:once`, not `pnpm build`, to confirm a change compiles: `build/` is
 - **One app per monitor.** Zebar opens a separate webview for each widget instance, and `monitorSelection: all` means one per monitor. Module state is therefore per monitor, which is why `src/lib/autotiler.svelte.ts` only acts while its own monitor is focused. Sharing state between windows needs Tauri events (`src/lib/remote_state.svelte.ts`).
 - **Static output, prerendered.** `@sveltejs/adapter-static` with `prerender = true` in `src/routes/+layout.ts`. Component scripts also run in Node at build time, so anything touching `zebar`, Tauri or `window` goes in `onMount` or `$effect`. Keep URLs relative (`fetch("config.json")`), since Zebar serves the pack directory as the site root.
 - **State lives in `src/lib/*.svelte.ts` modules.** `config` (`config.svelte.ts`) and `providers` (`providers.svelte.ts`) are module-level `$state` objects that components read directly. `configLoaded` is a promise for code that must wait for the user's config. `providers.*` fields are `null` until the first output, and `providers.glazewm` stays `null` when GlazeWM isn't running.
-- **Configuration has two runtime files.** `config.json` and `config.css` ship in `static/`, are fetched and linked at runtime, and are meant to be edited by users. The defaults are also compiled in through the `#static` import.
-  - The `Config` interface in `src/lib/config.svelte.ts` is the source of truth, and its JSDoc becomes the editor hints in `schema.json`.
-  - `deepMergeObjects` only walks keys present in the defaults, so a key missing from the default `config.json` is silently ignored.
+- **Configuration has two runtime files.** `config.json` and `config.css` ship in `static/`, are fetched and linked at runtime, and are meant to be edited by users.
+  - The Zod schema in `src/lib/config_schema.ts` is the source of truth for types, defaults and validation, and its descriptions become the editor hints in `schema.json`.
+  - `static/config.json` is a template for users that has to equal the defaults. `pnpm check` fails if it drifts.
   - Use `/add-config` for a new option; it spans several files, including the README.
 - **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.

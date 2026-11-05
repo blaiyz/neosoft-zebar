@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AttachmentDirection } from "#lib/config.svelte.ts";
+  import type { AttachmentDirection } from "#lib/config_schema.ts";
   import { config } from "#lib/config.svelte.ts";
   import type { Snippet } from "svelte";
   type Props = {

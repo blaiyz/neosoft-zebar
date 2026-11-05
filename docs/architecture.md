@@ -23,8 +23,8 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 `src/app.html` links `config.css` and preloads `config.json`, both relative to the page. Then:
 
 1. `src/routes/+page.svelte` runs `initializeAutotiler()` and `initializeBindingModesObserver()` during component init. These only register `$effect`s, which don't run during prerender.
-2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the configured refresh intervals (or keeps the defaults if loading failed), creates the Zebar provider group, and copies each output into the `providers` `$state`.
-3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it against the schema, deep-merges it over the defaults into the `config` `$state`, and resolves `configLoaded`. On any failure it logs to the console and rejects `configLoaded`, leaving the defaults in place.
+2. On mount, `+page.svelte` calls `initProviders()` and queues the `backgroundEffect` setup. Both wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group, and copies each output into the `providers` `$state`.
+3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it with the Zod schema, which fills in the defaults, and assigns the result to the `config` `$state`. On any failure it logs to the console and leaves the defaults in place. `configLoaded` resolves either way and never rejects.
 
 The UI renders before all of this finishes, with defaults and `null` providers, so components guard with `{#if}` or optional chaining.
 
@@ -35,6 +35,7 @@ Prerendering runs component scripts in Node at build time, which is why every ca
 Shared state is in `.svelte.ts` modules so it can use runes outside components:
 
 - `config.svelte.ts`: `config`, `configLoaded`, `loadConfig`.
+- `config_schema.ts`: `configSchema`, `defaultConfig` and the `Config` type. No `$state`, so scripts can import it too.
 - `providers.svelte.ts`: `providers`, `initProviders`. Components take what they need with `$derived(providers.x)`.
 - `binding_modes.svelte.ts`: `toggleModes`.
 
@@ -46,10 +47,10 @@ Users configure the pack through three files that ship in the build: `config.jso
 
 `config.json` flows like this:
 
-- `Config` in `src/lib/config.svelte.ts` is the source of truth. `pnpm schema` turns it, with its JSDoc, into `static/schema.json`, which the user's editor picks up through `$schema` and which is also bundled for runtime validation.
-- `static/config.json` is both the compiled-in defaults (through `#static`) and the file users edit.
-- `deepMergeObjects` walks only the keys of the defaults, so a key absent from the defaults has no effect. Arrays replace rather than merge.
-- The schema has no required fields, so partial files are valid. It doesn't reject unknown keys either.
+- The Zod schema in `src/lib/config_schema.ts` is the source of truth: `Config`, the defaults and validation all come from it. `pnpm schema` turns it, with its descriptions, into `static/schema.json`, which the user's editor picks up through `$schema`.
+- `static/config.json` is the file users edit. It repeats the defaults, and `pnpm check` fails if it drifts from them or if `schema.json` is out of date.
+- Every key has a default, so partial files are valid, and nested objects are filled in key by key. Unknown keys are dropped rather than rejected.
+- Validation is all or nothing: one invalid value leaves the whole file unused and the bar on its defaults.
 
 ## Styling
 
@@ -73,7 +74,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 ## Builds
 
-- `pnpm dev` runs `vite build --watch` in the `dev` mode. `vite.config.ts` wraps the adapter in that mode, so each build ends by copying `dev_static/` over `build/`. A developer's personal configuration ends up there, and anything missing from it keeps the `static/` version. `dev_static/` is created from `static/` on first use and isn't refreshed after that. `#static` imports read `static/` in every mode.
+- `pnpm dev` runs `vite build --watch` in the `dev` mode. `vite.config.ts` wraps the adapter in that mode, so each build ends by copying `dev_static/` over `build/`. A developer's personal configuration ends up there, and anything missing from it keeps the `static/` version. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
 - The last step of a `dev` build writes `dev-build.txt`. `src/lib/dev_reload.ts`, which only exists in that mode, polls the file and reloads the page when it changes. Being a file in the pack, it needs no server, port or CORS.
 - `pnpm dev:once` runs the same build once.
 - `scripts/build.js` (`pnpm build`) copies `README.md` and `misc/` into `static/` for marketplace preview images, then builds.
