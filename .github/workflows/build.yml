@@ -2,14 +2,7 @@ name: Build
 
 on:
   workflow_call:
-    inputs:
-      version-number:
-        type: string
   workflow_dispatch:
-    inputs:
-      version-number:
-        type: string
-        required: true
 
 permissions:
   contents: read

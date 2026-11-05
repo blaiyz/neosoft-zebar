@@ -40,7 +40,7 @@ Several places follow the Zebar version, and they can drift apart:
 - `zebar` in `package.json`, and what `pnpm-lock.yaml` resolves it to: the client library that gets bundled.
 - `@tauri-apps/api` in `package.json`: an exact pin matching the version `zebar` depends on. Window objects come from Zebar's copy, so a newer version here adds a second copy to the bundle and its types can stop matching.
 - `$schema` in `static/zpack.json`: the pack format.
-- The `tag` of the Zebar download in `.github/workflows/publish-marketplace.yml`: the CLI that publishes.
+- The tag in `gh release download` in `.github/actions/zebar-cli/action.yml`: the CLI that publishes. **Publish rehearsal** runs on any PR that changes it.
 
 Steps:
 

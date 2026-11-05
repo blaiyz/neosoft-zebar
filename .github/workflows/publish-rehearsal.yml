@@ -10,6 +10,7 @@ on:
       - LICENSE
       - README.md
       - scripts/build.js
+      - scripts/publish.sh
       - scripts/publish_stub.ts
       - static/**
   workflow_dispatch:
@@ -34,8 +35,8 @@ jobs:
       RELEASE_URL: https://github.com/blaiyz/neosoft-zebar/releases
       ZEBAR_PUBLISH_TOKEN: rehearsal
       RELEASE_NOTES: |-
-        ## "Double", 'single' and `backtick` quotes
-
+        - Starts with a hyphen, like a bullet list
+        - "Double", 'single' and `backtick` quotes
         - $HOME, ${HOME}, $(date) and \backslashes stay as written
         - Rosé Pine ✨
     steps:
@@ -55,16 +56,15 @@ jobs:
       - uses: ./.github/actions/zebar-cli
 
       - name: Publish to the stub
+        env:
+          ZEBAR_API_URL: http://127.0.0.1:8787
         run: |
+          jq -n --arg tagName "v$VERSION" --arg body "$RELEASE_NOTES" --arg url "$RELEASE_URL" \
+            '{$tagName, $body, $url}' > "$RUNNER_TEMP/release.json"
+
           node scripts/publish_stub.ts &
           stub=$!
           timeout 10 bash -c 'until curl -s -o /dev/null http://127.0.0.1:8787; do sleep 0.2; done'
 
-          zebar publish --pack-config ./build/zpack.json \
-            --version-override "$VERSION" \
-            --commit-sha "$(git rev-parse --short HEAD)" \
-            --release-notes "$RELEASE_NOTES" \
-            --release-url "$RELEASE_URL" \
-            --api-url http://127.0.0.1:8787
-
+          bash scripts/publish.sh "$RUNNER_TEMP/release.json"
           wait "$stub"
