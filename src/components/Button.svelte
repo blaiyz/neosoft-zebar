@@ -11,7 +11,7 @@
 </script>
 
 <button
-  class="flex items-center justify-center transition-colors bg-blend-30 border border-zb-border rounded-base shadow-button hover:border-blend-40 active:border-blend-70 p-1 {rest.class}"
+  class="flex items-center justify-center transition-colors bg-current/30 border border-zb-border rounded-base shadow-button hover:border-current/40 active:border-current/70 p-1 {rest.class}"
   onclick={callback}
   aria-label={label}
 >

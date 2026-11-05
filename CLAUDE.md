@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Neosoft Zebar is a widget pack for [Zebar](https://github.com/glzr-io/zebar) v3, a status bar for Windows that integrates with the GlazeWM tiling window manager. It is a SvelteKit app using Svelte 5 runes and Tailwind 3, compiled to static files in `build/` that Zebar loads into a Tauri webview. It began as a fork of Neobrutal Zebar, which is why the local folder keeps that name, and it is published to the Zebar marketplace as `neosoft-zebar`.
+Neosoft Zebar is a widget pack for [Zebar](https://github.com/glzr-io/zebar) v3, a status bar for Windows that integrates with the GlazeWM tiling window manager. It is a SvelteKit app using Svelte 5 runes and Tailwind 4, compiled to static files in `build/` that Zebar loads into a Tauri webview. It began as a fork of Neobrutal Zebar, which is why the local folder keeps that name, and it is published to the Zebar marketplace as `neosoft-zebar`.
 
 ## This repo is public
 
@@ -37,7 +37,7 @@ Use `pnpm dev`, not `pnpm build`, to confirm a change compiles: `build/` is the 
   - The `Config` interface in `src/lib/config.svelte.ts` is the source of truth, and its JSDoc becomes the editor hints in `schema.json`.
   - `deepMergeObjects` only walks keys present in the defaults, so a key missing from the default `config.json` is silently ignored.
   - Use `/add-config` for a new option; it spans several files, including the README.
-- **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `tailwind.config.js` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Class names built at runtime must be listed in the Tailwind `safelist`.
+- **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.
 
 Import paths: `$lib` is `src/lib`, `$comp` is `src/components`, `$static` is `static` (or `dev_static` during `pnpm dev`). Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.

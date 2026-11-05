@@ -57,7 +57,7 @@ Three layers of CSS variables, all HSL triplets without commas:
 
 1. `src/themes/*.css` define palettes. They are imported in `src/app.css`, so every palette is bundled.
 2. `static/config.css` maps semantic names to a palette (`--text: var(--tau-text)`) and sets sizes, fonts and radii. It isn't bundled, so editing it needs no rebuild. A color may carry an alpha (`--bg-focused: ... / 0.4`).
-3. `tailwind.config.js` exposes the semantic names as `zb-*` utilities through `hsl( var(--name) )`.
+3. `@theme inline` in `src/app.css` exposes the semantic names as `zb-*` utilities through `hsl(var(--name))`. Being inline, the values go straight into the utilities, as `--transition-duration` is set below `:root` and a theme variable there couldn't resolve it.
 
 `src/app.css` also applies a global transition to color-like properties on `*`, with its duration set from `transitionDuration` on the root element of `+layout.svelte`. Sizes derive from `--font-size`, so scaling the bar means raising the font size and the height in `zpack.json` together.
 

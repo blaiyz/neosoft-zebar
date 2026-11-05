@@ -25,9 +25,9 @@ Renaming or removing a key: old files still carry the old key. Its value is drop
 ## A config.css variable
 
 - [ ] Add it to `static/config.css` with a sensible default.
-- [ ] Colors: raw HSL triplets without commas. Map the semantic name to a palette variable from `src/themes/`. Expose it in `tailwind.config.js` under `zb` as `hsl( var(--name) )`.
+- [ ] Colors: raw HSL triplets without commas. Map the semantic name to a palette variable from `src/themes/`. Expose it in the `@theme` block of `src/app.css` as `--color-zb-<name>: hsl(var(--name));`.
 - [ ] Sizes: prefer values relative to `--font-size`, so scaling the bar keeps working.
-- [ ] Classes built at runtime go in the Tailwind `safelist`.
+- [ ] Classes chosen at runtime go in a lookup table of complete names, because Tailwind only generates what it finds written out in full.
 - [ ] Add the variable to every matching theme preset in `README.md`, using a suitable color from each palette.
 
 A user keeping an older `config.css` won't define the variable. Give it a fallback where the bar would otherwise look broken, for example `var(--name, var(--text))`.

@@ -65,21 +65,21 @@
 
 <div class="flex items-center h-full w-full">
   <div
-    class="relative flex items-stretch h-bar w-full font-zb text-zb-text text-zb-size font-base bg-opacity-0"
+    class="relative flex items-stretch h-bar w-full font-zb text-zb-text text-zb-size font-base"
   >
     {#if config.gradient !== "solid" && config.gradient !== "disabled"}
       <div
         class="absolute inset-0 {config.gradient === 'bottom'
-          ? 'bg-gradient-to-t'
-          : 'bg-gradient-to-b'} from-zb-bg-focused to-transparent {!glazewm
+          ? 'bg-linear-to-t/srgb'
+          : 'bg-linear-to-b/srgb'} from-zb-bg-focused to-transparent {!glazewm
           ?.currentMonitor.hasFocus
           ? 'opacity-0'
           : ''}"
       ></div>
       <div
         class="absolute inset-0 {config.gradient === 'bottom'
-          ? 'bg-gradient-to-t'
-          : 'bg-gradient-to-b'} from-zb-bg-unfocused to-transparent {glazewm
+          ? 'bg-linear-to-t/srgb'
+          : 'bg-linear-to-b/srgb'} from-zb-bg-unfocused to-transparent {glazewm
           ?.currentMonitor.hasFocus
           ? 'opacity-0'
           : ''}"

@@ -79,9 +79,9 @@
           )}
         >
           {#if shownSession.isPlaying}
-            <Pause class="transition transform group-hover:scale-125" />
+            <Pause class="transition group-hover:scale-125" />
           {:else}
-            <Play class="transition transform group-hover:scale-125" />
+            <Play class="transition group-hover:scale-125" />
           {/if}
         </Meter>
         <SmoothDiv
@@ -95,7 +95,7 @@
             </p>
           </span>
           <span
-            class="absolute inset-0 inline-flex items-center justify-center transform -translate-y-full {shownSession.title
+            class="absolute inset-0 inline-flex items-center justify-center -translate-y-full {shownSession.title
               ? 'opacity-0'
               : ''} transition-all group-hover:translate-y-0 group-hover:opacity-100"
           >

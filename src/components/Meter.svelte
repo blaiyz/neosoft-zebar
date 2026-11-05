@@ -65,7 +65,7 @@
 
   {#if animate}
     <span
-      class="absolute inset-0 flex items-center justify-center text-md transform -translate-y-full opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100"
+      class="absolute inset-0 flex items-center justify-center -translate-y-full opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100"
     >
       {normalizedPercent}%
     </span>

@@ -19,12 +19,10 @@ gh pr diff <n>
 CI builds, lints and type checks, but it can't exercise the widget. For anything beyond a patch bump:
 
 - Read the release notes or changelog for the jump. Pay attention to `svelte`, `@sveltejs/*`, `zebar`, `glazewm`, `tailwindcss` and `vite`.
-- Tailwind 4 and any major SvelteKit or Vite bump are migrations: handle them as a change of their own through `/change`, not as a merge.
+- A major Tailwind, SvelteKit or Vite bump is a migration: handle them as a change of their own through `/change`, not as a merge.
 - To test locally, the owner checks out the PR branch; then `pnpm install`, `pnpm check`, `pnpm dev`, and the owner reloads Zebar.
 
 Tell the owner: merge, or what blocks it.
-
-`svelte-range-slider-pips` is installed from a tarball of a fork, so Dependabot doesn't cover it.
 
 ## A red CI run
 

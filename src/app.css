@@ -1,17 +1,84 @@
 /* Since we're using nerdfonts only for weather icons, and the weather doesn't load offline anyway,
   it's okay to use a CDN for them. Everything else is bundled. */
 @import "https://www.nerdfonts.com/assets/css/webfont.css";
-@import "themes/rose-pine.css";
-@import "themes/catppuccin.css";
-@import "themes/nord.css";
-@import "themes/material.css";
-@import "themes/tau.css";
+@import "./themes/rose-pine.css";
+@import "./themes/catppuccin.css";
+@import "./themes/nord.css";
+@import "./themes/material.css";
+@import "./themes/tau.css";
+@import "tailwindcss" source(".");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind only applies hover on devices with a primary pointer that hovers, which leaves
+  out some touchscreen PCs. */
+@custom-variant hover (&:hover);
 
-@layer custom-base {
+/* `inline` puts these values directly into the utilities. `--transition-duration` is set below
+  `:root`, so a theme variable on `:root` couldn't resolve it. */
+@theme inline {
+  --color-zb-text: hsl(var(--text));
+  --color-zb-base: hsl(var(--bg));
+  --color-zb-muted: hsl(var(--muted));
+  --color-zb-border: hsl(var(--border));
+  --color-zb-shadow: hsl(var(--shadow));
+  --color-zb-bg-focused: hsl(var(--bg-focused));
+  --color-zb-bg-unfocused: hsl(var(--bg-unfocused));
+  --color-zb-icon: hsl(var(--icon));
+  --color-zb-memory: hsl(var(--memory));
+  --color-zb-cpu: hsl(var(--cpu));
+  --color-zb-cpu-high-usage: hsl(var(--cpu-high-usage));
+  --color-zb-battery-good: hsl(var(--battery-good));
+  --color-zb-battery-mid: hsl(var(--battery-mid));
+  --color-zb-battery-low: hsl(var(--battery-low));
+  --color-zb-focused-process: hsl(var(--focused-process));
+  --color-zb-process: hsl(var(--process));
+  --color-zb-displayed: hsl(var(--displayed));
+  --color-zb-ws-0: hsl(var(--ws-1));
+  --color-zb-ws-1: hsl(var(--ws-2));
+  --color-zb-ws-2: hsl(var(--ws-3));
+  --color-zb-ws-3: hsl(var(--ws-4));
+  --color-zb-ws-4: hsl(var(--ws-5));
+  --color-zb-accent: hsl(var(--accent));
+  --color-zb-tiling-direction: hsl(var(--tiling-direction));
+  --color-zb-click-through: hsl(var(--tiling-direction));
+  --color-zb-network: hsl(var(--network));
+  --color-zb-weather: hsl(var(--weather));
+  --color-zb-volume-start: hsl(var(--volume-start));
+  --color-zb-volume-end: hsl(var(--volume-end));
+  --color-zb-volume-inner: hsl(var(--volume-inner));
+
+  --radius-base: var(--radius);
+  --default-border-width: var(--border-size);
+
+  --shadow-button: var(--shadow-size-button) var(--shadow-size-button) 0
+    hsl(var(--shadow));
+  --shadow-bar: var(--shadow-size-bar) var(--shadow-size-bar) 0
+    hsl(var(--shadow));
+  --shadow-inverted-l: var(--radius) 0 0 0 hsl(var(--bg));
+  --shadow-inverted-r: calc(-1 * var(--radius)) 0 0 0 hsl(var(--bg));
+
+  --default-transition-duration: var(--transition-duration);
+
+  --font-zb: var(--font-family), var(--font-sans);
+  --font-weight-base: var(--font-weight);
+  --text-zb-size: var(--font-size);
+
+  --spacing-bar: var(--height);
+  --spacing-radius: var(--radius);
+  --spacing-zbx: var(--bar-margin-x);
+  --spacing-zby: var(--bar-margin-y);
+  --spacing-zrby: var(--right-margin);
+  --spacing-zlby: var(--left-margin);
+}
+
+@layer base {
+  * {
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill,
+      stroke, opacity;
+    transition-duration: var(--transition-duration);
+    transition-timing-function: var(--default-transition-timing-function);
+  }
+
   body {
     overflow: hidden;
   }
@@ -19,20 +86,20 @@
   :root {
     font-size: var(--font-size);
   }
-}
 
-.lucide-icon,
-.tabler-icon {
-  width: 1em;
-  height: 1em;
-}
+  button {
+    cursor: pointer;
+  }
 
-.nf,
-.tabler-icon {
-  stroke-width: 6%;
-  stroke: currentColor;
-}
+  .lucide-icon,
+  .tabler-icon {
+    width: 1em;
+    height: 1em;
+  }
 
-* {
-  @apply transition-[color,background-color,border-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to,opacity];
+  .nf,
+  .tabler-icon {
+    stroke-width: 6%;
+    stroke: currentColor;
+  }
 }
