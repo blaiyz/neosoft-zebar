@@ -75,6 +75,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 - `scripts/dev_build.js` (`pnpm dev`) swaps `dev_static/` into the place of `static/` for the length of `vite build`, so a developer's personal configuration ends up in `build/` and in the `$static` imports. `dev_static/` is created from `static/` on first use and isn't refreshed after that.
 - `scripts/build.js` (`pnpm build`) copies `README.md` and `misc/` into `static/` for marketplace preview images, then builds.
+- `pnpm dev:mock` runs the Vite dev server in the `mock` mode, where `vite.config.ts` aliases `zebar` to `src/lib/mock/zebar.ts`. The real package throws outside Zebar, so this is what lets the UI run in a browser. Its data is fixed, and it's never part of a build.
 
 ## CI and releases
 

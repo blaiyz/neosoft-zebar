@@ -14,7 +14,7 @@
   import { toggleModes } from "$lib/binding_modes.svelte";
 
   let media = $derived(providers.media);
-  let mediaTimeout: number | null = null;
+  let mediaTimeout: ReturnType<typeof setTimeout> | null = null;
   let shownSession = $state<MediaSession | null>(null);
 
   $effect(() => {

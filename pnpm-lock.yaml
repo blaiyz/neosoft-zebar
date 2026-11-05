@@ -8,9 +8,27 @@ importers:
 
   .:
     dependencies:
+      '@lucide/svelte':
+        specifier: ^0.577.0
+        version: 0.577.0(svelte@5.38.6)
+      '@tabler/icons-svelte':
+        specifier: ^3.34.1
+        version: 3.34.1(svelte@5.38.6)
+      '@tauri-apps/api':
+        specifier: ^2.7.0
+        version: 2.8.0
       glazewm:
         specifier: ^1.7.0
         version: 1.7.0
+      json5:
+        specifier: ^2.2.3
+        version: 2.2.3
+      jsonschema:
+        specifier: ^1.5.0
+        version: 1.5.0
+      svelte-range-slider-pips:
+        specifier: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main
+        version: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main(svelte@5.38.6)
       zebar:
         specifier: ^3.1.1
         version: 3.1.1
@@ -18,12 +36,6 @@ importers:
       '@eslint/js':
         specifier: ^9.34.0
         version: 9.34.0
-      '@lucide/svelte':
-        specifier: ^0.577.0
-        version: 0.577.0(svelte@5.38.6)
-      '@sveltejs/adapter-auto':
-        specifier: ^6.1.0
-        version: 6.1.0(@sveltejs/kit@2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))
       '@sveltejs/adapter-static':
         specifier: ^3.0.9
         version: 3.0.9(@sveltejs/kit@2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))
@@ -33,15 +45,6 @@ importers:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.1.2
         version: 6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1))
-      '@tabler/icons-svelte':
-        specifier: ^3.34.1
-        version: 3.34.1(svelte@5.38.6)
-      '@tauri-apps/api':
-        specifier: ^2.7.0
-        version: 2.8.0
-      '@types/eslint':
-        specifier: ^9.6.1
-        version: 9.6.1
       autoprefixer:
         specifier: ^10.4.21
         version: 10.4.21(postcss@8.5.6)
@@ -60,12 +63,6 @@ importers:
       globals:
         specifier: ^16.3.0
         version: 16.3.0
-      json5:
-        specifier: ^2.2.3
-        version: 2.2.3
-      jsonschema:
-        specifier: ^1.5.0
-        version: 1.5.0
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -81,9 +78,6 @@ importers:
       svelte-check:
         specifier: ^4.3.1
         version: 4.3.1(picomatch@4.0.3)(svelte@5.38.6)(typescript@5.9.2)
-      svelte-range-slider-pips:
-        specifier: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main
-        version: https://github.com/blaiyz/svelte-range-slider-pips/tarball/main(svelte@5.38.6)
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@18.19.130)(typescript@5.9.2))
@@ -479,11 +473,6 @@ packages:
     peerDependencies:
       acorn: ^8.9.0
 
-  '@sveltejs/adapter-auto@6.1.0':
-    resolution: {integrity: sha512-shOuLI5D2s+0zTv2ab5M5PqfknXqWbKi+0UwB9yLTRIdzsK1R93JOO8jNhIYSHdW+IYXIYnLniu+JZqXs7h9Wg==}
-    peerDependencies:
-      '@sveltejs/kit': ^2.0.0
-
   '@sveltejs/adapter-static@3.0.9':
     resolution: {integrity: sha512-aytHXcMi7lb9ljsWUzXYQ0p5X1z9oWud2olu/EpmH7aCu4m84h7QLvb5Wp+CFirKcwoNnYvYWhyP/L8Vh1ztdw==}
     peerDependencies:
@@ -548,9 +537,6 @@ packages:
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
-
-  '@types/eslint@9.6.1':
-    resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
@@ -1951,10 +1937,6 @@ snapshots:
     dependencies:
       acorn: 8.15.0
 
-  '@sveltejs/adapter-auto@6.1.0(@sveltejs/kit@2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))':
-    dependencies:
-      '@sveltejs/kit': 2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1))
-
   '@sveltejs/adapter-static@3.0.9(@sveltejs/kit@2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))':
     dependencies:
       '@sveltejs/kit': 2.36.1(@sveltejs/vite-plugin-svelte@6.1.3(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1)))(svelte@5.38.6)(vite@7.1.3(@types/node@18.19.130)(jiti@1.21.7)(yaml@2.8.1))
@@ -2024,11 +2006,6 @@ snapshots:
   '@tsconfig/node16@1.0.4': {}
 
   '@types/cookie@0.6.0': {}
-
-  '@types/eslint@9.6.1':
-    dependencies:
-      '@types/estree': 1.0.8
-      '@types/json-schema': 7.0.15
 
   '@types/estree@1.0.8': {}
 
