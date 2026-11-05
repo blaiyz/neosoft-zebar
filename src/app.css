@@ -1,12 +1,17 @@
-/* Since we're using nerdfonts only for weather icons, and the weather doesn't load offline anyway,
-  it's okay to use a CDN for them. Everything else is bundled. */
-@import "https://www.nerdfonts.com/assets/css/webfont.css";
+@import "@fontsource-variable/montserrat";
 @import "./themes/rose-pine.css";
 @import "./themes/catppuccin.css";
 @import "./themes/nord.css";
 @import "./themes/material.css";
 @import "./themes/tau.css";
 @import "tailwindcss" source(".");
+
+/* The weather glyphs of Symbols Nerd Font, subset to the ones `Weather.svelte` uses. Their
+  licenses are in `static/font-licenses.txt`. */
+@font-face {
+  font-family: "Weather Glyphs";
+  src: url("./lib/fonts/weather.woff2") format("woff2");
+}
 
 /* Tailwind only applies hover on devices with a primary pointer that hovers, which leaves
   out some touchscreen PCs. */
@@ -97,9 +102,17 @@
     height: 1em;
   }
 
-  .nf,
+  .weather-icon,
   .tabler-icon {
     stroke-width: 6%;
     stroke: currentColor;
+  }
+
+  .weather-icon {
+    font-family: "Weather Glyphs";
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
   }
 }

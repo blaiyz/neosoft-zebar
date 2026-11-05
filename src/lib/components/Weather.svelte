@@ -4,19 +4,20 @@
   import { providers } from "#lib/state/providers.svelte.ts";
   import type { WeatherStatus } from "zebar";
 
-  const STATUS_ICONS: Record<WeatherStatus, string> = {
-    clear_day: "nf-weather-day_sunny",
-    clear_night: "nf-weather-night_clear",
-    cloudy_day: "nf-weather-day_cloudy",
-    cloudy_night: "nf-weather-night_alt_cloudy",
-    light_rain_day: "nf-weather-day_sprinkle",
-    light_rain_night: "nf-weather-night_alt_sprinkle",
-    heavy_rain_day: "nf-weather-day_rain",
-    heavy_rain_night: "nf-weather-night_alt_rain",
-    snow_day: "nf-weather-day_snow",
-    snow_night: "nf-weather-night_alt_snow",
-    thunder_day: "nf-weather-day_lightning",
-    thunder_night: "nf-weather-night_alt_lightning"
+  // Code points in the font that `src/app.css` loads.
+  const STATUS_GLYPHS: Record<WeatherStatus, string> = {
+    clear_day: "\u{e30d}",
+    clear_night: "\u{e32b}",
+    cloudy_day: "\u{e302}",
+    cloudy_night: "\u{e37e}",
+    light_rain_day: "\u{e30b}",
+    light_rain_night: "\u{e328}",
+    heavy_rain_day: "\u{e308}",
+    heavy_rain_night: "\u{e325}",
+    snow_day: "\u{e30a}",
+    snow_night: "\u{e327}",
+    thunder_day: "\u{e305}",
+    thunder_night: "\u{e322}"
   };
 
   let weather = $derived(providers.weather);
@@ -35,7 +36,7 @@
       ]}
     >
       <span class="text-2xl">
-        <i class={["nf", STATUS_ICONS[weather.status]]}></i>
+        <i class="weather-icon">{STATUS_GLYPHS[weather.status]}</i>
       </span>
       {#if useCelsius}
         {Math.round(weather.celsiusTemp)}°C

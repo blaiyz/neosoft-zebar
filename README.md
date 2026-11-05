@@ -138,7 +138,7 @@ In order to use custom colors, you need to replace the color variables with HSL-
   ...
 ```
 
-In addition to colors, `config.css` provides variables that control other style options, such as border radius with `--radius`, fonts with `--font-family` and different margins. Use all configuration files (`config.json`, `config.css`, `zpack.json`) to achieve the exact widget style you want.
+In addition to colors, `config.css` provides variables that control other style options, such as border radius with `--radius`, fonts with `--font-family` (Montserrat is bundled as `Montserrat Variable`) and different margins. Use all configuration files (`config.json`, `config.css`, `zpack.json`) to achieve the exact widget style you want.
 
 > [!TIP]
 > To scale the entire widget, you need to both increase height in `zpack.json` and increase the font size in `config.css`. Neosoft Zebar's component sizes are all sized relative to the font size.
