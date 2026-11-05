@@ -37,7 +37,7 @@ Question: what does `zebar publish` really need and do, and which limits in Zeba
 `src/core/config/index.js` in `@sveltejs/kit`
 
 - `load_vite_config` calls `vite.resolveConfig` with `process.env.MODE ?? 'production'`. The analyse and prerender workers each use it and don't see `--mode`, so a Kit option set only for a given mode in `vite.config.ts` doesn't reach them.
-- Those two config loads took about 6 s of an 8.2 s build on one development machine.
+- Each of those workers loads the Vite config again, which adds to every build.
 
 ## Open questions
 

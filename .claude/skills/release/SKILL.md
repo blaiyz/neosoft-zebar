@@ -32,7 +32,7 @@ gh run list --branch main -L 5
 
 1. **Actions -> Release -> Run workflow** on `main`, with `version-number` (no `v` prefix), `draft` checked, and `release-notes`. It builds, zips `build/` and creates a draft GitHub release tagged `v<version>`.
 2. Check the draft on GitHub, then **publish it**. That fires **Publish to Zebar Marketplace** through the `release: published` event. It builds the tag and runs `zebar publish` with the release notes.
-3. If that run fails, fix the cause, then run **Publish to Zebar Marketplace** by hand with `version` set. It needs no new release.
+3. If that run fails, fix the cause, then run **Publish to Zebar Marketplace** by hand with `version` set. It needs no new release. A manual run builds the ref it's started on: choose the tag to publish the release as it stands, or `main` to include a fix, which then differs from the release zip.
 
 A release created without `draft` is published by `GITHUB_TOKEN`, and GitHub doesn't start workflows from events that token causes, so the marketplace step wouldn't run on its own. Publish the draft by hand instead, or start the marketplace workflow manually.
 

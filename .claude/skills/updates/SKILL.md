@@ -39,8 +39,8 @@ Several places follow the Zebar version, and they can drift apart:
 
 - `zebar` in `package.json`, and what `pnpm-lock.yaml` resolves it to: the client library that gets bundled.
 - `@tauri-apps/api` in `package.json`: an exact pin matching the version `zebar` depends on. Window objects come from Zebar's copy, so a newer version here adds a second copy to the bundle and its types can stop matching.
+- `glazewm` in `package.json`: stays on the version `zebar` depends on, so the bundle keeps one copy and its types keep matching Zebar's output.
 - `$schema` in `static/zpack.json`: the pack format.
-- The tag in `gh release download` in `.github/actions/zebar-cli/action.yml`: the CLI that publishes. **Publish rehearsal** runs on any PR that changes it.
 
 Steps:
 
@@ -49,3 +49,9 @@ Steps:
 3. Update all of them in one change, and `$schema` in `dev_static/zpack.json` for the owner.
 4. Risky tier. The owner tries it on the new app version.
 5. Update `docs/research/` with a new dated note if the behavior described there changed. Don't rewrite the old one.
+
+## Moving the publishing CLI
+
+`.github/actions/zebar-cli/action.yml` pins the Zebar build that runs `zebar publish`. It is pinned apart from the list above, so it can differ from `zebar` in `package.json`, and moving it is a separate decision.
+
+Change the tag, the file name and the SHA-256 in one change. `gh api repos/glzr-io/zebar/releases/tags/<tag>` gives each asset's `digest`. **Publish rehearsal** runs on that PR and has to pass.
