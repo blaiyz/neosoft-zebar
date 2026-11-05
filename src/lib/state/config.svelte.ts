@@ -15,12 +15,10 @@ const configLoaded = new Promise<Config>((resolve) => {
 });
 
 async function loadConfig() {
-  console.log("Fetching config...");
   try {
     const response = await fetch("config.json");
     const data = await response.text();
     Object.assign(config, configSchema.parse(JSON5.parse(data)));
-    console.log("Config loaded:", data);
   } catch (error) {
     console.error("Error loading config:", error);
   }

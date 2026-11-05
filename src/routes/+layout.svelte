@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { config, loadConfig } from "#lib/config.svelte.ts";
   import { reloadOnRebuild } from "#lib/dev_reload.ts";
+  import { config, loadConfig } from "#lib/state/config.svelte.ts";
   import { onMount, type Snippet } from "svelte";
   import "../app.css";
 

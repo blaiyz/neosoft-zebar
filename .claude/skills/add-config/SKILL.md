@@ -16,7 +16,7 @@ A setting lives in several places, and missing one usually fails silently.
 - [ ] Add the same default to `static/config.json`, the template users edit. `pnpm check` fails if the two differ.
 - [ ] Run `pnpm schema`. An invalid user file logs an error and leaves the bar on its defaults.
 - [ ] Add the option to the default configuration block in `README.md`.
-- [ ] Read it through the `config` object. It is reactive, and starts as the defaults until the user's file has loaded, so anything needing the final value once awaits `configLoaded` instead (see `src/lib/binding_modes.svelte.ts`).
+- [ ] Read it through the `config` object. It is reactive, and starts as the defaults until the user's file has loaded, so anything needing the final value once awaits `configLoaded` instead (see `src/lib/state/binding_modes.svelte.ts`).
 
 Existing users' files won't have the new key, so its default has to preserve today's behavior unless the change is meant to alter it. Every key needs a default, and that is what keeps old files valid.
 

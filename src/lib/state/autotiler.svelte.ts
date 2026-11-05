@@ -1,7 +1,7 @@
 import { untrack } from "svelte";
-import { providers } from "./providers.svelte";
+import { providers } from "#lib/state/providers.svelte.ts";
 import { ContainerType, TilingDirection, type Window } from "glazewm";
-import { config } from "./config.svelte";
+import { config } from "#lib/state/config.svelte.ts";
 
 // Each autotiler is only responsible for one monitor
 
@@ -24,7 +24,7 @@ const focusedWindow: Window | null = $derived.by(() => {
 });
 const focusedWindowId = $derived(focusedWindow?.id || null);
 
-export function initializeAutotiler() {
+export function initAutotiler() {
   $effect(() => {
     // Trigger effect when focusedWindowId changes (MUST BE FIRST!!!)
     // Using ID to avoid unnecessary updates
