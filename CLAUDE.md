@@ -12,14 +12,15 @@ Write for a reader who has never seen the conversation behind a change. Comments
 
 ## Commands
 
-The package manager is pnpm. There is no test suite and no dev server.
+The package manager is pnpm. There is no test suite.
 
 - `pnpm install`: install dependencies.
 - `pnpm dev`: one-shot build into `build/` using `dev_static/` instead of `static/`. Not a watcher. Reload Zebar to see the result.
+- `pnpm dev:mock`: Vite dev server with hot reload, for working on the UI in a normal browser. `src/lib/mock/zebar.ts` replaces the `zebar` package with fixed fake data, and it uses `static/`, not `dev_static/`. Nothing it does reaches GlazeWM or the system.
 - `pnpm build`: release build into `build/` using `static/`. Also copies `README.md` and `misc/` into `static/` (both gitignored there).
 - `pnpm lint`: `prettier --check .` and `eslint .`. This is what CI enforces, and Prettier covers Markdown too, including `CLAUDE.md`, `docs/` and `.claude/`.
 - `pnpm format`: `prettier --write .`
-- `pnpm check`: `svelte-check` type checking. CI does not run it, so run it yourself.
+- `pnpm check`: `svelte-check` type checking. CI runs this too.
 - `pnpm schema`: regenerate `static/schema.json` from the `Config` interface. Run `pnpm format` afterwards, because the generated file is not Prettier-clean.
 - One file: `pnpm exec prettier --check <file>`, `pnpm exec eslint <file>`.
 
@@ -54,7 +55,7 @@ The `test` route and `src/components/Test.svelte` are a sandbox for multi-window
   - **Docs only:** `pnpm exec prettier --check <files>`.
   - **Code:** `pnpm lint`, `pnpm check`, `pnpm dev`.
   - **Risky** (`zpack.json` privileges, config loading or schema, provider wiring, the autotiler, CI workflows, dependency bumps): the same checks, plus a specific list for the owner to try. Include multiple monitors, GlazeWM stopped and an invalid `config.json` where they apply.
-- Claude can't see the widget, and the page doesn't run in a plain browser because the Zebar client throws outside Zebar. Say what is unverified, and give the owner concrete things to check after reloading.
+- Claude can't see the widget in Zebar. `pnpm dev:mock` shows the UI in a browser, but not docking, click-through, Tauri calls or several monitors. Say what is unverified, and give the owner concrete things to check after reloading.
 
 ## Workflows
 
