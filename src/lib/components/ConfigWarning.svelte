@@ -12,7 +12,7 @@
 
 {#if configStatus.issues.length > 0}
   <span
-    class="flex size-8 cursor-help items-center justify-center text-xl text-zb-icon"
+    class="ml-3 flex size-8 cursor-help items-center justify-center text-xl text-zb-icon"
     title={summary}
   >
     <TriangleAlert aria-label={summary} />

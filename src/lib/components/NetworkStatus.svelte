@@ -11,12 +11,14 @@
   import WifiHigh from "@lucide/svelte/icons/wifi-high";
   import WifiLow from "@lucide/svelte/icons/wifi-low";
   import WifiZero from "@lucide/svelte/icons/wifi-zero";
+  import Collapsible from "./Collapsible.svelte";
 
   let network = $derived(providers.network);
 </script>
 
+<!-- Separate parts, because a part inside another would count its width twice. -->
 {#if config.sections.network !== "statistics"}
-  <div class="flex flex-row items-center gap-1 pl-2">
+  <Collapsible part="network" class="pl-5">
     {#if network?.defaultInterface?.type === "ethernet"}
       <EthernetPort />
     {:else if network?.defaultInterface?.type === "wifi"}
@@ -30,16 +32,20 @@
       {:else}
         <WifiZero />
       {/if}
-      {network.defaultGateway?.ssid}
     {:else if network?.defaultInterface?.type}
       <CircleQuestionMark />
     {:else}
       <GlobeOff />
     {/if}
-  </div>
+  </Collapsible>
+  {#if network?.defaultInterface?.type === "wifi" && network.defaultGateway?.ssid}
+    <Collapsible part="network.ssid" class="pl-1">
+      {network.defaultGateway.ssid}
+    </Collapsible>
+  {/if}
 {/if}
 {#if config.sections.network !== "interface" && network?.traffic}
-  <div class="flex flex-row items-center gap-2 font-mono">
+  <Collapsible part="network.rates" class="gap-2 pl-3 font-mono">
     {#if network.traffic.received}
       <div class="flex flex-row items-center">
         <ChevronsDown />
@@ -66,5 +72,5 @@
         </div>
       </div>
     {/if}
-  </div>
+  </Collapsible>
 {/if}

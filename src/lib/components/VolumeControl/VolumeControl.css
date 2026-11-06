@@ -25,12 +25,8 @@
 
 #VolumeSlider.rangeSlider {
   margin: 0;
-  margin-inline: 0.5rem;
-  transition: margin var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#VolumeSlider.rangeSlider:hover,
-#VolumeSlider.rangeSlider:active {
+  /* The handle grows past the ends of the track on hover. It stays inside this,
+     because a change in width here would make the bar rearrange itself. */
   margin-inline: 1.2rem;
 }
 

@@ -16,7 +16,7 @@ A setting lives in several places, and missing one usually fails silently.
 - [ ] Run `pnpm schema`. Don't add the key to `static/config.json`: it stays empty, because anything in it is imported over the user's settings.
 - [ ] Mention the option in the README if users need to know about it. The schema's hints cover the rest, so the README doesn't list every key.
 - [ ] Read it through the `config` object. It holds the defaults until `configStatus.loaded`, and it can change at any time, so read it in a template, `$derived` or `$effect`, never once. If an effect shouldn't run on the defaults, check `configStatus.loaded` (see `src/lib/state/binding_modes.svelte.ts`).
-- [ ] A new section: add it to `src/lib/sections.ts` and `src/lib/components/section_components.ts`, and its provider to `src/lib/state/providers.svelte.ts`, which starts it unless the section is `false`.
+- [ ] A new section: add it to `src/lib/sections.ts`, in `partSides` and at the point in `collapseSteps` where it should give way as well, and to `src/lib/components/section_components.ts`, and its provider to `src/lib/state/providers.svelte.ts`, which starts it unless the section is `false`.
 
 Stored documents won't have the new key, so its default applies to them. The default has to preserve today's behavior unless the change is meant to alter it. Every key needs a default, and that is what keeps partial documents valid.
 

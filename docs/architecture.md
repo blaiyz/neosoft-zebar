@@ -38,12 +38,14 @@ Prerendering runs component scripts in Node at build time, which is why every ca
 Shared state is in `.svelte.ts` modules in `src/lib/state/`, so it can use runes outside components:
 
 - `config.svelte.ts`: `config`, `configStatus`, `loadConfig`.
-- `layout.svelte.ts`: `isSectionShown`.
+- `layout.svelte.ts`: `isSectionShown`, and fitting the bar to its width (see below).
 - `providers.svelte.ts`: `providers`, `initProviders`. Components take what they need with `$derived(providers.x)`.
 - `binding_modes.svelte.ts`: `toggleModes`.
 - `monitor.svelte.ts`: `initMonitor`, `isOnPrimaryMonitor`.
 
 Local UI state stays in components. `AnimatedList` animates items entering, leaving and moving, and `Reveal` does the same for a single piece of content. They position items from measured widths and move them with CSS transitions. Svelte's `animate:` and `transition:` directives aren't used for this, because they jump when interrupted: an item still animating stays in the layout when it starts to leave, and one that returns partway through doesn't move. Both take their duration from `bar.transitionDuration`.
+
+`Collapsible` hides and shows content whose width can change while it does, through a grid track going between `0fr` and `1fr`. The track takes its size from the content on every frame, so it can't lag the way a list that sets a width can.
 
 ## Configuration
 
@@ -61,6 +63,18 @@ Settings are therefore one JSON document in `localStorage`, which is shared by e
 - **Windows stay in step.** After a write, `BroadcastChannel` tells the other windows to read the document again. `syncState()` copies only the values that differ, so a change doesn't wake everything that reads `config`.
 
 Sections are listed in `src/lib/sections.ts`, in display order, which is all `LeftGroup` and `RightGroup` render from. Their components are in `section_components.ts`, because the list is also imported by the schema, which runs in Node. `isSectionShown()` decides what appears.
+
+## Fitting the bar
+
+Every window fits its own bar, in `src/lib/state/layout.svelte.ts`. The grid's columns are `minmax(0,1fr) auto minmax(0,1fr)`, so a side can't widen its column and the middle stays centred. Each side has to fit inside its column.
+
+- **Parts** are what can give way: a whole section, or a piece of one. `sections.ts` has them in `partSides`, with the order they go in as `collapseSteps`. A part stays rendered while it's hidden, clipped by `Collapsible`, so its width is always known. Parts that don't hide, such as the workspace buttons, report their widths from invisible copies.
+- **`fit()`** in `src/lib/utils/fit.ts` is a pure function. It takes what each side would need with everything at its widest, and walks the steps in order, taking only those that help a side that doesn't fit. A step for a part in the middle counts half for each side, because the column on either side gains half of it. With taskbar integration the workspaces sit over the end of the left column, so their steps count for the left side alone, and their width comes out of its room.
+- **Pins:** a section set to `true`, or a specific form like `"interface"`, isn't offered as a step, so its width comes out of what the others can have.
+- **Preferences:** `preferPart()` is for what the user asked for by clicking, like the slider. The others give way to it, but if all of them together can't make room, it goes instead and they stay as they were. `fit()` tries the steps without it first to find out. The chevron and the volume slider go together: `placeVolumeSlider()` works out whether the slider could fit even while it's closed, and hides the chevron if it couldn't, so there's never a button that does nothing.
+- **Timing:** a `ResizeObserver` watches the columns, the groups and every part. Giving way happens at once. Coming back waits a second and needs a little room to spare, so that a new track title can't make sections bounce.
+
+A part must not be inside an `AnimatedList`. The list would lag behind the part, and the fit would count the same width twice for as long as the two disagree. A part must not be inside another part for the same reason, which is why `NetworkStatus` is three parts side by side. The spacing between sections is inside what collapses, so that nothing stays behind.
 
 ## Styling
 

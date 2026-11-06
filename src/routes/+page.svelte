@@ -8,6 +8,11 @@
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
   import { config, configStatus } from "#lib/state/config.svelte.ts";
   import {
+    initLayout,
+    trackColumn,
+    trackContent
+  } from "#lib/state/layout.svelte.ts";
+  import {
     initMonitor,
     isOnPrimaryMonitor
   } from "#lib/state/monitor.svelte.ts";
@@ -25,6 +30,7 @@
   initAutotiler();
   initBindingModes();
   initProviders();
+  initLayout();
 
   $effect(() => {
     if (configStatus.loaded) {
@@ -69,18 +75,23 @@
       ></div>
     {/if}
     <div
-      class="relative z-10 mx-zbx my-zby grid h-full w-full grid-cols-[1fr_auto_1fr] grid-rows-1 items-center"
+      class="relative z-10 mx-zbx my-zby grid h-full w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-1 items-center"
     >
-      <Group
-        leftCurve={!config.bar.attachSides}
-        class="h-full justify-self-start"
-        innerClass={[
-          "flex h-full items-center px-4",
-          isOnPrimaryMonitor() && "pl-zlby"
-        ]}
+      <div
+        class="flex h-full min-w-0 justify-start"
+        {@attach trackColumn("left")}
       >
-        <LeftGroup />
-      </Group>
+        <Group
+          leftCurve={!config.bar.attachSides}
+          class="h-full max-w-full"
+          innerClass={[
+            "flex h-full items-center px-4",
+            isOnPrimaryMonitor() && "pl-zlby"
+          ]}
+        >
+          <LeftGroup />
+        </Group>
+      </div>
       <div class="flex h-full items-center">
         <Group
           rightCurve={!config.taskbarIntegration.enabled}
@@ -94,7 +105,9 @@
             config.taskbarIntegration.enabled ? "pl-3" : "px-3"
           ]}
         >
-          <Workspaces />
+          <div class="h-full w-max" {@attach trackContent("center")}>
+            <Workspaces />
+          </div>
         </Group>
         {#if config.taskbarIntegration.enabled}
           <Group leftCurve={false} class="px-2">
@@ -102,16 +115,21 @@
           </Group>
         {/if}
       </div>
-      <Group
-        rightCurve={!config.bar.attachSides}
-        class="h-full justify-self-end"
-        innerClass={[
-          "flex h-full items-center pr-4 pl-2",
-          isOnPrimaryMonitor() && "pr-zrby"
-        ]}
+      <div
+        class="flex h-full min-w-0 justify-end"
+        {@attach trackColumn("right")}
       >
-        <RightGroup />
-      </Group>
+        <Group
+          rightCurve={!config.bar.attachSides}
+          class="h-full max-w-full"
+          innerClass={[
+            "flex h-full items-center justify-end pr-4 pl-2",
+            isOnPrimaryMonitor() && "pr-zrby"
+          ]}
+        >
+          <RightGroup />
+        </Group>
+      </div>
     </div>
   </div>
 </div>

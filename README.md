@@ -96,7 +96,9 @@ To see the description and value options for each field, open `config.json` in V
 
 **Mistakes don't break the bar.** A value that isn't valid is ignored and everything else still applies. A warning icon appears in the bar until the file is fixed. Hover over it to see which settings were ignored.
 
-**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default. `network` can also be `"interface"` or `"statistics"`. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
+**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
+
+When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way. Clicking the clock to show the date, or opening the volume slider, counts as asking for it: other sections give way, unless that still wouldn't leave enough room, in which case it stays closed and nothing moves. The volume slider's button hides while the slider can't fit.
 
 Some settings have to be configured in `zpack.json`, which is the configuration file Zebar uses (shipped together as well). In there, you have options to change the size and positioning of the widget.
 

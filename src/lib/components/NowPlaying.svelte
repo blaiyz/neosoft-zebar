@@ -1,5 +1,6 @@
 <script lang="ts">
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
+  import { layout, partTarget, remToPx } from "#lib/state/layout.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { secondsToHms } from "#lib/utils/format.ts";
   import Pause from "@lucide/svelte/icons/pause";
@@ -7,14 +8,43 @@
   import SkipBack from "@lucide/svelte/icons/skip-back";
   import SkipForward from "@lucide/svelte/icons/skip-forward";
   import { onDestroy, untrack } from "svelte";
+  import type { Attachment } from "svelte/attachments";
   import type { MediaSession } from "zebar";
-  import AnimatedList from "./AnimatedList.svelte";
+  import Collapsible from "./Collapsible.svelte";
   import Meter from "./Meter.svelte";
   import Reveal from "./Reveal.svelte";
+
+  /** The range of the title's width and the space before it, in rem. */
+  const TITLE_MIN = 6;
+  const TITLE_MAX = 24;
+  const TITLE_GAP = 0.5;
 
   let media = $derived(providers.media);
   let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
   let shownSession = $state<MediaSession | null>(null);
+  // Stays after the session ends, to show while the section closes.
+  let lastSession = $state.raw<MediaSession | null>(null);
+  let active = $derived(media !== null && shownSession !== null);
+
+  // What the title would like to be, which an invisible copy of it reports.
+  let titleWidth = $state(0);
+  let titleLimit = $derived(partTarget("media.title"));
+
+  const measureTitle: Attachment<HTMLElement> = (element) => {
+    const observer = new ResizeObserver(() => {
+      titleWidth = Math.min(
+        Math.max(
+          element.getBoundingClientRect().width + remToPx(TITLE_GAP),
+          remToPx(TITLE_MIN)
+        ),
+        remToPx(TITLE_MAX)
+      );
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  };
 
   $effect(() => {
     const session = media?.currentSession;
@@ -23,6 +53,7 @@
       clearTimeout(mediaTimeout);
       mediaTimeout = undefined;
       shownSession = session;
+      lastSession = session;
       return;
     }
     if (prevSession) {
@@ -41,12 +72,9 @@
   onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
-<AnimatedList
-  items={media && shownSession ? [shownSession] : []}
-  key={() => "session"}
-  anchor="end"
->
-  {#snippet item(session: MediaSession)}
+<Collapsible when={active} anchor="end">
+  {#if lastSession}
+    {@const session = lastSession}
     <div class="relative flex h-full items-stretch">
       <Reveal when={!toggleModes.clickThrough}>
         <button
@@ -58,7 +86,7 @@
         </button>
       </Reveal>
       <button
-        class="group relative inline-flex items-center justify-center gap-x-2 overflow-hidden px-1 transition hover:text-zb-accent"
+        class="group relative inline-flex items-center justify-center overflow-hidden px-1 transition hover:text-zb-accent"
         aria-label="Toggle"
         onclick={() => media?.togglePlayPause()}
       >
@@ -73,10 +101,26 @@
             <Play class="transition group-hover:scale-125" />
           {/if}
         </Meter>
-        <Reveal>
+        <Collapsible
+          part="media.title"
+          when={active}
+          full={() => titleWidth}
+          floor={() => remToPx(TITLE_MIN)}
+        >
           <div
-            class="relative flex max-w-24 min-w-24 items-center justify-center sm:max-w-48 md:max-w-64 lg:max-w-xs xl:max-w-sm"
+            class={[
+              "relative flex items-center justify-center pl-2",
+              layout.ready && "transition-[width] ease-(--ease)"
+            ]}
+            style:width="{titleLimit || titleWidth}px"
           >
+            <span
+              {@attach measureTitle}
+              class="invisible absolute whitespace-nowrap"
+              aria-hidden="true"
+            >
+              {session.title}
+            </span>
             <span
               class="truncate transition group-hover:translate-y-full group-hover:opacity-0"
             >
@@ -86,7 +130,7 @@
             </span>
             <span
               class={[
-                "absolute inset-0 inline-flex -translate-y-full items-center justify-center",
+                "absolute inset-y-0 right-0 left-2 inline-flex -translate-y-full items-center justify-center",
                 session.title && "opacity-0",
                 "transition-all group-hover:translate-y-0 group-hover:opacity-100"
               ]}
@@ -94,7 +138,7 @@
               {secondsToHms(session.position)}/{secondsToHms(session.endTime)}
             </span>
           </div>
-        </Reveal>
+        </Collapsible>
       </button>
       <Reveal when={!toggleModes.clickThrough} anchor="end">
         <button
@@ -106,5 +150,5 @@
         </button>
       </Reveal>
     </div>
-  {/snippet}
-</AnimatedList>
+  {/if}
+</Collapsible>
