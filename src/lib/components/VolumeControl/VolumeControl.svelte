@@ -9,8 +9,7 @@
   import VolumeX from "@lucide/svelte/icons/volume-x";
   import { onMount } from "svelte";
   import RangeSlider from "svelte-range-slider-pips";
-  import { fly } from "svelte/transition";
-  import SmoothDiv from "../SmoothDiv.svelte";
+  import Reveal from "../Reveal.svelte";
   import "./VolumeControl.css";
 
   let audio = $derived(providers.audio);
@@ -26,9 +25,6 @@
     if (volume <= 66) return Volume1;
     return Volume2;
   });
-
-  // The chevron only exists while click-through is off, so this applies during its outro.
-  let leavingClass = $derived(toggleModes.clickThrough && "absolute");
 
   const onMouseWheel = (e: WheelEvent) => {
     if (!device) return;
@@ -50,8 +46,8 @@
 {#if device}
   <div class="mr-1 flex h-full items-stretch" onwheel={onMouseWheel}>
     <div class="flex h-full items-center overflow-hidden">
-      <SmoothDiv class="flex justify-end" innerClass="flex justify-end">
-        {#if sliderOpen}
+      <Reveal when={sliderOpen} anchor="end" fly={false}>
+        <div class="flex items-center">
           {#if toggleModes.clickThrough}
             <div class="w-2"></div>
           {/if}
@@ -69,54 +65,28 @@
             on:change={(e: CustomEvent<{ value: number }>) =>
               audio?.setVolume(e.detail.value)}
           />
-        {/if}
-      </SmoothDiv>
+        </div>
+      </Reveal>
     </div>
-    <SmoothDiv
-      height={false}
-      class="flex h-full justify-end"
-      innerClass="flex justify-end"
-    >
-      {#if !toggleModes.clickThrough}
-        <button
-          class="relative flex h-full items-center justify-end text-lg transition hover:scale-125 hover:text-zb-accent"
-          aria-label="Open volume slider"
-          onclick={() => (sliderOpen = !sliderOpen)}
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-        >
-          <ChevronLeft
-            class={[
-              leavingClass,
-              sliderOpen && "rotate-180",
-              "mx-1 transition"
-            ]}
-          />
-        </button>
-      {/if}
-    </SmoothDiv>
-    <SmoothDiv
-      height={false}
-      class="flex h-full justify-end"
-      innerClass="flex justify-end"
-    >
-      {@const visible = !sliderOpen || !toggleModes.clickThrough}
-      {#if visible}
-        <button
-          class="relative flex h-full items-center justify-end stroke-2 text-lg transition hover:scale-125 hover:text-zb-accent"
-          aria-label="Mute"
-          onclick={() => audio?.setMute(!muted)}
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-        >
-          <!-- `absolute` has to be on the icon: during the outro it has no effect on a wrapper or the button. -->
-          <VolumeIcon
-            class={[
-              !visible && "absolute",
-              toggleModes.clickThrough ? "ml-2" : "ml-1",
-              "mr-2"
-            ]}
-          />
-        </button>
-      {/if}
-    </SmoothDiv>
+    <Reveal when={!toggleModes.clickThrough} anchor="end">
+      <button
+        class="relative flex h-full items-center justify-end text-lg transition hover:scale-125 hover:text-zb-accent"
+        aria-label="Open volume slider"
+        onclick={() => (sliderOpen = !sliderOpen)}
+      >
+        <ChevronLeft class={[sliderOpen && "rotate-180", "mx-1 transition"]} />
+      </button>
+    </Reveal>
+    <Reveal when={!sliderOpen || !toggleModes.clickThrough} anchor="end">
+      <button
+        class="relative flex h-full items-center justify-end stroke-2 text-lg transition hover:scale-125 hover:text-zb-accent"
+        aria-label="Mute"
+        onclick={() => audio?.setMute(!muted)}
+      >
+        <VolumeIcon
+          class={[toggleModes.clickThrough ? "ml-2" : "ml-1", "mr-2"]}
+        />
+      </button>
+    </Reveal>
   </div>
 {/if}

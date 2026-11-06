@@ -3,7 +3,7 @@
   import { providers } from "#lib/state/providers.svelte.ts";
   import { formatDate } from "#lib/utils/format.ts";
   import PointFilled from "@tabler/icons-svelte/icons/point-filled";
-  import SmoothDiv from "./SmoothDiv.svelte";
+  import Reveal from "./Reveal.svelte";
 
   let date = $derived(providers.date);
   let fullDate = $derived(config.showFullDateByDefault);
@@ -21,8 +21,11 @@
 </script>
 
 <PointFilled class="mr-2" />
-<SmoothDiv class="flex h-full items-stretch overflow-hidden">
-  <button class="hover:text-zb-accent" onclick={() => (fullDate = !fullDate)}>
+<Reveal class="overflow-hidden">
+  <button
+    class="h-full hover:text-zb-accent"
+    onclick={() => (fullDate = !fullDate)}
+  >
     <p class="whitespace-nowrap tabular-nums">
       {date?.new.toLocaleTimeString(undefined, timeOptions).toUpperCase()}
       {#if fullDate}
@@ -31,4 +34,4 @@
       {/if}
     </p>
   </button>
-</SmoothDiv>
+</Reveal>

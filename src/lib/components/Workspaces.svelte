@@ -6,16 +6,17 @@
   import { getWindows } from "#lib/utils/glaze_wm_utils.ts";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
   import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
-  import { TilingDirection } from "glazewm";
-  import { flip } from "svelte/animate";
-  import { fly } from "svelte/transition";
+  import {
+    TilingDirection,
+    type BindingModeConfig,
+    type Window,
+    type Workspace
+  } from "glazewm";
+  import AnimatedList from "./AnimatedList.svelte";
   import Button from "./Button.svelte";
-  import SmoothDiv from "./SmoothDiv.svelte";
+  import Reveal from "./Reveal.svelte";
 
   let glazewm = $derived(providers.glazewm);
-
-  // The icon only exists while click-through is on, so this applies during its outro.
-  let leavingClass = $derived(!toggleModes.clickThrough && "absolute");
 
   // Written out in full so that Tailwind finds and generates them.
   const workspaceTextColors = [
@@ -36,27 +37,36 @@
 
 {#if glazewm}
   <div class="flex h-full items-center">
-    <SmoothDiv class="flex justify-end" innerClass="flex items-center">
-      {#each glazewm.currentWorkspaces as workspace (workspace.id)}
+    <AnimatedList
+      items={glazewm.currentWorkspaces}
+      key={(workspace: Workspace) => workspace.id}
+    >
+      {#snippet item(workspace: Workspace)}
         {@const globalIndex = glazewm.allWorkspaces.findIndex(
           (ws) => ws.id === workspace.id
         )}
-        <div
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-          animate:flip={{ duration: config.transitionDuration }}
-          class="mr-2"
-        >
+        {@const buttonWidth =
+          toggleModes.clickThrough || config.useThinnerWorkspaceButtons
+            ? "min-w-8"
+            : "min-w-14 px-2"}
+        <div class="relative mr-2 h-8">
+          <!-- Takes the final width at once for the list to measure, so the list and the
+               button below reach it together on the same curve. -->
+          <div
+            class={["invisible w-max border p-1", buttonWidth]}
+            aria-hidden="true"
+          >
+            {workspace.name}
+          </div>
           <Button
             class={[
-              "box-border h-8",
+              "absolute inset-y-0 left-0 w-max transition-[color,background-color,border-color,min-width,padding] ease-(--list-ease)",
               workspaceTextColors[globalIndex],
               workspace.isDisplayed && [
                 workspaceBorderColors[globalIndex],
                 "hover:border-current/70 active:border-current/50!"
               ],
-              toggleModes.clickThrough || config.useThinnerWorkspaceButtons
-                ? "aspect-square"
-                : "min-w-14 px-2"
+              buttonWidth
             ]}
             callback={() =>
               glazewm.runCommand(`focus --workspace ${workspace.name}`)}
@@ -64,8 +74,8 @@
             {workspace.name}
           </Button>
         </div>
-      {/each}
-    </SmoothDiv>
+      {/snippet}
+    </AnimatedList>
     <button
       aria-label="tiling-direction"
       class="mx-1 flex items-center justify-center text-zb-tiling-direction"
@@ -80,23 +90,15 @@
         ]}
       />
     </button>
-    <SmoothDiv class="flex justify-end" innerClass="flex items-center">
-      {#if toggleModes.clickThrough}
-        <span
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-          class="relative flex flex-row-reverse"
-        >
-          <MousePointer2Off
-            class={[leavingClass, "mx-1 text-zb-click-through"]}
-          />
-        </span>
-      {/if}
-    </SmoothDiv>
-    <SmoothDiv class="flex justify-end" innerClass="flex items-center">
-      {#each glazewm.bindingModes.filter((mode) => mode.name !== "ct") as bindingMode (bindingMode.name)}
+    <Reveal when={toggleModes.clickThrough}>
+      <MousePointer2Off class="mx-1 text-zb-click-through" />
+    </Reveal>
+    <AnimatedList
+      items={glazewm.bindingModes.filter((mode) => mode.name !== "ct")}
+      key={(mode: BindingModeConfig) => mode.name}
+    >
+      {#snippet item(bindingMode: BindingModeConfig)}
         <button
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-          animate:flip={{ duration: config.transitionDuration }}
           class="mx-2"
           onclick={() => {
             void glazewm.runCommand(
@@ -106,19 +108,17 @@
         >
           {bindingMode.displayName ?? bindingMode.name}
         </button>
-      {/each}
-    </SmoothDiv>
+      {/snippet}
+    </AnimatedList>
 
     {#if glazewm.displayedWorkspace}
-      <SmoothDiv class="flex justify-end" innerClass="flex h-full items-center">
-        {#each getWindows(glazewm.displayedWorkspace) as child (child.id)}
+      <AnimatedList
+        items={getWindows(glazewm.displayedWorkspace)}
+        key={(child: Window) => child.id}
+      >
+        {#snippet item(child: Window)}
           {@const Icon = getProcessIcon(child)}
           <span
-            transition:fly|global={{
-              y: 20,
-              duration: config.transitionDuration
-            }}
-            animate:flip={{ duration: config.transitionDuration }}
             class={[
               "ml-1 flex items-center text-xl",
               child.hasFocus ? "text-zb-focused-process" : "text-zb-process"
@@ -126,8 +126,8 @@
           >
             <Icon />
           </span>
-        {/each}
-      </SmoothDiv>
+        {/snippet}
+      </AnimatedList>
     {/if}
   </div>
 {/if}
