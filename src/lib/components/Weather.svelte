@@ -21,7 +21,7 @@
   };
 
   let weather = $derived(providers.weather);
-  let useCelsius = $derived(config.useCelsiusByDefault);
+  let useCelsius = $derived(config.weather.unit === "celsius");
 </script>
 
 {#if weather}

@@ -21,7 +21,7 @@ The package manager is pnpm. There is no test suite.
 - `pnpm build`: release build into `build/` using `static/`. Then copies `README.md` and `LICENSE` into `build/`, because `zebar publish` only packs them from the root of the pack.
 - `pnpm lint`: `prettier --check .` and `eslint .`. This is what CI enforces, and Prettier covers Markdown too, including `CLAUDE.md`, `docs/` and `.claude/`.
 - `pnpm format`: `prettier --write .`, which also sorts Tailwind classes, in `class` and `innerClass`.
-- `pnpm check`: `svelte-check` type checking, then a check that `static/config.json` and `static/schema.json` match `src/lib/config_schema.ts`. CI runs this too.
+- `pnpm check`: `svelte-check` type checking, then a check that `static/schema.json` matches `src/lib/config_schema.ts` and that `static/config.json` is still the empty template. CI runs this too.
 - `pnpm schema`: regenerate `static/schema.json` from the Zod schema.
 - `pnpm verify`: `pnpm lint`, `pnpm check` and `pnpm dev:once`.
 - One file: `pnpm exec prettier --check <file>`, `pnpm exec eslint <file>`.
@@ -34,12 +34,14 @@ Use `pnpm dev:once`, not `pnpm build`, to confirm a change compiles: `build/` is
 
 - **One app per monitor.** Zebar opens a separate webview for each widget instance, and `monitorSelection: all` means one per monitor. Module state is therefore per monitor, which is why `src/lib/state/autotiler.svelte.ts` only acts while its own monitor is focused. Sharing state between windows needs Tauri events (`src/lib/state/remote_state.svelte.ts`).
 - **Static output, prerendered.** `@sveltejs/adapter-static` with `prerender = true` in `src/routes/+layout.ts`. Component scripts also run in Node at build time, so anything touching `zebar`, Tauri or `window` goes in `onMount` or `$effect`. Keep URLs relative (`fetch("config.json")`), since Zebar serves the pack directory as the site root.
-- **State lives in `src/lib/state/`.** Components are in `src/lib/components/` and pure helpers in `src/lib/utils/`. `config` (`config.svelte.ts`) and `providers` (`providers.svelte.ts`) are module-level `$state` objects that components read directly. `configLoaded` is a promise for code that must wait for the user's config. `providers.*` fields are `null` until the first output, and `providers.glazewm` stays `null` when GlazeWM isn't running.
-- **Configuration has two runtime files.** `config.json` and `config.css` ship in `static/`, are fetched and linked at runtime, and are meant to be edited by users.
+- **State lives in `src/lib/state/`.** Components are in `src/lib/components/` and pure helpers in `src/lib/utils/`. `config` (`config.svelte.ts`) and `providers` (`providers.svelte.ts`) are module-level `$state` objects that components read directly. `configStatus.loaded` tells effects when `config` holds the user's settings instead of the defaults. Settings can change while the bar runs, so read them reactively instead of once. `providers.*` fields are `null` until the first output, and `providers.glazewm` stays `null` when GlazeWM isn't running.
+- **Settings are one document in `localStorage`.** A widget can't write files and a marketplace install gets a new folder per version, so this is what survives updates. `src/lib/state/config.svelte.ts` owns it, and windows stay in step over `BroadcastChannel`.
   - The Zod schema in `src/lib/config_schema.ts` is the source of truth for types, defaults and validation, and its descriptions become the editor hints in `schema.json`.
-  - `static/config.json` is a template for users that has to equal the defaults. `pnpm check` fails if it drifts.
-  - Use `/add-config` for a new option; it spans several files, including the README.
-- **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `config.css` maps semantic names (`--text`, `--cpu`) to a palette, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
+  - `config.json` is only a way in: when its text changes, its keys are merged into the document. `static/config.json` must stay empty apart from `$schema` and `version`, and `pnpm check` fails otherwise.
+  - `custom.css` does the same for `theme.customCss`. It's optional and must not ship in `static/`, because an update would then count as a change and wipe the user's CSS.
+  - Changing the shape of the document means raising `CONFIG_VERSION` and adding a step in `src/lib/config_migrations.ts`.
+  - Use `/add-config` for a new option; it spans several files.
+- **Styling is a chain of CSS variables.** `src/themes/*.css` define palettes as raw HSL triplets, `src/themes/presets.css` maps semantic names (`--text`, `--cpu`) to a palette for each `theme.preset`, and `@theme` in `src/app.css` exposes them as `zb-*` colors. Sizes derive from `--font-size`. Tailwind only generates classes it finds written out in full in `src/`, so a name built at runtime needs a lookup table of complete names.
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.
 
 Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mode. They are subpath imports from `package.json`, so they need the file extension (`#lib/state/config.svelte.ts`). SvelteKit is configured through `sveltekit()` in `vite.config.ts`. Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
@@ -52,7 +54,7 @@ Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mod
 - Ask clarifying questions instead of guessing, and don't start research or a new phase of work until asked.
 - Check APIs against the installed version before using them: `node_modules`, the Svelte and SvelteKit docs for the version in `pnpm-lock.yaml`, and the source of [Zebar](https://github.com/glzr-io/zebar) and [GlazeWM](https://github.com/glzr-io/glazewm). Use runes for all new Svelte code, and match what the neighbouring files do unless a change is meant to replace it.
 - `dev_static/` is the owner's personal setup. Add to it when a change needs that, and say so, but never replace its files.
-- Don't let docs go stale. Prefer pointing at the source over copying a list into a doc. The README repeats the default `config.json` and the theme presets, so update it in the same change, and `grep -rn` `README.md`, `docs/` and `.claude/` for anything added, renamed or removed. Files under `docs/research/` are dated snapshots and stay as written.
+- Don't let docs go stale. Prefer pointing at the source over copying a list into a doc. The README lists the theme presets, so update it in the same change, and `grep -rn` `README.md`, `docs/` and `.claude/` for anything added, renamed or removed. Files under `docs/research/` are dated snapshots and stay as written.
 - Test by risk and say which tier ran:
   - **Docs only:** `pnpm exec prettier --check <files>`.
   - **Code:** `pnpm verify`.
@@ -64,7 +66,7 @@ Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mod
 Project skills in `.claude/skills/`, each also a slash command.
 
 - `/change`: any fix, feature or tweak, from request to commit message. Start here.
-- `/add-config`: a new `config.json` option or `config.css` variable.
+- `/add-config`: a new setting or theme variable.
 - `/review-loop`: fresh reviewer agents (`.claude/agents/reviewer.md`) review a change until a round comes back clean. Only when the owner asks.
 - `/release`: prepare a release and its notes. The owner runs the workflows.
 - `/updates`: Dependabot PRs, a red CI run, moving to a new Zebar version.

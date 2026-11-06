@@ -20,7 +20,6 @@ const REQUIRED_FILES = [
   "zpack.json",
   "index.html",
   "config.json",
-  "config.css",
   "README.md",
   "LICENSE"
 ];

@@ -1,6 +1,6 @@
 import { untrack } from "svelte";
 import { currentWidget } from "zebar";
-import { config, configLoaded } from "#lib/state/config.svelte.ts";
+import { config, configStatus } from "#lib/state/config.svelte.ts";
 import { providers } from "#lib/state/providers.svelte.ts";
 
 const bindingModes = $derived(providers.glazewm?.bindingModes || []);
@@ -55,8 +55,10 @@ export function initBindingModes() {
     void window.setIgnoreCursorEvents(toggleModes.clickThrough);
   });
 
-  void configLoaded.then(() => {
-    toggleModes.clickThrough = config.clickThroughByDefault;
+  $effect(() => {
+    if (configStatus.loaded) {
+      toggleModes.clickThrough = config.clickThroughByDefault;
+    }
   });
 }
 

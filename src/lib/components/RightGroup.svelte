@@ -1,21 +1,14 @@
 <script lang="ts">
-  import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
-  import Clock from "./Clock.svelte";
-  import NowPlaying from "./NowPlaying.svelte";
-  import VolumeControl from "./VolumeControl/VolumeControl.svelte";
-  import Weather from "./Weather.svelte";
+  import { rightSections } from "#lib/sections.ts";
+  import { isSectionShown } from "#lib/state/layout.svelte.ts";
+  import { sectionComponents } from "./section_components.ts";
 </script>
 
 <div class="flex h-full flex-row items-center">
-  <NowPlaying />
-  {#if isOnPrimaryMonitor()}
-    <VolumeControl />
-  {/if}
-  {#if config.showWeatherSection}
-    <Weather />
-  {/if}
-  {#if !isOnPrimaryMonitor() || !config.taskbarIntegration.enabled}
-    <Clock />
-  {/if}
+  {#each rightSections as id (id)}
+    {#if isSectionShown(id)}
+      {@const Section = sectionComponents[id]}
+      <Section />
+    {/if}
+  {/each}
 </div>

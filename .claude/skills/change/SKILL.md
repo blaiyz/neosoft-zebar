@@ -24,7 +24,7 @@ Request: $ARGUMENTS
 ## 3. Make it
 
 - Follow the style of the neighbouring files. Use runes for all new Svelte code.
-- A new `config.json` option or `config.css` variable: use `/add-config`.
+- A new setting or theme variable: use `/add-config`.
 - Anything needing a shell command: add a narrow rule to `privileges.shellCommands` in `static/zpack.json`.
 - Code reaching Zebar, Tauri or `window` goes in `onMount` or `$effect`, because pages are prerendered.
 - Follow the writing rules in `CLAUDE.md` ("This repo is public"): comments describe the code as it stands.

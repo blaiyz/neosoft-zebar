@@ -128,14 +128,25 @@ function runCommand(command: string) {
   return Promise.resolve();
 }
 
-export function createProviderGroup() {
-  return {
-    onOutput(listener: (outputMap: OutputMap) => void) {
-      outputListeners.push(listener);
-      listener(buildOutputMap());
+export function createProvider({ type }: { type: keyof OutputMap }) {
+  const provider = {
+    output: buildOutputMap()[type],
+    onOutput(listener: () => void) {
+      const onChange = (outputMap: OutputMap) => {
+        provider.output = outputMap[type];
+        listener();
+      };
+      outputListeners.push(onChange);
+      provider.stop = () => {
+        outputListeners.splice(outputListeners.indexOf(onChange), 1);
+        return Promise.resolve();
+      };
+      listener();
     },
-    onError() {}
+    onError() {},
+    stop: () => Promise.resolve()
   };
+  return provider;
 }
 
 export function currentWidget() {

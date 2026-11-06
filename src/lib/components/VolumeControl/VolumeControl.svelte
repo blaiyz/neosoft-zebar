@@ -1,13 +1,12 @@
 <script lang="ts">
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
-  import { config, configLoaded } from "#lib/state/config.svelte.ts";
+  import { config } from "#lib/state/config.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import ChevronLeft from "@lucide/svelte/icons/chevron-left";
   import Volume from "@lucide/svelte/icons/volume";
   import Volume1 from "@lucide/svelte/icons/volume-1";
   import Volume2 from "@lucide/svelte/icons/volume-2";
   import VolumeX from "@lucide/svelte/icons/volume-x";
-  import { onMount } from "svelte";
   import RangeSlider from "svelte-range-slider-pips";
   import Reveal from "../Reveal.svelte";
   import "./VolumeControl.css";
@@ -16,7 +15,7 @@
   let device = $derived(audio?.defaultPlaybackDevice);
   let volume = $derived(device?.volume ?? 0);
   let muted = $derived(device?.isMuted ?? false);
-  let sliderOpen = $state(false);
+  let sliderOpen = $derived(config.volume.sliderOpen);
   let values = $derived([volume]);
 
   let VolumeIcon = $derived.by(() => {
@@ -34,13 +33,6 @@
     newVolume = Math.max(0, Math.min(100, newVolume));
     void audio?.setVolume(newVolume);
   };
-
-  onMount(async () => {
-    await configLoaded;
-    if (config.extendVolumeSliderByDefault) {
-      sliderOpen = true;
-    }
-  });
 </script>
 
 {#if device}

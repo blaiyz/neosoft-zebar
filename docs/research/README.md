@@ -8,3 +8,4 @@ These are **dated snapshots**: versions and "today" refer to the date at the top
 
 - `zebar.md` (2026-11-05): how Zebar loads packs, what the client API offers, and how publishing works
 - `publishing-and-build.md` (2026-11-05): what `zebar publish` sends and rejects, how shell rules match, and which SvelteKit workers ignore `--mode`
+- `multi-window-and-persistence.md` (2026-11-06): where a pack can keep settings, how its windows talk to each other, and what popup windows can do

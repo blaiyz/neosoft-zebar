@@ -15,7 +15,7 @@
   let network = $derived(providers.network);
 </script>
 
-{#if config.showNetworkSection !== "statistics"}
+{#if config.sections.network !== "statistics"}
   <div class="flex flex-row items-center gap-1 pl-2">
     {#if network?.defaultInterface?.type === "ethernet"}
       <EthernetPort />
@@ -38,7 +38,7 @@
     {/if}
   </div>
 {/if}
-{#if config.showNetworkSection !== "interface" && network?.traffic}
+{#if config.sections.network !== "interface" && network?.traffic}
   <div class="flex flex-row items-center gap-2 font-mono">
     {#if network.traffic.received}
       <div class="flex flex-row items-center">

@@ -20,11 +20,14 @@ Zebar finds packs one directory below `~/.glzr/zebar/`, and installs marketplace
 
 ## Startup
 
-`src/app.html` links `config.css` and preloads `config.json`, both relative to the page. Then:
+`src/app.html` preloads `config.json`, relative to the page, and an inline script paints the saved theme so that the default look doesn't flash. Then:
 
-1. `src/routes/+page.svelte` runs `initAutotiler()` and `initBindingModes()` during component init. These register `$effect`s, which don't run during prerender. `initBindingModes()` also waits for `configLoaded`, which can't settle there, because `loadConfig()` only runs on mount.
-2. On mount, `+page.svelte` calls `initMonitor()`, which works out whether this is the primary monitor, then `initProviders()`, and queues the `backgroundEffect` setup. The last two wait for `configLoaded`, because a child's `onMount` runs before its parent's. `initProviders()` then applies the refresh intervals, creates the Zebar provider group with only the providers its sections need, and copies each output into the `providers` `$state`.
-3. On mount, `+layout.svelte` calls `loadConfig()`. It fetches `config.json`, parses it with JSON5 (so comments are allowed), validates it with the Zod schema, which fills in the defaults, and assigns the result to the `config` `$state`. On any failure it logs to the console and leaves the defaults in place. `configLoaded` resolves either way and never rejects.
+1. `src/routes/+page.svelte` runs `initAutotiler()`, `initBindingModes()` and `initProviders()` during component init. These register `$effect`s, which don't run during prerender.
+2. On mount, `+page.svelte` calls `initMonitor()`, which works out whether this is the primary monitor.
+3. On mount, `+layout.svelte` calls `loadConfig()`. It applies the stored document at once, then imports `config.json` and `custom.css` if they changed, and sets `configStatus.loaded`. It can't fail: anything it can't read becomes an entry in `configStatus.issues`.
+4. Effects that need the user's settings wait for `configStatus.loaded`. `syncProviders()` then starts only the providers that its sections need, and copies each output into the `providers` `$state`. The theme, the background effect and the click-through default are applied the same way.
+
+These effects keep running, so a change to the settings applies without a reload, in every window.
 
 The UI renders before all of this finishes, with defaults and `null` providers, so components guard with `{#if}` or optional chaining.
 
@@ -34,35 +37,44 @@ Prerendering runs component scripts in Node at build time, which is why every ca
 
 Shared state is in `.svelte.ts` modules in `src/lib/state/`, so it can use runes outside components:
 
-- `config.svelte.ts`: `config`, `configLoaded`, `loadConfig`.
+- `config.svelte.ts`: `config`, `configStatus`, `loadConfig`.
+- `layout.svelte.ts`: `isSectionShown`.
 - `providers.svelte.ts`: `providers`, `initProviders`. Components take what they need with `$derived(providers.x)`.
 - `binding_modes.svelte.ts`: `toggleModes`.
 - `monitor.svelte.ts`: `initMonitor`, `isOnPrimaryMonitor`.
 
-Local UI state stays in components. `AnimatedList` animates items entering, leaving and moving, and `Reveal` does the same for a single piece of content. They position items from measured widths and move them with CSS transitions. Svelte's `animate:` and `transition:` directives aren't used for this, because they jump when interrupted: an item still animating stays in the layout when it starts to leave, and one that returns partway through doesn't move. Both take their duration from `transitionDuration`.
+Local UI state stays in components. `AnimatedList` animates items entering, leaving and moving, and `Reveal` does the same for a single piece of content. They position items from measured widths and move them with CSS transitions. Svelte's `animate:` and `transition:` directives aren't used for this, because they jump when interrupted: an item still animating stays in the layout when it starts to leave, and one that returns partway through doesn't move. Both take their duration from `bar.transitionDuration`.
 
 ## Configuration
 
-Users configure the pack through three files that ship in the build: `config.json`, `config.css` and `zpack.json`.
+A widget can't write files, and a marketplace install gets a new folder for each version, so nothing the pack ships can hold settings across updates. `docs/research/multi-window-and-persistence.md` has the evidence.
 
-`config.json` flows like this:
+Settings are therefore one JSON document in `localStorage`, which is shared by every window of the pack and survives updates. Only `zpack.json` stays a file, because Zebar reads the window's height and docked edge when it creates the window.
 
-- The Zod schema in `src/lib/config_schema.ts` has no `$state`, so scripts can import it too, and it is the source of truth: `Config`, the defaults and validation all come from it. `pnpm schema` turns it, with its descriptions, into `static/schema.json`, which the user's editor picks up through `$schema`.
-- `static/config.json` is the file users edit. It repeats the defaults, and `pnpm check` fails if it drifts from them or if `schema.json` is out of date.
-- Every key has a default, so partial files are valid, and nested objects are filled in key by key. Unknown keys are dropped rather than rejected.
-- Validation is all or nothing: one invalid value leaves the whole file unused and the bar on its defaults.
+- **The schema is the source of truth.** The Zod schema in `src/lib/config_schema.ts` has no `$state`, so scripts can import it too. `Config`, the defaults and validation all come from it. `pnpm schema` turns it, with its descriptions, into `static/schema.json`, which the user's editor picks up through `$schema`.
+- **The document is partial.** It holds only what the user set, so a changed default reaches everyone who didn't choose a value. Every key has a default, and nested objects are filled in key by key. Unknown keys are dropped rather than rejected.
+- **Validation drops keys, not documents.** `parseDocument()` in `src/lib/config_document.ts` removes each key that fails and parses again, because a stored document can't be fixed by hand. The issues go to `configStatus.issues`, which `ConfigWarning.svelte` shows.
+- **`config.json` is an import.** `static/config.json` holds only `$schema` and `version`, and `pnpm check` keeps it that way, because anything in it would be merged over the user's settings. At startup the file's text is compared with the text last imported. If it changed, its keys are merged into the document, and otherwise it's ignored, so whichever changed last wins.
+- **`custom.css` is an import too.** Its text becomes `theme.customCss`, so a stylesheet can be written as a real file. The pack doesn't ship one: an update would replace a template, and its text would count as a change and wipe the stored CSS. A missing file is a 404, which leaves the stored CSS alone, and Zebar's service worker doesn't cache those, so a file created later is found.
+- **Versions.** `src/lib/config_migrations.ts` upgrades documents one version at a time. A document with no version counts as v1, because v1 files had none. A step that stops `true` from carrying over is deliberate: v1 files repeated every default, so `true` only meant the user left the option alone.
+- **A backup.** The previous document is kept under a second key before a migration or an import, and before unreadable data is discarded.
+- **Windows stay in step.** After a write, `BroadcastChannel` tells the other windows to read the document again. `syncState()` copies only the values that differ, so a change doesn't wake everything that reads `config`.
+
+Sections are listed in `src/lib/sections.ts`, in display order, which is all `LeftGroup` and `RightGroup` render from. Their components are in `section_components.ts`, because the list is also imported by the schema, which runs in Node. `isSectionShown()` decides what appears.
 
 ## Styling
 
 Three layers of CSS variables, all HSL triplets without commas:
 
 1. `src/themes/*.css` define palettes. They are imported in `src/app.css`, so every palette is bundled.
-2. `static/config.css` maps semantic names to a palette (`--text: var(--tau-text)`) and sets sizes, fonts and radii. It isn't bundled, so editing it needs no rebuild. A color may carry an alpha (`--bg-focused: ... / 0.4`).
+2. `src/themes/presets.css` maps semantic names to a palette (`--text: var(--tau-text)`), one block per `[data-theme]`, and sets the default sizes. A color may carry an alpha (`--bg-focused: ... / 0.4`). It sits in the `presets` layer, the lowest one. The values in `theme` go in an `overrides` layer above it, so they replace the preset, and `theme.customCss` has no layer, so it beats both without needing specificity.
 3. `@theme inline` in `src/app.css` exposes the semantic names as `zb-*` utilities through `hsl(var(--name))`. Being inline, the values go straight into the utilities, as `--transition-duration` is set below `:root` and a theme variable there couldn't resolve it.
+
+`applyTheme()` in `src/lib/theme.ts` turns `theme` into a snapshot: the preset, the variables for the `overrides` layer and the custom CSS. The function that paints it lives in `src/app.html`, so that the same code can run before the app loads, and the snapshot is saved for that. It is separate from the document because the inline script can't validate one.
 
 Fonts are bundled, so the bar needs no network to look right. `src/app.css` imports Montserrat from `@fontsource-variable/montserrat` and loads `src/lib/fonts/weather.woff2`, a subset holding only the glyphs in `Weather.svelte`. A new glyph means subsetting again. `static/font-licenses.txt` ships their licenses with the pack.
 
-`src/app.css` also applies a global transition to color-like properties on `*`, with its duration set from `transitionDuration` on the root element of `+layout.svelte`. Sizes derive from `--font-size`, so scaling the bar means raising the font size and the height in `zpack.json` together.
+`src/app.css` also applies a global transition to color-like properties on `*`, with its duration set from `bar.transitionDuration` on the root element of `+layout.svelte`. Sizes derive from `--font-size`, so scaling the bar means raising the font size and the height in `zpack.json` together.
 
 ## GlazeWM integration
 

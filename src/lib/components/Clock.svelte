@@ -6,17 +6,17 @@
   import Reveal from "./Reveal.svelte";
 
   let date = $derived(providers.date);
-  let fullDate = $derived(config.showFullDateByDefault);
+  let fullDate = $derived(config.clock.fullDate !== false);
 
   let timeOptions: Intl.DateTimeFormatOptions = $derived({
     hour: "numeric",
     minute: "2-digit",
-    ...(config.use24hClock === "auto"
+    ...(config.clock.use24h === "auto"
       ? {}
-      : config.use24hClock
+      : config.clock.use24h
         ? { hour12: false }
         : { hour12: true }),
-    ...(config.showSeconds ? { second: "numeric" } : {})
+    ...(config.clock.showSeconds ? { second: "numeric" } : {})
   });
 </script>
 
