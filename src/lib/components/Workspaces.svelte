@@ -46,7 +46,7 @@
           (ws) => ws.id === workspace.id
         )}
         {@const buttonWidth =
-          toggleModes.clickThrough || config.useThinnerWorkspaceButtons
+          toggleModes.clickThrough || config.workspaces.thinButtons === true
             ? "min-w-8"
             : "min-w-14 px-2"}
         <div class="relative mr-2 h-8">
@@ -60,7 +60,7 @@
           </div>
           <Button
             class={[
-              "absolute inset-y-0 left-0 w-max transition-[color,background-color,border-color,min-width,padding] ease-(--list-ease)",
+              "absolute inset-y-0 left-0 w-max transition-[color,background-color,border-color,min-width,padding] ease-(--ease)",
               workspaceTextColors[globalIndex],
               workspace.isDisplayed && [
                 workspaceBorderColors[globalIndex],

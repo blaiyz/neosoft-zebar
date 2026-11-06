@@ -1,42 +1,42 @@
 import type { Config } from "#lib/config_schema.ts";
-import { configLoaded } from "#lib/state/config.svelte.ts";
+import { config, configStatus } from "#lib/state/config.svelte.ts";
 import {
-  createProviderGroup,
+  createProvider,
   type ProviderGroup,
   type ProviderGroupConfig
 } from "zebar";
 
-/** Sections that can be turned off take their providers with them. */
-function createProviderConfig(config: Config) {
-  const { refreshIntervals } = config.providersConfig;
+/** Only `false` skips a provider, because `auto` may show its section at any time. */
+function createProviderConfig({ sections, providers }: Config) {
+  const { refreshIntervals } = providers;
 
   return {
     date: { type: "date" },
     glazewm: { type: "glazewm" },
-    media: { type: "media" },
-    audio: { type: "audio" },
-    ...(config.showBatterySection && {
+    ...(sections.media !== false && { media: { type: "media" as const } }),
+    ...(sections.volume !== false && { audio: { type: "audio" as const } }),
+    ...(sections.battery !== false && {
       battery: {
         type: "battery" as const,
         refreshInterval: refreshIntervals.battery
       }
     }),
-    ...(config.showCpuSection && {
+    ...(sections.cpu !== false && {
       cpu: { type: "cpu" as const, refreshInterval: refreshIntervals.cpu }
     }),
-    ...(config.showMemorySection && {
+    ...(sections.memory !== false && {
       memory: {
         type: "memory" as const,
         refreshInterval: refreshIntervals.memory
       }
     }),
-    ...(config.showNetworkSection !== false && {
+    ...(sections.network !== false && {
       network: {
         type: "network" as const,
         refreshInterval: refreshIntervals.network
       }
     }),
-    ...(config.showWeatherSection && {
+    ...(sections.weather !== false && {
       weather: {
         type: "weather" as const,
         refreshInterval: refreshIntervals.weather
@@ -46,8 +46,10 @@ function createProviderConfig(config: Config) {
 }
 
 type ProviderConfig = Required<ReturnType<typeof createProviderConfig>>;
+type ProviderName = keyof ProviderConfig;
+type ProviderOutputs = ProviderGroup<ProviderConfig>["outputMap"];
 
-const providers: ProviderGroup<ProviderConfig>["outputMap"] = $state({
+const providers: ProviderOutputs = $state({
   battery: null,
   cpu: null,
   date: null,
@@ -59,19 +61,65 @@ const providers: ProviderGroup<ProviderConfig>["outputMap"] = $state({
   audio: null
 });
 
-async function initProviders() {
-  const config = await configLoaded;
-  const providerGroup = createProviderGroup(createProviderConfig(config));
+const running: Partial<
+  Record<ProviderName, { key: string; stop: () => Promise<void> }>
+> = {};
 
-  providerGroup.onOutput((outputMap) => {
-    Object.assign(providers, outputMap);
+function setOutput<Name extends ProviderName>(
+  name: Name,
+  output: ProviderOutputs[Name]
+) {
+  providers[name] = output;
+}
+
+function startProvider<Name extends ProviderName>(
+  name: Name,
+  providerConfig: ProviderConfig[Name],
+  key: string
+) {
+  const provider = createProvider(providerConfig);
+
+  provider.onOutput(() => {
+    setOutput(name, provider.output as ProviderOutputs[Name]);
+  });
+  provider.onError((error) => {
+    setOutput(name, null);
+    if (config.providers.logErrors) {
+      console.error(`Provider error (${name}):`, error);
+    }
   });
 
-  if (config.providersConfig.enableErrorLogging) {
-    providerGroup.onError((error) => {
-      console.error("Provider error:", error);
-    });
+  running[name] = { key, stop: () => provider.stop() };
+}
+
+/**
+ * Restarts only what changed. Stopping them all for any change would empty
+ * `providers.glazewm` and take the workspaces with it.
+ */
+function syncProviders(wanted: Partial<ProviderConfig>) {
+  const names = Object.keys(providers) as ProviderName[];
+
+  for (const name of names) {
+    const providerConfig = wanted[name];
+    const key = providerConfig && JSON.stringify(providerConfig);
+    const current = running[name];
+    if (current?.key === key) continue;
+
+    if (current) {
+      void current.stop();
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete running[name];
+      setOutput(name, null);
+    }
+    if (providerConfig && key) startProvider(name, providerConfig, key);
   }
+}
+
+/** Call while a component initializes. */
+function initProviders() {
+  $effect(() => {
+    if (configStatus.loaded) syncProviders(createProviderConfig(config));
+  });
 }
 
 export { initProviders, providers };

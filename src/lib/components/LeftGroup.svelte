@@ -1,25 +1,16 @@
 <script lang="ts">
-  import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
-  import BatteryMeter from "./BatteryMeter.svelte";
-  import HeartButton from "./HeartButton.svelte";
-  import NetworkStatus from "./NetworkStatus.svelte";
-  import PowerButton from "./PowerButton.svelte";
-  import SystemMeters from "./SystemMeters.svelte";
+  import { leftSections } from "#lib/sections.ts";
+  import { isSectionShown } from "#lib/state/layout.svelte.ts";
+  import ConfigWarning from "./ConfigWarning.svelte";
+  import { sectionComponents } from "./section_components.ts";
 </script>
 
 <div class="flex flex-row items-center gap-3">
-  {#if config.showShutdownButton}
-    <PowerButton />
-  {/if}
-  {#if config.showHeartButton}
-    <HeartButton />
-  {/if}
-  <SystemMeters />
-  {#if config.showBatterySection}
-    <BatteryMeter />
-  {/if}
-  {#if config.showNetworkSection && isOnPrimaryMonitor()}
-    <NetworkStatus />
-  {/if}
+  <ConfigWarning />
+  {#each leftSections as id (id)}
+    {#if isSectionShown(id)}
+      {@const Section = sectionComponents[id]}
+      <Section />
+    {/if}
+  {/each}
 </div>

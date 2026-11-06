@@ -1,39 +1,4 @@
 {
   "$schema": "./schema.json",
-  "direction": "top",
-  "gradient": "top",
-  "attachSides": true,
-  "taskbarIntegration": {
-    "enabled": false,
-    "extraIcons": 0,
-    "primaryMonitorSelection": "all",
-    "secondaryMonitorSelection": "monitor"
-  },
-  "transitionDuration": 400,
-  "providersConfig": {
-    "refreshIntervals": {
-      "cpu": 2000,
-      "memory": 5000,
-      "battery": 60000,
-      "weather": 900000,
-      "network": 2000
-    },
-    "enableErrorLogging": false
-  },
-  "backgroundEffect": "inherit",
-  "enableAutoTiling": true,
-  "clickThroughByDefault": false,
-  "showShutdownButton": true,
-  "showHeartButton": true,
-  "showCpuSection": true,
-  "showMemorySection": true,
-  "showBatterySection": true,
-  "showNetworkSection": true,
-  "extendVolumeSliderByDefault": false,
-  "showWeatherSection": true,
-  "useCelsiusByDefault": true,
-  "showFullDateByDefault": false,
-  "use24hClock": "auto",
-  "showSeconds": false,
-  "useThinnerWorkspaceButtons": false
+  "version": 2
 }

@@ -4,6 +4,7 @@
 @import "./themes/nord.css";
 @import "./themes/material.css";
 @import "./themes/tau.css";
+@import "./themes/presets.css";
 @import "tailwindcss" source(".");
 
 /* The weather glyphs of Symbols Nerd Font, subset to the ones `Weather.svelte` uses. Their
@@ -36,7 +37,6 @@
   --color-zb-battery-low: hsl(var(--battery-low));
   --color-zb-focused-process: hsl(var(--focused-process));
   --color-zb-process: hsl(var(--process));
-  --color-zb-displayed: hsl(var(--displayed));
   --color-zb-ws-0: hsl(var(--ws-1));
   --color-zb-ws-1: hsl(var(--ws-2));
   --color-zb-ws-2: hsl(var(--ws-3));
@@ -44,7 +44,7 @@
   --color-zb-ws-4: hsl(var(--ws-5));
   --color-zb-accent: hsl(var(--accent));
   --color-zb-tiling-direction: hsl(var(--tiling-direction));
-  --color-zb-click-through: hsl(var(--tiling-direction));
+  --color-zb-click-through: hsl(var(--click-through));
   --color-zb-network: hsl(var(--network));
   --color-zb-weather: hsl(var(--weather));
   --color-zb-volume-start: hsl(var(--volume-start));

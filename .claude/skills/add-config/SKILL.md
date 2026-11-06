@@ -1,6 +1,6 @@
 ---
 name: add-config
-description: Add, rename or remove a user-facing setting - a config.json option or a config.css variable - across the interface, schema, defaults, Tailwind, README and dev setup. Use whenever a change introduces or alters something users configure.
+description: Add, rename or remove a user-facing setting - an option in the settings document or a theme variable - across the schema, migrations, Tailwind, presets, README and dev setup. Use whenever a change introduces or alters something users configure.
 argument-hint: "[setting and what it controls]"
 ---
 
@@ -10,34 +10,36 @@ Setting: $ARGUMENTS
 
 A setting lives in several places, and missing one usually fails silently.
 
-## A config.json option
+## An option in the settings document
 
 - [ ] Add the field with its default to the schema in `src/lib/config_schema.ts`, in the object it belongs to. `.describe()` becomes the editor hint users see, so describe each value. Write it for users.
-- [ ] Add the same default to `static/config.json`, the template users edit. `pnpm check` fails if the two differ.
-- [ ] Run `pnpm schema`. An invalid user file logs an error and leaves the bar on its defaults.
-- [ ] Add the option to the default configuration block in `README.md`.
-- [ ] Read it through the `config` object. It is reactive, and starts as the defaults until the user's file has loaded, so anything needing the final value once awaits `configLoaded` instead (see `src/lib/state/binding_modes.svelte.ts`).
+- [ ] Run `pnpm schema`. Don't add the key to `static/config.json`: it stays empty, because anything in it is imported over the user's settings.
+- [ ] Mention the option in the README if users need to know about it. The schema's hints cover the rest, so the README doesn't list every key.
+- [ ] Read it through the `config` object. It holds the defaults until `configStatus.loaded`, and it can change at any time, so read it in a template, `$derived` or `$effect`, never once. If an effect shouldn't run on the defaults, check `configStatus.loaded` (see `src/lib/state/binding_modes.svelte.ts`).
+- [ ] A new section: add it to `src/lib/sections.ts` and `src/lib/components/section_components.ts`, and its provider to `src/lib/state/providers.svelte.ts`, which starts it unless the section is `false`.
 
-Existing users' files won't have the new key, so its default has to preserve today's behavior unless the change is meant to alter it. Every key needs a default, and that is what keeps old files valid.
+Stored documents won't have the new key, so its default applies to them. The default has to preserve today's behavior unless the change is meant to alter it. Every key needs a default, and that is what keeps partial documents valid.
 
-Renaming or removing a key: old files still carry the old key. The schema drops unknown keys without rejecting them, so the user's setting is lost without warning. Mention that in the release notes.
+Renaming or removing a key: stored documents still carry the old key, and the schema drops unknown keys without rejecting them, so the user's setting would be lost without warning.
 
-## A config.css variable
+- [ ] Raise `CONFIG_VERSION` and add a step to `MIGRATIONS` in `src/lib/config_migrations.ts`. Steps run in order, and keys already in the new format have to pass through them.
+- [ ] Use a throwaway script to run the step over a realistic old document, including `dev_static/config.json`.
 
-- [ ] Add it to `static/config.css` with a sensible default.
-- [ ] Colors: raw HSL triplets without commas. Map the semantic name to a palette variable from `src/themes/`. Expose it in the `@theme` block of `src/app.css` as `--color-zb-<name>: hsl(var(--name));`.
-- [ ] Sizes: prefer values relative to `--font-size`, so scaling the bar keeps working.
+## A theme variable
+
+- [ ] Add it to the `:root` block of `src/themes/presets.css` if it isn't a color, and prefer values relative to `--font-size`, so scaling the bar keeps working.
+- [ ] Colors: raw HSL triplets without commas. Add it to **every** `[data-theme]` block in `src/themes/presets.css`, using a suitable color from that palette. A preset that misses it renders nothing.
+- [ ] Expose a color in the `@theme` block of `src/app.css` as `--color-zb-<name>: hsl(var(--name));`.
 - [ ] Classes chosen at runtime go in a lookup table of complete names, because Tailwind only generates what it finds written out in full.
-- [ ] Add the variable to every matching theme preset in `README.md`, using a suitable color from each palette.
 
-A user keeping an older `config.css` won't define the variable. Give it a fallback where the bar would otherwise look broken, for example `var(--name, var(--text))`.
+A new preset also needs a name in `themePresets` in `src/lib/config_schema.ts` and a row in the README's table.
 
 ## Dev setup
 
-`pnpm dev` copies `dev_static/` over the build, and that folder is created once and never refreshed, so a new option doesn't exist there until it's added:
+`pnpm dev` copies `dev_static/` over the build, and that folder is created once and never refreshed:
 
 - [ ] Copy `static/schema.json` over `dev_static/schema.json`. The schema is generated, so this replaces nothing of the owner's.
-- [ ] Add the new key to `dev_static/config.json` or the new variable to `dev_static/config.css`, without touching anything else in those files, and tell the owner you did.
+- [ ] Add the new key to `dev_static/config.json` only if a change needs it to differ from the default, without touching anything else in the file, and tell the owner you did.
 
 ## Check
 

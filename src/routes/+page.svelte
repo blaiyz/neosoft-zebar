@@ -6,7 +6,7 @@
   import Workspaces from "#lib/components/Workspaces.svelte";
   import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
-  import { config, configLoaded } from "#lib/state/config.svelte.ts";
+  import { config, configStatus } from "#lib/state/config.svelte.ts";
   import {
     initMonitor,
     isOnPrimaryMonitor
@@ -17,18 +17,23 @@
 
   let glazewm = $derived(providers.glazewm);
   let gradientDirection = $derived(
-    config.gradient === "bottom" ? "bg-linear-to-t/srgb" : "bg-linear-to-b/srgb"
+    config.bar.gradient === "bottom"
+      ? "bg-linear-to-t/srgb"
+      : "bg-linear-to-b/srgb"
   );
 
   initAutotiler();
   initBindingModes();
+  initProviders();
+
+  $effect(() => {
+    if (configStatus.loaded) {
+      void applyBackgroundEffect(config.bar.backgroundEffect);
+    }
+  });
 
   onMount(() => {
     initMonitor();
-    void initProviders();
-    void configLoaded.then(({ backgroundEffect }) =>
-      applyBackgroundEffect(backgroundEffect)
-    );
   });
 </script>
 
@@ -36,7 +41,7 @@
   <div
     class="relative flex h-bar w-full items-stretch font-zb text-zb-size font-base text-zb-text"
   >
-    {#if config.gradient !== "solid" && config.gradient !== "disabled"}
+    {#if config.bar.gradient !== "solid" && config.bar.gradient !== "disabled"}
       <div
         class={[
           "absolute inset-0",
@@ -53,7 +58,7 @@
           glazewm?.currentMonitor.hasFocus && "opacity-0"
         ]}
       ></div>
-    {:else if config.gradient === "solid"}
+    {:else if config.bar.gradient === "solid"}
       <div
         class={[
           "absolute inset-0",
@@ -67,7 +72,7 @@
       class="relative z-10 mx-zbx my-zby grid h-full w-full grid-cols-[1fr_auto_1fr] grid-rows-1 items-center"
     >
       <Group
-        leftCurve={!config.attachSides}
+        leftCurve={!config.bar.attachSides}
         class="h-full justify-self-start"
         innerClass={[
           "flex h-full items-center px-4",
@@ -98,7 +103,7 @@
         {/if}
       </div>
       <Group
-        rightCurve={!config.attachSides}
+        rightCurve={!config.bar.attachSides}
         class="h-full justify-self-end"
         innerClass={[
           "flex h-full items-center pr-4 pl-2",

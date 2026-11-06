@@ -75,7 +75,7 @@
     entry.leaving = true;
     entry.removal = setTimeout(() => {
       entries = entries.filter((other) => other !== entry);
-    }, config.transitionDuration);
+    }, config.bar.transitionDuration);
   };
 
   const reconcile = (next: T[]) => {
@@ -182,15 +182,13 @@
 
 <style>
   .list {
-    --list-ease: cubic-bezier(0.33, 1, 0.68, 1);
-
     position: relative;
     height: 100%;
     flex: none;
   }
 
   .list.settled {
-    transition: width var(--transition-duration) var(--list-ease);
+    transition: width var(--transition-duration) var(--ease);
   }
 
   .slot {
@@ -209,7 +207,7 @@
   }
 
   .slot.placed {
-    transition: translate var(--transition-duration) var(--list-ease);
+    transition: translate var(--transition-duration) var(--ease);
   }
 
   .face {
@@ -221,8 +219,8 @@
 
   .face.fly {
     transition:
-      opacity var(--transition-duration) var(--list-ease),
-      transform var(--transition-duration) var(--list-ease);
+      opacity var(--transition-duration) var(--ease),
+      transform var(--transition-duration) var(--ease);
 
     @starting-style {
       opacity: 0;

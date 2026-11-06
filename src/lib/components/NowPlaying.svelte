@@ -1,6 +1,5 @@
 <script lang="ts">
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { secondsToHms } from "#lib/utils/format.ts";
   import Pause from "@lucide/svelte/icons/pause";
@@ -43,7 +42,7 @@
 </script>
 
 <AnimatedList
-  items={isOnPrimaryMonitor() && media && shownSession ? [shownSession] : []}
+  items={media && shownSession ? [shownSession] : []}
   key={() => "session"}
   anchor="end"
 >
