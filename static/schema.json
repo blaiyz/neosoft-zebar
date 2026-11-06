@@ -188,7 +188,7 @@
       "properties": {
         "sliderOpen": {
           "default": false,
-          "description": "Whether the volume slider starts open.",
+          "description": "Whether the volume slider starts open. It stays closed while it doesn't fit, even with everything else hidden.",
           "type": "boolean"
         }
       }

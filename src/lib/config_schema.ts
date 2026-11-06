@@ -157,7 +157,9 @@ const volume = z
     sliderOpen: z
       .boolean()
       .default(false)
-      .describe("Whether the volume slider starts open.")
+      .describe(
+        "Whether the volume slider starts open. It stays closed while it doesn't fit, even with everything else hidden."
+      )
   })
   .prefault({});
 
