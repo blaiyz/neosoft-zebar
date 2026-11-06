@@ -7,6 +7,11 @@
   import { getWindows } from "#lib/utils/glaze_wm_utils.ts";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
   import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
+  import {
+    workspaceGaps,
+    workspaceWidth,
+    type WorkspaceItem
+  } from "#lib/workspace_styles.ts";
   import { untrack } from "svelte";
   import {
     TilingDirection,
@@ -15,11 +20,8 @@
     type Workspace
   } from "glazewm";
   import AnimatedList from "./AnimatedList.svelte";
-  import Button from "./Button.svelte";
   import Reveal from "./Reveal.svelte";
-
-  const WIDE_BUTTON = "min-w-14 px-2";
-  const THIN_BUTTON = "min-w-8";
+  import WorkspaceRow from "./WorkspaceRow.svelte";
 
   /** How many process icons fit when they have to, counting the `+N`. */
   const ICON_SLOTS = 4;
@@ -31,10 +33,22 @@
   let alwaysThin = $derived(
     toggleModes.clickThrough || config.workspaces.thinButtons === true
   );
-  let buttonWidth = $derived(
+  let thin = $derived(
     alwaysThin || partTarget("workspaces.thin") !== undefined
-      ? THIN_BUTTON
-      : WIDE_BUTTON
+  );
+  let style = $derived(config.workspaces.style);
+
+  let items = $derived(
+    (glazewm?.currentWorkspaces ?? []).map(
+      ({ id, name, isDisplayed }: Workspace): WorkspaceItem => ({
+        id,
+        name,
+        color:
+          (glazewm?.allWorkspaces.findIndex((other) => other.id === id) ?? 0) +
+          1,
+        current: isDisplayed
+      })
+    )
   );
 
   let windows = $derived(
@@ -89,28 +103,21 @@
       [list, icon]
     );
   });
-
-  // Written out in full so that Tailwind finds and generates them.
-  const workspaceTextColors = [
-    "text-zb-ws-0",
-    "text-zb-ws-1",
-    "text-zb-ws-2",
-    "text-zb-ws-3",
-    "text-zb-ws-4"
-  ];
-  const workspaceBorderColors = [
-    "border-zb-ws-0",
-    "border-zb-ws-1",
-    "border-zb-ws-2",
-    "border-zb-ws-3",
-    "border-zb-ws-4"
-  ];
 </script>
 
-{#snippet buttonSizes(sizing: string)}
+{#snippet buttonSizes(thinned: boolean)}
   <div class="flex">
-    {#each glazewm?.currentWorkspaces ?? [] as workspace (workspace.id)}
-      <div class={["mr-2 w-max border p-1", sizing]}>{workspace.name}</div>
+    {#each items as item (item.id)}
+      <div
+        class={[
+          "border p-1",
+          style === "string" && !item.current ? "w-6 overflow-hidden" : "w-max",
+          workspaceGaps[style],
+          workspaceWidth(style, thinned, item.current)
+        ]}
+      >
+        {item.name}
+      </div>
     {/each}
   </div>
 {/snippet}
@@ -120,10 +127,10 @@
     <!-- The whole row of buttons in both forms, whichever one is showing, and an icon. -->
     <div class="invisible absolute" aria-hidden="true">
       <div class="w-max" bind:this={wideButtons}>
-        {@render buttonSizes(WIDE_BUTTON)}
+        {@render buttonSizes(false)}
       </div>
       <div class="w-max" bind:this={thinButtons}>
-        {@render buttonSizes(THIN_BUTTON)}
+        {@render buttonSizes(true)}
       </div>
       {#if windows[0]}
         {@const Icon = getProcessIcon(windows[0])}
@@ -132,43 +139,14 @@
         </div>
       {/if}
     </div>
-    <div class="h-full" bind:this={buttons}>
-      <AnimatedList
-        items={glazewm.currentWorkspaces}
-        key={(workspace: Workspace) => workspace.id}
-      >
-        {#snippet item(workspace: Workspace)}
-          {@const globalIndex = glazewm.allWorkspaces.findIndex(
-            (ws) => ws.id === workspace.id
-          )}
-          <div class="relative mr-2 h-8">
-            <!-- Takes the final width at once for the list to measure, so the list and the
-               button below reach it together on the same curve. -->
-            <div
-              class={["invisible w-max border p-1", buttonWidth]}
-              aria-hidden="true"
-            >
-              {workspace.name}
-            </div>
-            <Button
-              class={[
-                "absolute inset-y-0 left-0 w-max transition-[color,background-color,border-color,min-width,padding] ease-(--ease)",
-                workspaceTextColors[globalIndex],
-                workspace.isDisplayed && [
-                  workspaceBorderColors[globalIndex],
-                  "hover:border-current/70 active:border-current/50!"
-                ],
-                buttonWidth
-              ]}
-              callback={() =>
-                glazewm.runCommand(`focus --workspace ${workspace.name}`)}
-            >
-              {workspace.name}
-            </Button>
-          </div>
-        {/snippet}
-      </AnimatedList>
-    </div>
+    <WorkspaceRow
+      bind:element={buttons}
+      {items}
+      {style}
+      {thin}
+      onpick={({ name }: WorkspaceItem) =>
+        glazewm.runCommand(`focus --workspace ${name}`)}
+    />
     <button
       aria-label="tiling-direction"
       class="mx-1 flex items-center justify-center text-zb-tiling-direction"

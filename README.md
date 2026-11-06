@@ -8,7 +8,8 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 - System information meters with dynamic coloring and animations
 - Smooth animations
 - Media controls
-- Configuration using CSS variables and a JSON file
+- A settings window with live preview, and sharing of settings and themes as a file
+- Flyouts for audio devices, the calendar, network and system details, and power options
 - Customizable layout and appearance
 - Built-in auto-tiler
 - Multi-monitor support
@@ -75,7 +76,11 @@ To work on the look of the bar in a normal browser, `pnpm run dev:mock` starts a
 
 ## 🔧 Configuration
 
-Neosoft Zebar keeps its settings in Zebar's storage, not in the folder of the installed pack, so they survive updates. To change them, edit `config.json`, which ships together with the bundle, and reload Zebar with **Empty cache & reload configs** from its tray menu.
+Neosoft Zebar keeps its settings in Zebar's storage, not in the folder of the installed pack, so they survive updates. There are two ways to change them, and they can be mixed.
+
+**The settings window** opens from the gear at the left end of the bar, or from the `settings` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Undo there goes back to before the last import or reset.
+
+**`config.json`** ships together with the bundle. Edit it and reload Zebar with **Empty cache & reload configs** from its tray menu.
 
 Only write what you want to change. Everything else keeps its default, and a new release can improve those defaults for you:
 
@@ -98,18 +103,43 @@ To see the description and value options for each field, open `config.json` in V
 
 **Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
 
-When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way. Clicking the clock to show the date, or opening the volume slider, counts as asking for it: other sections give way, unless that still wouldn't leave enough room, in which case it stays closed and nothing moves. The volume slider's button hides while the slider can't fit.
+**Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
+
+When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way.
+
+Right-clicking the clock switches the date on or off, and saves it. Turning it on sets `clock.fullDate` to `"preferred"`: other sections give way to it, but it can still collapse if they can't make enough room, and if there's no room for it at all, the click does nothing. Clicking the weather switches the unit, which is saved too. Saved settings apply to every monitor.
 
 Some settings have to be configured in `zpack.json`, which is the configuration file Zebar uses (shipped together as well). In there, you have options to change the size and positioning of the widget.
 
 > [!NOTE]
 > If you're using window scaling in Windows, you may need to edit `zpack.json` to set the correct height (default is `40px`).
 
+### Flyouts
+
+Clicking a section opens a popup beside it, which closes when you click anywhere else:
+
+| Section                | Flyout                                                                     |
+| ---------------------- | -------------------------------------------------------------------------- |
+| Volume                 | A slider and mute button for every playback and recording device           |
+| Clock                  | A calendar with week numbers                                               |
+| Network                | Addresses, link speed, totals and a graph of recent traffic                |
+| CPU, memory or battery | Recent usage, disks, battery health and uptime                             |
+| Power                  | Lock, sleep, sign out, restart and shut down, which all ask you to confirm |
+
+Restarting and shutting down wait a minute, and the Power flyout can cancel them. Scrolling over the volume icon still changes the volume.
+
+### System tray (experimental)
+
+`sections.tray` shows the tray in a flyout, with any icons you pin in the bar. Drag icons to rearrange them, or to the top of the flyout to pin them.
+
+> [!WARNING]
+> It's off by default because Zebar's tray provider can break the native system tray on Windows 10 until Explorer restarts ([zebar#301](https://github.com/glzr-io/zebar/issues/301)). This part of the pack hasn't been tried against the real provider yet, and order and pins are matched by tooltip, because Zebar's icon ids change on every update.
+
 ### Upgrading from 1.x
 
 Your old `config.json` still works: put it back and reload, and it's converted. Sections you had left on become `"auto"`, and anything you turned off stays off.
 
-`config.css` is no longer read, but it's still valid: rename it to `custom.css`, and it keeps working (see [Custom CSS](#custom-css)).
+`config.css` is no longer read, but it's still valid: rename it to `custom.css`, and it keeps working (see [Custom CSS](#custom-css)). Remove any colors you didn't change first, because a color set there stays the same in every theme.
 
 ## 🎨 Themes
 
@@ -137,7 +167,7 @@ To change individual colors, use `theme.colors`, with HSL-encoded colors without
 }
 ```
 
-`theme` also sets the corner radius with `radius` and the font with `fontFamily` (Montserrat is bundled as `Montserrat Variable`).
+`theme` also sets the corner radius with `radius` and the font with `fontFamily` (Figtree is bundled as `Figtree Variable`).
 
 ### Custom CSS
 
@@ -256,4 +286,4 @@ Before opening a pull request, run `pnpm verify`, which runs the linters, the ty
 
 ## Acknowledgements
 
-Keeping settings in `localStorage` was inspired by [overline-zebar](https://github.com/mushfikurr/overline-zebar) by [mushfikurr](https://github.com/mushfikurr).
+The settings window, the flyouts and keeping settings in `localStorage` were inspired by [overline-zebar](https://github.com/mushfikurr/overline-zebar) by [mushfikurr](https://github.com/mushfikurr).

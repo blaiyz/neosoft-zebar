@@ -1,8 +1,12 @@
 Fonts bundled with this widget pack
 
-Montserrat
-Copyright 2011 The Montserrat Project Authors
-https://github.com/JulietaUla/Montserrat
+Figtree
+Copyright 2022 The Figtree Project Authors
+https://github.com/erikdkennedy/figtree
+
+JetBrains Mono
+Copyright 2020 The JetBrains Mono Project Authors
+https://github.com/JetBrains/JetBrainsMono
 
 Weather icons
 A subset of Symbols Nerd Font 3.5.1, Copyright (c) 2016, Ryan McIntyre

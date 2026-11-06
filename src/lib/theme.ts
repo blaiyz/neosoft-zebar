@@ -3,6 +3,40 @@ import type { TaskbarIntegration, Theme } from "#lib/config_schema.ts";
 /** Read by the script in `src/app.html` to paint the theme before the page loads. */
 const THEME_KEY = "neosoft.theme";
 
+/** How long things take to leave, which is quicker than they arrive. */
+export const exitTime = (duration: number) => duration * 0.65;
+
+/** The colors `theme.colors` can replace. */
+export const themeColors = [
+  "text",
+  "accent",
+  "bg",
+  "muted",
+  "border",
+  "shadow",
+  "icon",
+  "bg-focused",
+  "bg-unfocused",
+  "cpu",
+  "cpu-high-usage",
+  "memory",
+  "battery-good",
+  "battery-mid",
+  "battery-low",
+  "process",
+  "focused-process",
+  "ws-1",
+  "ws-2",
+  "ws-3",
+  "ws-4",
+  "ws-5",
+  "tiling-direction",
+  "click-through",
+  "volume-start",
+  "volume-end",
+  "volume-inner"
+];
+
 export type ThemeSnapshot = {
   preset: string;
   /** CSS variables that replace the preset's. */

@@ -1,16 +1,5 @@
-import { isDocument, type ConfigDocument } from "./config_document.ts";
+import { isDocument, setPath, type ConfigDocument } from "./config_document.ts";
 import { CONFIG_VERSION } from "./config_schema.ts";
-
-function setPath(document: ConfigDocument, path: string, value: unknown) {
-  const keys = path.split(".");
-  const last = keys.pop() as string;
-  let parent = document;
-  for (const key of keys) {
-    const child = parent[key];
-    parent = isDocument(child) ? child : (parent[key] = {});
-  }
-  parent[last] = value;
-}
 
 /** Renamed keys, with the value kept as it is. */
 const V1_MOVES: Record<string, string> = {
@@ -20,7 +9,6 @@ const V1_MOVES: Record<string, string> = {
   backgroundEffect: "bar.backgroundEffect",
   transitionDuration: "bar.transitionDuration",
   enableAutoTiling: "autoTiling",
-  extendVolumeSliderByDefault: "volume.sliderOpen",
   use24hClock: "clock.use24h",
   showSeconds: "clock.showSeconds"
 };
@@ -67,6 +55,8 @@ function fromV1(document: ConfigDocument): ConfigDocument {
     const value = take(key);
     if (value !== undefined && value !== false) setPath(migrated, path, value);
   }
+
+  take("extendVolumeSliderByDefault");
 
   if (take("useCelsiusByDefault") === false) {
     setPath(migrated, "weather.unit", "fahrenheit");

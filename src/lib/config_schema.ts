@@ -103,7 +103,7 @@ const theme = z
       .nullable()
       .default(null)
       .describe(
-        "The font of the bar, as a CSS font family. Montserrat is bundled as `Montserrat Variable`, and `null` uses it."
+        "The font of the bar, as a CSS font family. Figtree is bundled as `Figtree Variable`, and `null` uses it."
       ),
     fontSize: z
       .string()
@@ -123,6 +123,12 @@ const theme = z
 
 const sections = z
   .object({
+    settings: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether the bar has a button for the settings window, which Zebar's tray menu opens too."
+      ),
     power: section,
     heart: section,
     cpu: section,
@@ -135,6 +141,12 @@ const sections = z
         "Like the other sections, with `interface` to only show the connection and `statistics` to only show the transfer rates."
       ),
     media: section,
+    tray: z
+      .literal([true, false, "auto"])
+      .default(false)
+      .describe(
+        "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts."
+      ),
     volume: section,
     weather: section,
     clock: z.boolean().default(true)
@@ -143,6 +155,12 @@ const sections = z
 
 const workspaces = z
   .object({
+    style: z
+      .enum(["keys", "track", "string", "solid"])
+      .default("track")
+      .describe(
+        "How workspaces look. `keys` are tinted buttons with a ring around the current one, `track` is one groove with a bead across it, `string` shrinks the others to dots, and `solid` fills the current one with its color."
+      ),
     thinButtons: z
       .literal([true, false, "auto"])
       .default("auto")
@@ -152,13 +170,13 @@ const workspaces = z
   })
   .prefault({});
 
-const volume = z
+const media = z
   .object({
-    sliderOpen: z
-      .boolean()
-      .default(false)
+    style: z
+      .enum(["pill", "tucked", "capsule", "equalizer"])
+      .default("pill")
       .describe(
-        "Whether the volume slider starts open. It stays closed while it doesn't fit, even with everything else hidden."
+        "How the media controls look. `pill` puts them in a pill with progress around play, `tucked` keeps back and next hidden until hovered, `capsule` fills the whole section as the track plays, and `equalizer` has bars that move while it plays."
       )
   })
   .prefault({});
@@ -169,7 +187,7 @@ const weather = z
       .enum(["celsius", "fahrenheit"])
       .default("celsius")
       .describe(
-        "The unit the temperature starts in. Clicking the weather switches it."
+        "The unit of the temperature. Clicking the weather switches it."
       )
   })
   .prefault({});
@@ -182,10 +200,35 @@ const clock = z
       .describe("Whether to use a 24-hour clock. `auto` follows the system."),
     showSeconds: z.boolean().default(false),
     fullDate: z
-      .literal([true, false, "auto"])
+      .literal([true, false, "auto", "preferred"])
       .default("auto")
       .describe(
-        "Whether to show the full date beside the time. `auto` drops it when space runs out, and clicking the clock switches it."
+        [
+          "Whether to show the full date beside the time. Right-clicking the clock switches it between `preferred` and `false`.",
+          "`auto`- It's the first thing to go when space runs out.",
+          "`preferred`- Other sections give way to it, and it only goes if they can't make enough room.",
+          "`true`- It always shows.",
+          "`false`- It never shows."
+        ].join("\n\n")
+      )
+  })
+  .prefault({});
+
+const tray = z
+  .object({
+    pinned: z
+      .array(z.string())
+      .default([])
+      .describe("The tray icons shown in the bar, in their order."),
+    order: z
+      .array(z.string())
+      .default([])
+      .describe("The order of the tray icons. Dragging them sets it."),
+    invertIcons: z
+      .boolean()
+      .default(false)
+      .describe(
+        "Inverts the tray icons, for monochrome icons that are hard to see on a light theme."
       )
   })
   .prefault({});
@@ -229,7 +272,8 @@ const refreshIntervals = z
     memory: z.number().default(5000),
     battery: z.number().default(60000),
     weather: z.number().default(900000),
-    network: z.number().default(2000)
+    network: z.number().default(2000),
+    disk: z.number().default(60000)
   })
   .prefault({});
 
@@ -259,9 +303,10 @@ export const configSchema = z.object({
   theme,
   sections,
   workspaces,
-  volume,
+  media,
   weather,
   clock,
+  tray,
   autoTiling: z
     .boolean()
     .default(true)
@@ -284,7 +329,9 @@ export const configSchema = z.object({
 export type Config = z.infer<typeof configSchema>;
 export type AttachmentDirection = Config["bar"]["direction"];
 export type BackgroundEffect = Config["bar"]["backgroundEffect"];
+export type MediaStyle = Config["media"]["style"];
 export type TaskbarIntegration = Config["taskbarIntegration"];
 export type Theme = Config["theme"];
+export type WorkspaceStyle = Config["workspaces"]["style"];
 
 export const defaultConfig = configSchema.parse({});

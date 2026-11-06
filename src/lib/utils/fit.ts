@@ -12,8 +12,6 @@ export type FitStep<Part extends string> = {
    * nothing else gives way on its account.
    */
   last?: boolean;
-  /** Applies whether or not it's needed. */
-  always?: boolean;
 };
 
 export type FitInput<Part extends string> = {
@@ -42,7 +40,7 @@ function walk<Part extends string>(
   const overflow = { ...start };
   const targets = { ...given };
 
-  for (const { part, side, to, partial, always } of steps) {
+  for (const { part, side, to, partial } of steps) {
     const current = targets[part] ?? widths[part] ?? 0;
     const available = current - to;
     if (available <= 0) continue;
@@ -51,7 +49,7 @@ function walk<Part extends string>(
     const share = 1 / sides.length;
 
     const worst = Math.max(...sides.map((name) => overflow[name]));
-    if (worst <= 0 && !always) continue;
+    if (worst <= 0) continue;
 
     const saved = partial ? Math.min(available, worst / share) : available;
     targets[part] = current - saved;

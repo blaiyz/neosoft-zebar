@@ -41,12 +41,15 @@ function createProviderConfig({ sections, providers }: Config) {
         type: "weather" as const,
         refreshInterval: refreshIntervals.weather
       }
-    })
+    }),
+    ...(sections.tray !== false && { systray: { type: "systray" as const } }),
+    disk: { type: "disk", refreshInterval: refreshIntervals.disk },
+    host: { type: "host" }
   } satisfies ProviderGroupConfig;
 }
 
 type ProviderConfig = Required<ReturnType<typeof createProviderConfig>>;
-type ProviderName = keyof ProviderConfig;
+export type ProviderName = keyof ProviderConfig;
 type ProviderOutputs = ProviderGroup<ProviderConfig>["outputMap"];
 
 const providers: ProviderOutputs = $state({
@@ -58,7 +61,10 @@ const providers: ProviderOutputs = $state({
   network: null,
   weather: null,
   media: null,
-  audio: null
+  audio: null,
+  systray: null,
+  disk: null,
+  host: null
 });
 
 const running: Partial<
@@ -70,6 +76,13 @@ function setOutput<Name extends ProviderName>(
   output: ProviderOutputs[Name]
 ) {
   providers[name] = output;
+}
+
+/** The last output stays for as long as its section takes to close. */
+function clearOutput(name: ProviderName) {
+  setTimeout(() => {
+    if (!running[name]) setOutput(name, null);
+  }, config.bar.transitionDuration);
 }
 
 function startProvider<Name extends ProviderName>(
@@ -96,11 +109,14 @@ function startProvider<Name extends ProviderName>(
  * Restarts only what changed. Stopping them all for any change would empty
  * `providers.glazewm` and take the workspaces with it.
  */
-function syncProviders(wanted: Partial<ProviderConfig>) {
+function syncProviders(
+  available: Partial<ProviderConfig>,
+  wanted: readonly ProviderName[]
+) {
   const names = Object.keys(providers) as ProviderName[];
 
   for (const name of names) {
-    const providerConfig = wanted[name];
+    const providerConfig = wanted.includes(name) ? available[name] : undefined;
     const key = providerConfig && JSON.stringify(providerConfig);
     const current = running[name];
     if (current?.key === key) continue;
@@ -109,17 +125,36 @@ function syncProviders(wanted: Partial<ProviderConfig>) {
       void current.stop();
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete running[name];
-      setOutput(name, null);
     }
     if (providerConfig && key) startProvider(name, providerConfig, key);
+    else if (current) clearOutput(name);
   }
 }
 
-/** Call while a component initializes. */
-function initProviders() {
+/** What the bar itself shows. */
+const barProviders: readonly ProviderName[] = [
+  "audio",
+  "battery",
+  "cpu",
+  "date",
+  "glazewm",
+  "media",
+  "memory",
+  "network",
+  "systray",
+  "weather"
+];
+
+/**
+ * Call while a component initializes. A window starts the providers in `wanted`,
+ * except for those that the sections they belong to have turned off.
+ */
+function initProviders(wanted: readonly ProviderName[]) {
   $effect(() => {
-    if (configStatus.loaded) syncProviders(createProviderConfig(config));
+    if (configStatus.loaded) {
+      syncProviders(createProviderConfig(config), wanted);
+    }
   });
 }
 
-export { initProviders, providers };
+export { barProviders, initProviders, providers };

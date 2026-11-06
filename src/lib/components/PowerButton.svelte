@@ -1,32 +1,19 @@
 <script lang="ts">
+  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
+  import { pendingPower } from "#lib/state/power.svelte.ts";
+  import { providers } from "#lib/state/providers.svelte.ts";
   import IconPowerButton from "@tabler/icons-svelte/icons/power";
-  import { shellExec } from "zebar";
-  import Button from "./Button.svelte";
+  import BeadButton from "./BeadButton.svelte";
 
-  let shuttingDown = $state(false);
-
-  async function togglePowerOff() {
-    try {
-      if (shuttingDown) {
-        await shellExec("shutdown", ["/a"]);
-        shuttingDown = false;
-      } else {
-        await shellExec("shutdown", ["/s"]);
-        shuttingDown = true;
-      }
-    } catch (err) {
-      console.error("Shutdown command failed", err);
-      shuttingDown = false;
-    }
-  }
+  let now = $derived(providers.date?.new.getTime() ?? 0);
+  let pending = $derived((pendingPower.value?.at ?? 0) > now);
 </script>
 
-<Button
-  class="text-zb-icon"
-  label="Shut down"
-  callback={() => {
-    void togglePowerOff();
-  }}
+<BeadButton
+  class={pending ? "animate-pulse" : ""}
+  label="Power"
+  tone={pending ? "--accent" : "--memory"}
+  {@attach opensFlyout("power")}
 >
   <IconPowerButton />
-</Button>
+</BeadButton>

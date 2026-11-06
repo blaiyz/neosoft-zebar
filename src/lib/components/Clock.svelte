@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { config } from "#lib/state/config.svelte.ts";
+  import { config, updateSetting } from "#lib/state/config.svelte.ts";
+  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { partTarget, preferPart } from "#lib/state/layout.svelte.ts";
   import { formatDate } from "#lib/utils/format.ts";
@@ -14,20 +15,24 @@
   );
 
   $effect(() => {
-    preferPart("clock.date", fullDate === true);
+    preferPart("clock.date", fullDate === "preferred");
   });
 
-  const toggleDate = async () => {
+  const toggleDate = async (event: MouseEvent) => {
+    event.preventDefault();
+
     if (dateShown) {
-      fullDate = false;
+      updateSetting("clock.fullDate", false);
       return;
     }
 
-    // A click that can't show it leaves nothing behind to show it later.
+    // This tries it here before saving it, so that what can't show it leaves nothing
+    // behind to show it later, and the other monitors don't see it either.
     const before = fullDate;
-    fullDate = true;
+    fullDate = "preferred";
     await tick();
     if (partTarget("clock.date") === 0) fullDate = before;
+    else updateSetting("clock.fullDate", "preferred");
   };
 
   let timeOptions: Intl.DateTimeFormatOptions = $derived({
@@ -45,7 +50,8 @@
 <PointFilled class="mr-2" />
 <button
   class="flex h-full items-center whitespace-nowrap tabular-nums hover:text-zb-accent"
-  onclick={() => void toggleDate()}
+  oncontextmenu={(event) => void toggleDate(event)}
+  {@attach opensFlyout("calendar")}
 >
   <p>
     {date?.new.toLocaleTimeString(undefined, timeOptions).toUpperCase()}

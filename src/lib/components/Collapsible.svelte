@@ -16,7 +16,7 @@
    */
   type Props = {
     /** The part of the bar this is, if the bar can collapse it. */
-    part?: PartId;
+    part?: PartId | undefined;
     when?: boolean;
     /** The side that stays still while the width changes. */
     anchor?: "start" | "end";
@@ -58,8 +58,7 @@
           if (!untrack(() => when)) return 0;
           return full?.() ?? inner.getBoundingClientRect().width;
         },
-        floor,
-        natural: () => inner.getBoundingClientRect().width
+        floor
       },
       [outer, inner]
     );

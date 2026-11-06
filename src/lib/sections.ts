@@ -1,13 +1,14 @@
 /** The sections of the bar, in the order they appear on each side. */
-export const leftSections = [
-  "power",
-  "heart",
-  "cpu",
-  "memory",
-  "battery",
-  "network"
+export const pillSections = ["settings", "power", "heart"] as const;
+export const meterSections = ["cpu", "memory", "battery", "network"] as const;
+export const leftSections = [...pillSections, ...meterSections] as const;
+export const rightSections = [
+  "media",
+  "tray",
+  "volume",
+  "weather",
+  "clock"
 ] as const;
-export const rightSections = ["media", "volume", "weather", "clock"] as const;
 
 export const sectionIds = [...leftSections, ...rightSections] as const;
 export type SectionId = (typeof sectionIds)[number];
@@ -23,8 +24,8 @@ const partSides = {
   "network.ssid": "left",
   "network.rates": "left",
   "media.title": "right",
-  "volume.slider": "right",
-  "volume.chevron": "right",
+  tray: "right",
+  volume: "right",
   weather: "right",
   "clock.date": "right",
   "workspaces.thin": "center",
@@ -32,6 +33,13 @@ const partSides = {
 } as const;
 
 export type PartId = keyof typeof partSides;
+
+/** What the settings show of the bar, which is its sections and the workspaces. */
+export type BarPart = SectionId | "workspaces";
+
+/** The part that a whole section collapses as. The network's are inside it. */
+export const sectionPart = (id: SectionId) =>
+  id !== "network" && id in partSides ? (id as PartId) : undefined;
 
 export function partSide(part: PartId, taskbarIntegration: boolean) {
   const side = partSides[part];
@@ -62,9 +70,9 @@ export const collapseSteps: CollapseStep[] = [
   { part: "network.rates", section: "network" },
   { part: "cpu", section: "cpu" },
   { part: "weather", section: "weather" },
+  { part: "tray", section: "tray" },
   { part: "workspaces.icons", toFloor: true },
   { part: "media.title", section: "media" },
   { part: "network", section: "network" },
-  { part: "volume.chevron", section: "volume" },
-  { part: "volume.slider" }
+  { part: "volume", section: "volume" }
 ];

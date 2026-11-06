@@ -47,6 +47,7 @@
           "items": {
             "type": "string",
             "enum": [
+              "settings",
               "power",
               "heart",
               "cpu",
@@ -54,6 +55,7 @@
               "battery",
               "network",
               "media",
+              "tray",
               "volume",
               "weather",
               "clock"
@@ -96,7 +98,7 @@
         },
         "fontFamily": {
           "default": null,
-          "description": "The font of the bar, as a CSS font family. Montserrat is bundled as `Montserrat Variable`, and `null` uses it.",
+          "description": "The font of the bar, as a CSS font family. Figtree is bundled as `Figtree Variable`, and `null` uses it.",
           "type": ["string", "null"]
         },
         "fontSize": {
@@ -120,6 +122,11 @@
       "default": {},
       "type": "object",
       "properties": {
+        "settings": {
+          "default": true,
+          "description": "Whether the bar has a button for the settings window, which Zebar's tray menu opens too.",
+          "type": "boolean"
+        },
         "power": {
           "default": "auto",
           "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
@@ -155,6 +162,11 @@
           "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
           "enum": [true, false, "auto"]
         },
+        "tray": {
+          "default": false,
+          "description": "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts.",
+          "enum": [true, false, "auto"]
+        },
         "volume": {
           "default": "auto",
           "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
@@ -175,6 +187,12 @@
       "default": {},
       "type": "object",
       "properties": {
+        "style": {
+          "default": "track",
+          "description": "How workspaces look. `keys` are tinted buttons with a ring around the current one, `track` is one groove with a bead across it, `string` shrinks the others to dots, and `solid` fills the current one with its color.",
+          "type": "string",
+          "enum": ["keys", "track", "string", "solid"]
+        },
         "thinButtons": {
           "default": "auto",
           "description": "Whether workspace buttons are thin. `auto` makes them thin when space runs out.",
@@ -182,14 +200,15 @@
         }
       }
     },
-    "volume": {
+    "media": {
       "default": {},
       "type": "object",
       "properties": {
-        "sliderOpen": {
-          "default": false,
-          "description": "Whether the volume slider starts open. It stays closed while it doesn't fit, even with everything else hidden.",
-          "type": "boolean"
+        "style": {
+          "default": "pill",
+          "description": "How the media controls look. `pill` puts them in a pill with progress around play, `tucked` keeps back and next hidden until hovered, `capsule` fills the whole section as the track plays, and `equalizer` has bars that move while it plays.",
+          "type": "string",
+          "enum": ["pill", "tucked", "capsule", "equalizer"]
         }
       }
     },
@@ -199,7 +218,7 @@
       "properties": {
         "unit": {
           "default": "celsius",
-          "description": "The unit the temperature starts in. Clicking the weather switches it.",
+          "description": "The unit of the temperature. Clicking the weather switches it.",
           "type": "string",
           "enum": ["celsius", "fahrenheit"]
         }
@@ -220,8 +239,35 @@
         },
         "fullDate": {
           "default": "auto",
-          "description": "Whether to show the full date beside the time. `auto` drops it when space runs out, and clicking the clock switches it.",
-          "enum": [true, false, "auto"]
+          "description": "Whether to show the full date beside the time. Right-clicking the clock switches it between `preferred` and `false`.\n\n`auto`- It's the first thing to go when space runs out.\n\n`preferred`- Other sections give way to it, and it only goes if they can't make enough room.\n\n`true`- It always shows.\n\n`false`- It never shows.",
+          "enum": [true, false, "auto", "preferred"]
+        }
+      }
+    },
+    "tray": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "pinned": {
+          "default": [],
+          "description": "The tray icons shown in the bar, in their order.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order": {
+          "default": [],
+          "description": "The order of the tray icons. Dragging them sets it.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invertIcons": {
+          "default": false,
+          "description": "Inverts the tray icons, for monochrome icons that are hard to see on a light theme.",
+          "type": "boolean"
         }
       }
     },
@@ -306,6 +352,10 @@
             },
             "network": {
               "default": 2000,
+              "type": "number"
+            },
+            "disk": {
+              "default": 60000,
               "type": "number"
             }
           }

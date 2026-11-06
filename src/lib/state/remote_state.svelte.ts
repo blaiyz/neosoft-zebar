@@ -1,43 +1,47 @@
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import type { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+type Message<T> = { ask: true } | { value: T };
 
 /**
- * A value shared between widget windows, each of which is a separate app. Writes
- * are broadcast over Tauri events. Call it while a component initializes, because
- * it listens for as long as that component is mounted.
+ * A value shared between the pack's windows, each of which is a separate app. A
+ * window that opens later asks the others for the current value, which arrives a
+ * moment after it starts, and `known` says when it has.
+ *
+ * Replace the value to change it. Nothing watches what's inside it, and all of it
+ * is sent on every write, so it should stay small.
  */
-export function RemoteState<T>(stateIdentifier: string, initialValue: T) {
-  const state = $state<{ value: T }>({ value: initialValue });
-  let currentWindow: WebviewWindow | null = null;
+export class RemoteState<T> {
+  #value: T;
+  #known = $state(false);
+  #channel: BroadcastChannel | undefined;
 
-  $effect(() => {
-    currentWindow = getCurrentWebviewWindow();
-    const unlistenPromise = currentWindow.listen<{ value: T }>(
-      `remote-state:${stateIdentifier}`,
-      (event) => {
-        state.value = event.payload.value;
+  constructor(name: string, initialValue: T) {
+    this.#value = $state.raw(initialValue);
+    // Component scripts also run in Node, when pages are prerendered.
+    if (typeof window === "undefined") return;
+
+    const channel = new BroadcastChannel(`neosoft.state.${name}`);
+    channel.onmessage = ({ data }: MessageEvent<Message<T>>) => {
+      if ("value" in data) {
+        this.#value = data.value;
+        this.#known = true;
+      } else if (this.#known) {
+        channel.postMessage({ value: $state.snapshot(this.#value) });
       }
-    );
-
-    return () => {
-      void unlistenPromise.then((unlisten) => {
-        unlisten();
-      });
     };
-  });
+    channel.postMessage({ ask: true });
+    this.#channel = channel;
+  }
 
-  const handler = {
-    get<T2>(target: T2, prop: keyof T2): T2[keyof T2] {
-      if (typeof target[prop] === "object" && target[prop] !== null) {
-        return new Proxy(target[prop], handler) as unknown as T2[keyof T2];
-      }
-      return target[prop];
-    },
-    set<T2>(target: T2, prop: keyof T2, value: T2[keyof T2]): boolean {
-      target[prop] = value;
-      void currentWindow?.emit(`remote-state:${stateIdentifier}`, state);
-      return true;
-    }
-  };
-  return new Proxy(state, handler) as typeof state;
+  get known() {
+    return this.#known;
+  }
+
+  get value() {
+    return this.#value;
+  }
+
+  set value(next: T) {
+    this.#value = next;
+    this.#known = true;
+    this.#channel?.postMessage({ value: $state.snapshot(next) });
+  }
 }

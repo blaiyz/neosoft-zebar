@@ -1,23 +1,16 @@
 <script lang="ts">
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
-  import { layout, partTarget, remToPx } from "#lib/state/layout.svelte.ts";
+  import { config } from "#lib/state/config.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
-  import { secondsToHms } from "#lib/utils/format.ts";
-  import Pause from "@lucide/svelte/icons/pause";
-  import Play from "@lucide/svelte/icons/play";
-  import SkipBack from "@lucide/svelte/icons/skip-back";
-  import SkipForward from "@lucide/svelte/icons/skip-forward";
   import { onDestroy, untrack } from "svelte";
-  import type { Attachment } from "svelte/attachments";
   import type { MediaSession } from "zebar";
   import Collapsible from "./Collapsible.svelte";
-  import Meter from "./Meter.svelte";
-  import Reveal from "./Reveal.svelte";
+  import MediaControls from "./MediaControls.svelte";
 
-  /** The range of the title's width and the space before it, in rem. */
-  const TITLE_MIN = 6;
-  const TITLE_MAX = 24;
-  const TITLE_GAP = 0.5;
+  /** How far a reading can be from where this has counted to, in seconds. */
+  const SEEK_TOLERANCE = 2;
+  /** How often the time moves on between readings, in milliseconds. */
+  const TICK_TIME = 250;
 
   let media = $derived(providers.media);
   let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -25,26 +18,6 @@
   // Stays after the session ends, to show while the section closes.
   let lastSession = $state.raw<MediaSession | null>(null);
   let active = $derived(media !== null && shownSession !== null);
-
-  // What the title would like to be, which an invisible copy of it reports.
-  let titleWidth = $state(0);
-  let titleLimit = $derived(partTarget("media.title"));
-
-  const measureTitle: Attachment<HTMLElement> = (element) => {
-    const observer = new ResizeObserver(() => {
-      titleWidth = Math.min(
-        Math.max(
-          element.getBoundingClientRect().width + remToPx(TITLE_GAP),
-          remToPx(TITLE_MIN)
-        ),
-        remToPx(TITLE_MAX)
-      );
-    });
-    observer.observe(element);
-    return () => {
-      observer.disconnect();
-    };
-  };
 
   $effect(() => {
     const session = media?.currentSession;
@@ -69,86 +42,48 @@
     }
   });
 
+  // The provider only reports each percent of a track, so the time counts up by
+  // itself in between. A reading close to it is left alone, to keep it from stepping
+  // back, and anything further off is a seek.
+  let position = $state(0);
+  let countedTitle: string | null = null;
+
+  $effect(() => {
+    if (!lastSession) return;
+    const { title, isPlaying, endTime, position: reading } = lastSession;
+
+    const isOff = Math.abs(reading - untrack(() => position)) > SEEK_TOLERANCE;
+    if (!isPlaying || isOff || title !== countedTitle) position = reading;
+    countedTitle = title;
+    if (!isPlaying) return;
+
+    let last = performance.now();
+    const timer = setInterval(() => {
+      const now = performance.now();
+      position = Math.min(endTime, position + (now - last) / 1000);
+      last = now;
+    }, TICK_TIME);
+
+    return () => {
+      clearInterval(timer);
+    };
+  });
+
+  let session = $derived(lastSession && { ...lastSession, position });
+
   onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
 <Collapsible when={active} anchor="end">
-  {#if lastSession}
-    {@const session = lastSession}
-    <div class="relative flex h-full items-stretch">
-      <Reveal when={!toggleModes.clickThrough}>
-        <button
-          class="relative flex h-full items-center justify-end transition hover:scale-125 hover:text-zb-accent"
-          aria-label="Previous"
-          onclick={() => media?.previous()}
-        >
-          <SkipBack class="mx-2" />
-        </button>
-      </Reveal>
-      <button
-        class="group relative inline-flex items-center justify-center overflow-hidden px-1 transition hover:text-zb-accent"
-        aria-label="Toggle"
-        onclick={() => media?.togglePlayPause()}
-      >
-        <Meter
-          animate={false}
-          class="h-8 stroke-zb-accent"
-          percent={Math.round((session.position / session.endTime) * 100)}
-        >
-          {#if session.isPlaying}
-            <Pause class="transition group-hover:scale-125" />
-          {:else}
-            <Play class="transition group-hover:scale-125" />
-          {/if}
-        </Meter>
-        <Collapsible
-          part="media.title"
-          when={active}
-          full={() => titleWidth}
-          floor={() => remToPx(TITLE_MIN)}
-        >
-          <div
-            class={[
-              "relative flex items-center justify-center pl-2",
-              layout.ready && "transition-[width] ease-(--ease)"
-            ]}
-            style:width="{titleLimit || titleWidth}px"
-          >
-            <span
-              {@attach measureTitle}
-              class="invisible absolute whitespace-nowrap"
-              aria-hidden="true"
-            >
-              {session.title}
-            </span>
-            <span
-              class="truncate transition group-hover:translate-y-full group-hover:opacity-0"
-            >
-              <p class="truncate">
-                {session.title}
-              </p>
-            </span>
-            <span
-              class={[
-                "absolute inset-y-0 right-0 left-2 inline-flex -translate-y-full items-center justify-center",
-                session.title && "opacity-0",
-                "transition-all group-hover:translate-y-0 group-hover:opacity-100"
-              ]}
-            >
-              {secondsToHms(session.position)}/{secondsToHms(session.endTime)}
-            </span>
-          </div>
-        </Collapsible>
-      </button>
-      <Reveal when={!toggleModes.clickThrough} anchor="end">
-        <button
-          class="relative flex h-full items-center justify-end transition hover:scale-125 hover:text-zb-accent"
-          aria-label="Next"
-          onclick={() => media?.next()}
-        >
-          <SkipForward class="mx-2" />
-        </button>
-      </Reveal>
-    </div>
+  {#if session}
+    <MediaControls
+      style={config.media.style}
+      {session}
+      skips={!toggleModes.clickThrough}
+      part="media.title"
+      onprevious={() => media?.previous()}
+      ontoggle={() => media?.togglePlayPause()}
+      onnext={() => media?.next()}
+    />
   {/if}
 </Collapsible>

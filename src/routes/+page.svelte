@@ -7,6 +7,8 @@
   import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
   import { config, configStatus } from "#lib/state/config.svelte.ts";
+  import { closeFlyout, initFlyoutWindow } from "#lib/state/flyouts.svelte.ts";
+  import { initHistory } from "#lib/state/history.svelte.ts";
   import {
     initLayout,
     trackColumn,
@@ -16,7 +18,11 @@
     initMonitor,
     isOnPrimaryMonitor
   } from "#lib/state/monitor.svelte.ts";
-  import { initProviders, providers } from "#lib/state/providers.svelte.ts";
+  import {
+    barProviders,
+    initProviders,
+    providers
+  } from "#lib/state/providers.svelte.ts";
   import { applyBackgroundEffect } from "#lib/window_effects.ts";
   import { onMount } from "svelte";
 
@@ -29,8 +35,10 @@
 
   initAutotiler();
   initBindingModes();
-  initProviders();
+  initProviders(barProviders);
   initLayout();
+  initHistory();
+  initFlyoutWindow();
 
   $effect(() => {
     if (configStatus.loaded) {
@@ -42,6 +50,9 @@
     initMonitor();
   });
 </script>
+
+<!-- A flyout closes when it loses focus. This is for when that doesn't reach it. -->
+<svelte:window onpointerdown={closeFlyout} />
 
 <div class="flex h-full w-full items-center">
   <div

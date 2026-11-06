@@ -1,13 +1,13 @@
 <script lang="ts">
   import IconHeartFilled from "@tabler/icons-svelte/icons/heart-filled";
   import { shellExec } from "zebar";
-  import Button from "./Button.svelte";
+  import BeadButton from "./BeadButton.svelte";
 </script>
 
-<Button
-  class="text-zb-icon"
+<BeadButton
   label="Open the project on GitHub"
-  callback={() => {
+  tone="--icon"
+  onclick={() => {
     void shellExec("cmd", [
       "/c",
       "start",
@@ -16,4 +16,4 @@
   }}
 >
   <IconHeartFilled />
-</Button>
+</BeadButton>
