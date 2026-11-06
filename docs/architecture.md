@@ -39,7 +39,7 @@ Shared state is in `.svelte.ts` modules in `src/lib/state/`, so it can use runes
 - `binding_modes.svelte.ts`: `toggleModes`.
 - `monitor.svelte.ts`: `initMonitor`, `isOnPrimaryMonitor`.
 
-Local UI state stays in components. `SmoothDiv` animates size changes using a `Spring` driven by `transitionDuration`.
+Local UI state stays in components. `AnimatedList` animates items entering, leaving and moving, and `Reveal` does the same for a single piece of content. They position items from measured widths and move them with CSS transitions. Svelte's `animate:` and `transition:` directives aren't used for this, because they jump when interrupted: an item still animating stays in the layout when it starts to leave, and one that returns partway through doesn't move. Both take their duration from `transitionDuration`.
 
 ## Configuration
 
