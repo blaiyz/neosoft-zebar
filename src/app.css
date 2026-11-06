@@ -1,4 +1,5 @@
-@import "@fontsource-variable/montserrat";
+@import "@fontsource-variable/figtree";
+@import "@fontsource-variable/jetbrains-mono";
 @import "./themes/rose-pine.css";
 @import "./themes/catppuccin.css";
 @import "./themes/nord.css";
@@ -22,6 +23,11 @@
   `:root`, so a theme variable on `:root` couldn't resolve it. */
 @theme inline {
   --color-zb-text: hsl(var(--text));
+  --color-zb-dim: var(--dim);
+  --color-zb-faint: var(--faint);
+  --color-zb-surface-1: var(--surface-1);
+  --color-zb-surface-2: var(--surface-2);
+  --color-zb-surface-3: var(--surface-3);
   --color-zb-base: hsl(var(--bg));
   --color-zb-muted: hsl(var(--muted));
   --color-zb-border: hsl(var(--border));
@@ -52,6 +58,8 @@
   --color-zb-volume-inner: hsl(var(--volume-inner));
 
   --radius-base: var(--radius);
+  --radius-well: var(--well-radius);
+  --radius-control: var(--control-radius);
   --default-border-width: var(--border-size);
 
   --shadow-button: var(--shadow-size-button) var(--shadow-size-button) 0
@@ -64,6 +72,7 @@
   --default-transition-duration: var(--transition-duration);
 
   --font-zb: var(--font-family), var(--font-sans);
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
   --font-weight-base: var(--font-weight);
   --text-zb-size: var(--font-size);
 
@@ -96,6 +105,33 @@
     cursor: pointer;
   }
 
+  :focus-visible {
+    outline: 0.15rem solid hsl(var(--accent));
+    outline-offset: 0.1rem;
+  }
+
+  /* A hairline that thickens under the pointer. `scrollbar-width` would turn these off. */
+  ::-webkit-scrollbar {
+    width: 0.7rem;
+    height: 0.7rem;
+  }
+
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border: 0.26rem solid transparent;
+    border-radius: 999px;
+    background: var(--surface-3) padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 0.18rem;
+    background: var(--dim) padding-box;
+  }
+
   .lucide-icon,
   .tabler-icon {
     width: 1em;
@@ -115,4 +151,45 @@
     line-height: 1;
     -webkit-font-smoothing: antialiased;
   }
+}
+
+@utility field-input {
+  width: 11rem;
+  flex: none;
+  height: 2.4rem;
+  padding-inline: 0.7rem;
+  border-radius: var(--control-radius);
+  background: var(--surface-2);
+  font-family: --theme(--font-mono);
+  font-size: 0.9rem;
+  text-align: right;
+  transition: background-color var(--transition-duration) var(--spring-out);
+
+  &:hover,
+  &:focus {
+    background: var(--surface-3);
+  }
+}
+
+@utility code-editor {
+  display: block;
+  width: 100%;
+  resize: none;
+  padding: 0.9rem 1rem;
+  border-radius: var(--control-radius);
+  background: hsl(var(--bg));
+  color: hsl(var(--text));
+  font-family: --theme(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* What a change of theme fades through, which stays out of the way of the pointer. */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--time-fade);
 }

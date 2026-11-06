@@ -6,6 +6,7 @@ import {
 } from "#lib/sections.ts";
 import { config, configStatus } from "#lib/state/config.svelte.ts";
 import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
+import { providers, type ProviderName } from "#lib/state/providers.svelte.ts";
 import { fit, type FitInput, type FitSide } from "#lib/utils/fit.ts";
 import { untrack } from "svelte";
 
@@ -23,8 +24,6 @@ export type PartMeasure = {
   full: () => number;
   /** Its narrowest useful width, for a part that stops short of hiding. */
   floor?: (() => number) | undefined;
-  /** Its width if it were showing, whether or not it is or wants to be. */
-  natural?: () => number;
 };
 
 type Targets = Partial<Record<PartId, number | undefined>>;
@@ -44,7 +43,6 @@ const contents: Partial<Record<Column, HTMLElement>> = {};
 
 let observer: ResizeObserver | undefined;
 let growTimer: ReturnType<typeof setTimeout> | undefined;
-let sliderBlocked = false;
 
 export const remToPx = (rem: number) =>
   rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -126,63 +124,7 @@ function readFit(): FitInput<PartId> | null {
     };
   });
 
-  return placeVolumeSlider({ steps, widths, needed, capacity });
-}
-
-/**
- * The chevron only exists to open and close the slider, so this one decision covers
- * both of them. If the slider couldn't fit with the chevron beside it, both go. If
- * it could, the chevron stays, and the slider too if it wants to be open, neither
- * of them being offered as a step for anything else.
- *
- * The answer is worked out as if the slider were open, so it doesn't depend on
- * whether either of them is showing, which would make them keep changing the room
- * the other one has. Once they've gone they need room to spare to return, like
- * everything else, so that they can't flicker at the edge.
- */
-function placeVolumeSlider(input: FitInput<PartId>): FitInput<PartId> {
-  const wanted = parts.get("volume.slider")?.natural?.();
-  if (wanted === undefined) return input;
-
-  const others = input.steps.filter(
-    ({ part }) => part !== "volume.slider" && part !== "volume.chevron"
-  );
-
-  const trial = fit({
-    steps: [
-      ...others,
-      { part: "volume.slider", side: "right", to: 0, last: true }
-    ],
-    widths: { ...input.widths, "volume.slider": wanted },
-    needed: {
-      ...input.needed,
-      right: input.needed.right - (input.widths["volume.slider"] ?? 0) + wanted
-    },
-    capacity: {
-      ...input.capacity,
-      right: input.capacity.right - (sliderBlocked ? remToPx(GROW_MARGIN) : 0)
-    }
-  });
-  sliderBlocked = trial["volume.slider"] === 0;
-
-  if (sliderBlocked) {
-    // Even with the section pinned, as the chevron can't do anything here.
-    const gone = ["volume.slider", "volume.chevron"] as const;
-    return {
-      ...input,
-      steps: [
-        ...gone.map((part) => ({
-          part,
-          side: "right" as const,
-          to: 0,
-          always: true
-        })),
-        ...others
-      ]
-    };
-  }
-
-  return preferences["volume.slider"] ? { ...input, steps: others } : input;
+  return { steps, widths, needed, capacity };
 }
 
 function widthIn(from: Targets, part: PartId, input: FitInput<PartId>) {
@@ -358,8 +300,23 @@ export function initLayout() {
   });
 }
 
+/** The sections with nothing to show before their provider's first output. */
+const sectionProviders: Partial<Record<SectionId, ProviderName>> = {
+  battery: "battery",
+  cpu: "cpu",
+  memory: "memory",
+  network: "network",
+  tray: "systray",
+  volume: "audio",
+  weather: "weather"
+};
+
+/** A section waits for its provider, so that it opens at its real width. */
 export function isSectionShown(id: SectionId) {
   if (config.sections[id] === false) return false;
+
+  const provider = sectionProviders[id];
+  if (provider && providers[provider] === null) return false;
 
   const onPrimary = isOnPrimaryMonitor();
   if (config.bar.primaryMonitorOnly.includes(id) && !onPrimary) return false;

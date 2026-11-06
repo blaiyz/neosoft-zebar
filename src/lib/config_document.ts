@@ -19,6 +19,22 @@ export function isDocument(value: unknown): value is ConfigDocument {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** Sets a key by its dotted path, creating the objects on the way to it. */
+export function setPath(
+  document: ConfigDocument,
+  path: string,
+  value: unknown
+) {
+  const keys = path.split(".");
+  const last = keys.pop() as string;
+  let parent = document;
+  for (const key of keys) {
+    const child = parent[key];
+    parent = isDocument(child) ? child : (parent[key] = {});
+  }
+  parent[last] = value;
+}
+
 /** Removes a key, or the whole array if the key is inside one. */
 function removeKey(document: ConfigDocument, path: PropertyKey[]) {
   let parent = document;
@@ -54,6 +70,27 @@ export function parseDocument(input: ConfigDocument): ParsedDocument {
   }
 
   return { config: defaultConfig, document: {}, issues };
+}
+
+/**
+ * What differs between a config and a reference to compare it with, which is small
+ * enough to share and keeps following the defaults it doesn't differ from.
+ */
+export function differences(
+  value: ConfigDocument,
+  reference: ConfigDocument
+): ConfigDocument {
+  const changed: ConfigDocument = {};
+  for (const [key, current] of Object.entries(value)) {
+    const base = reference[key];
+    if (isDocument(current) && isDocument(base)) {
+      const nested = differences(current, base);
+      if (Object.keys(nested).length > 0) changed[key] = nested;
+    } else if (JSON.stringify(current) !== JSON.stringify(base)) {
+      changed[key] = current;
+    }
+  }
+  return changed;
 }
 
 /** Puts `changes` over `document`, key by key. Arrays are replaced whole. */

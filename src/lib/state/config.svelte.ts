@@ -1,12 +1,19 @@
 import {
+  differences,
   isDocument,
   mergeDocuments,
   parseDocument,
+  setPath,
   type ConfigDocument
 } from "#lib/config_document.ts";
 import { migrate } from "#lib/config_migrations.ts";
-import { CONFIG_VERSION, defaultConfig } from "#lib/config_schema.ts";
+import {
+  CONFIG_VERSION,
+  defaultConfig,
+  type Config
+} from "#lib/config_schema.ts";
 import JSON5 from "json5";
+import { flushSync } from "svelte";
 
 /**
  * `localStorage` is where settings live, because a widget can't write files and
@@ -19,6 +26,8 @@ const BACKUP_KEY = "neosoft.config.backup";
 const IMPORTED_KEY = "neosoft.config.imported";
 const IMPORTED_CSS_KEY = "neosoft.config.importedCss";
 const CHANNEL_NAME = "neosoft.config";
+/** No settings. The version keeps it from reading as an old file to upgrade. */
+const EMPTY_DOCUMENT = { version: CONFIG_VERSION };
 
 const config = $state(structuredClone(defaultConfig));
 
@@ -26,11 +35,46 @@ const configStatus = $state({
   /** Whether `config` holds the user's settings yet, rather than the defaults. */
   loaded: false,
   /** What was wrong with the settings, as one line per problem. */
-  issues: [] as string[]
+  issues: [] as string[],
+  /** Whether there's an earlier document to go back to. */
+  canUndo: false
 });
 
 let channel: BroadcastChannel | undefined;
 let fileIssues: string[] = [];
+let fades = true;
+/**
+ * The longest a change waits for its fade, in milliseconds. A fade starts on the next
+ * frame, which a window that's covered may not get.
+ */
+const FADE_WAIT = 200;
+/** The newest settings, until they've been applied. */
+let waiting: ReturnType<typeof parseDocument> | null = null;
+
+/** For a window that spends its time hidden, where a fade would have to wait. */
+function skipConfigFades() {
+  fades = false;
+}
+
+/** The settings that change the look all at once, with no animation of their own. */
+const lookOf = ({
+  theme,
+  bar,
+  clock,
+  media,
+  workspaces,
+  taskbarIntegration
+}: Config) =>
+  JSON.stringify([
+    theme,
+    media.style,
+    workspaces.style,
+    bar.gradient,
+    bar.attachSides,
+    clock.use24h,
+    clock.showSeconds,
+    taskbarIntegration
+  ]);
 
 /**
  * Copies `source` over `target`, touching only what differs, so that a change to
@@ -81,10 +125,114 @@ function readDocument(): ConfigDocument {
   }
 }
 
-function applyDocument(document: ConfigDocument) {
-  const { config: parsed, issues } = parseDocument(document);
+function applyWaiting() {
+  if (!waiting) return;
+
+  const { config: parsed, issues } = waiting;
+  waiting = null;
   syncState(config, parsed);
   configStatus.issues = [...issues, ...fileIssues];
+  configStatus.canUndo = localStorage.getItem(BACKUP_KEY) !== null;
+}
+
+/**
+ * A fade applies its change a moment later, and a newer change can arrive before
+ * then. Whichever way it comes, only the newest is applied.
+ */
+function applyDocument(next: ConfigDocument) {
+  const fading = waiting !== null;
+  waiting = parseDocument(next);
+  if (fading) return;
+
+  if (
+    fades &&
+    configStatus.loaded &&
+    lookOf(waiting.config) !== lookOf(config)
+  ) {
+    const transition = document.startViewTransition(() => {
+      applyWaiting();
+      flushSync();
+    });
+    // A newer fade cuts this one short, which is expected.
+    transition.ready.catch(() => {});
+    setTimeout(applyWaiting, FADE_WAIT);
+  } else {
+    applyWaiting();
+  }
+}
+
+/**
+ * Sends the document itself, because a change to `localStorage` can reach another
+ * window later than this message does.
+ */
+function announceDocument(document: ConfigDocument) {
+  channel?.postMessage(JSON.stringify(document));
+}
+
+/** Writes a document and applies it here and in every other window. */
+function publishDocument(document: ConfigDocument) {
+  writeDocument(document);
+  applyDocument(readDocument());
+  announceDocument(document);
+}
+
+/**
+ * Changes settings from inside a window. Keys that aren't mentioned stay as they
+ * are, and a key set to `undefined` goes back to its default. Nothing is written if
+ * a value isn't valid, and what's wrong with it is returned.
+ */
+function updateConfig(changes: ConfigDocument) {
+  const { issues } = parseDocument(
+    JSON.parse(JSON.stringify(changes)) as ConfigDocument
+  );
+  if (issues.length === 0) {
+    publishDocument(mergeDocuments(readDocument(), changes));
+  }
+  return issues;
+}
+
+/** Applies one setting by its dotted path. */
+function updateSetting(path: string, value: unknown) {
+  const changes: ConfigDocument = {};
+  setPath(changes, path, value);
+  return updateConfig(changes);
+}
+
+/** The settings as a file, holding only what differs from the defaults. */
+function exportConfig(scope: "all" | "theme") {
+  const changed = differences($state.snapshot(config), defaultConfig);
+  const document = scope === "theme" ? { theme: changed.theme ?? {} } : changed;
+
+  return JSON.stringify({ ...document, version: CONFIG_VERSION }, null, 2);
+}
+
+/**
+ * Merges a shared file over the settings, in any version it was written in. Keys
+ * that can't be used are left out and reported.
+ */
+function importConfig(text: string) {
+  const file: unknown = JSON5.parse(text);
+  if (!isDocument(file)) throw new Error("It should hold an object");
+
+  const { document, issues } = parseDocument(migrate(file));
+  backUp(localStorage.getItem(DOCUMENT_KEY));
+  publishDocument(mergeDocuments(readDocument(), document));
+  return issues;
+}
+
+/** Swaps the document with its backup, so that undoing can be undone too. */
+function undoConfigChange() {
+  const backup = localStorage.getItem(BACKUP_KEY);
+  if (backup === null) return;
+
+  backUp(localStorage.getItem(DOCUMENT_KEY) ?? JSON.stringify(EMPTY_DOCUMENT));
+  localStorage.setItem(DOCUMENT_KEY, backup);
+  publishDocument(readDocument());
+}
+
+function resetConfig() {
+  backUp(localStorage.getItem(DOCUMENT_KEY));
+  publishDocument(EMPTY_DOCUMENT);
 }
 
 async function readFile(path: string) {
@@ -111,9 +259,10 @@ function importIfChanged(
   if (text === localStorage.getItem(importedKey)) return;
 
   backUp(localStorage.getItem(DOCUMENT_KEY));
-  writeDocument(mergeDocuments(readDocument(), changes));
+  const merged = mergeDocuments(readDocument(), changes);
+  writeDocument(merged);
   localStorage.setItem(importedKey, text);
-  channel?.postMessage(null);
+  announceDocument(merged);
 }
 
 /**
@@ -158,8 +307,8 @@ async function importCustomCss() {
 /** Stored settings apply at once, so the bar doesn't wait for a file to load. */
 async function loadConfig() {
   channel = new BroadcastChannel(CHANNEL_NAME);
-  channel.onmessage = () => {
-    applyDocument(readDocument());
+  channel.onmessage = ({ data }: MessageEvent<string>) => {
+    applyDocument(JSON.parse(data) as ConfigDocument);
   };
 
   applyDocument(readDocument());
@@ -171,4 +320,15 @@ async function loadConfig() {
   configStatus.loaded = true;
 }
 
-export { config, configStatus, loadConfig };
+export {
+  config,
+  configStatus,
+  exportConfig,
+  importConfig,
+  loadConfig,
+  resetConfig,
+  skipConfigFades,
+  undoConfigChange,
+  updateConfig,
+  updateSetting
+};

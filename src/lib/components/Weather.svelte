@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { config } from "#lib/state/config.svelte.ts";
+  import { config, updateSetting } from "#lib/state/config.svelte.ts";
   import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import type { WeatherStatus } from "zebar";
@@ -27,7 +27,8 @@
 {#if weather}
   <button
     class="hover:text-zb-accent"
-    onclick={() => (useCelsius = !useCelsius)}
+    onclick={() =>
+      updateSetting("weather.unit", useCelsius ? "fahrenheit" : "celsius")}
   >
     <div
       class={[

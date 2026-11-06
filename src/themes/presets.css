@@ -14,8 +14,8 @@
     --left-margin: 1rem;
 
     --font-family:
-      "Montserrat Variable", Montserrat, "SF Pro Display", Roboto, Helvetica,
-      Arial, sans-serif;
+      "Figtree Variable", Figtree, "SF Pro Display", Roboto, Helvetica, Arial,
+      sans-serif;
     --font-size: 14px;
     --font-weight: 500;
 
@@ -26,6 +26,96 @@
     --shadow-size-button: 0rem;
 
     --ease: cubic-bezier(0.33, 1, 0.68, 1);
+
+    /* Springs written out as curves, so that CSS can run them without any script. */
+    --spring-soft: linear(
+      0,
+      0.078,
+      0.25,
+      0.446,
+      0.629,
+      0.778,
+      0.889,
+      0.963,
+      1.008,
+      1.03,
+      1.038,
+      1.037,
+      1.031,
+      1.023,
+      1.016,
+      1.01,
+      1.005,
+      1.002,
+      1,
+      0.999,
+      1
+    );
+    --spring-melt: linear(
+      0,
+      0.055,
+      0.1734,
+      0.3101,
+      0.4422,
+      0.5591,
+      0.6575,
+      0.7374,
+      0.8009,
+      0.8503,
+      0.8883,
+      0.9172,
+      0.9389,
+      0.9551,
+      0.9672,
+      0.9761,
+      0.9826,
+      0.9874,
+      0.9909,
+      0.9935,
+      0.9953,
+      0.9966,
+      0.9976,
+      0.9983,
+      1
+    );
+    --spring-pop: linear(
+      0,
+      0.103,
+      0.331,
+      0.589,
+      0.815,
+      0.98,
+      1.079,
+      1.122,
+      1.123,
+      1.101,
+      1.069,
+      1.038,
+      1.012,
+      0.996,
+      0.987,
+      0.984,
+      0.986,
+      0.989,
+      0.993,
+      0.997,
+      1
+    );
+    --spring-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --well-radius: calc(var(--radius) * 0.7);
+    --control-radius: calc(var(--radius) * 0.6);
+  }
+
+  /* Tones of a theme's own colors. A value with `var()` in it resolves where it's
+    declared, so these are repeated for anything that shows a different theme. */
+  :root,
+  [data-theme] {
+    --surface-1: color-mix(in srgb, hsl(var(--text)) 6%, hsl(var(--bg)));
+    --surface-2: color-mix(in srgb, hsl(var(--text)) 11%, hsl(var(--bg)));
+    --surface-3: color-mix(in srgb, hsl(var(--text)) 17%, hsl(var(--bg)));
+    --dim: color-mix(in srgb, hsl(var(--text)) 64%, hsl(var(--bg)));
+    --faint: color-mix(in srgb, hsl(var(--text)) 42%, hsl(var(--bg)));
   }
 
   [data-theme="tau"] {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
+  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { formatNetworkValue } from "#lib/utils/format.ts";
   import ChevronsDown from "@lucide/svelte/icons/chevrons-down";
@@ -14,11 +15,16 @@
   import Collapsible from "./Collapsible.svelte";
 
   let network = $derived(providers.network);
+  let shows = $derived(config.sections.network);
 </script>
 
 <!-- Separate parts, because a part inside another would count its width twice. -->
-{#if config.sections.network !== "statistics"}
-  <Collapsible part="network" class="pl-5">
+<button
+  class="flex h-full flex-none items-center hover:text-zb-accent"
+  aria-label="Network details"
+  {@attach opensFlyout("network")}
+>
+  <Collapsible part="network" when={shows !== "statistics"} class="pl-5">
     {#if network?.defaultInterface?.type === "ethernet"}
       <EthernetPort />
     {:else if network?.defaultInterface?.type === "wifi"}
@@ -39,38 +45,42 @@
     {/if}
   </Collapsible>
   {#if network?.defaultInterface?.type === "wifi" && network.defaultGateway?.ssid}
-    <Collapsible part="network.ssid" class="pl-1">
+    <Collapsible part="network.ssid" when={shows !== "statistics"} class="pl-1">
       {network.defaultGateway.ssid}
     </Collapsible>
   {/if}
-{/if}
-{#if config.sections.network !== "interface" && network?.traffic}
-  <Collapsible part="network.rates" class="gap-2 pl-3 font-mono">
-    {#if network.traffic.received}
-      <div class="flex flex-row items-center">
-        <ChevronsDown />
-        <div class="flex flex-row items-center gap-1">
-          <span class="inline-block min-w-12 text-right align-middle">
-            {formatNetworkValue(network.traffic.received.iecValue)}
-          </span>
-          <span class="inline-block min-w-7 align-middle">
-            {network.traffic.received.iecUnit}
-          </span>
+  {#if network?.traffic}
+    <Collapsible
+      part="network.rates"
+      when={shows !== "interface"}
+      class="gap-2 pl-3 font-mono"
+    >
+      {#if network.traffic.received}
+        <div class="flex flex-row items-center">
+          <ChevronsDown />
+          <div class="flex flex-row items-center gap-1">
+            <span class="inline-block min-w-12 text-right align-middle">
+              {formatNetworkValue(network.traffic.received.iecValue)}
+            </span>
+            <span class="inline-block min-w-7 align-middle">
+              {network.traffic.received.iecUnit}
+            </span>
+          </div>
         </div>
-      </div>
-    {/if}
-    {#if network.traffic.transmitted}
-      <div class="flex flex-row items-center">
-        <ChevronsUp />
-        <div class="flex flex-row items-center gap-1">
-          <span class="inline-block min-w-12 text-right align-middle">
-            {formatNetworkValue(network.traffic.transmitted.iecValue)}
-          </span>
-          <span class="inline-block min-w-7 align-middle">
-            {network.traffic.transmitted.iecUnit}
-          </span>
+      {/if}
+      {#if network.traffic.transmitted}
+        <div class="flex flex-row items-center">
+          <ChevronsUp />
+          <div class="flex flex-row items-center gap-1">
+            <span class="inline-block min-w-12 text-right align-middle">
+              {formatNetworkValue(network.traffic.transmitted.iecValue)}
+            </span>
+            <span class="inline-block min-w-7 align-middle">
+              {network.traffic.transmitted.iecUnit}
+            </span>
+          </div>
         </div>
-      </div>
-    {/if}
-  </Collapsible>
-{/if}
+      {/if}
+    </Collapsible>
+  {/if}
+</button>

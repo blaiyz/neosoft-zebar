@@ -41,7 +41,15 @@
           },
           {
             "program": "shutdown",
-            "argsRegex": "^/(a|s)$"
+            "argsRegex": "^/(a|l|(s|r) /t 60)$"
+          },
+          {
+            "program": "rundll32",
+            "argsRegex": "^user32\\.dll,LockWorkStation$"
+          },
+          {
+            "program": "powershell",
+            "argsRegex": "^-NoProfile -Command Add-Type -AssemblyName System\\.Windows\\.Forms; \\[System\\.Windows\\.Forms\\.Application\\]::SetSuspendState\\('Suspend', \\$false, \\$false\\)$"
           }
         ]
       },
@@ -59,6 +67,80 @@
           "dockToEdge": {
             "enabled": true,
             "edge": "top",
+            "windowMargin": "0px"
+          }
+        }
+      ]
+    },
+    {
+      "name": "flyout",
+      "htmlPath": "./flyout.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": true,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["**"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": []
+      },
+      "privileges": {
+        "shellCommands": [
+          {
+            "program": "reg",
+            "argsRegex": "^query HKCU\\\\Control Panel\\\\International$"
+          },
+          {
+            "program": "cmd",
+            "argsRegex": "^/c start https://github\\.com/blaiyz/neosoft-zebar$"
+          },
+          {
+            "program": "shutdown",
+            "argsRegex": "^/(a|l|(s|r) /t 60)$"
+          },
+          {
+            "program": "rundll32",
+            "argsRegex": "^user32\\.dll,LockWorkStation$"
+          },
+          {
+            "program": "powershell",
+            "argsRegex": "^-NoProfile -Command Add-Type -AssemblyName System\\.Windows\\.Forms; \\[System\\.Windows\\.Forms\\.Application\\]::SetSuspendState\\('Suspend', \\$false, \\$false\\)$"
+          }
+        ]
+      },
+      "presets": []
+    },
+    {
+      "name": "settings",
+      "htmlPath": "./settings.html",
+      "zOrder": "normal",
+      "shownInTaskbar": true,
+      "focused": true,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["**"],
+      "caching": {
+        "defaultDuration": 604800,
+        "rules": []
+      },
+      "privileges": {
+        "shellCommands": []
+      },
+      "presets": [
+        {
+          "name": "default",
+          "anchor": "center",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "860px",
+          "height": "620px",
+          "monitorSelection": {
+            "type": "primary"
+          },
+          "dockToEdge": {
+            "enabled": false,
+            "edge": null,
             "windowMargin": "0px"
           }
         }

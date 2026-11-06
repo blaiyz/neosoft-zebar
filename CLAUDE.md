@@ -32,11 +32,13 @@ Use `pnpm dev:once`, not `pnpm build`, to confirm a change compiles: `build/` is
 
 `docs/architecture.md` covers this in depth. The essentials:
 
-- **One app per monitor.** Zebar opens a separate webview for each widget instance, and `monitorSelection: all` means one per monitor. Module state is therefore per monitor, which is why `src/lib/state/autotiler.svelte.ts` only acts while its own monitor is focused. Sharing state between windows needs Tauri events (`src/lib/state/remote_state.svelte.ts`).
+- **One app per monitor.** Zebar opens a separate webview for each widget instance, and `monitorSelection: all` means one per monitor. Module state is therefore per monitor, which is why `src/lib/state/autotiler.svelte.ts` only acts while its own monitor is focused. Sharing state between windows needs `RemoteState` (`src/lib/state/remote_state.svelte.ts`).
 - **Static output, prerendered.** `@sveltejs/adapter-static` with `prerender = true` in `src/routes/+layout.ts`. Component scripts also run in Node at build time, so anything touching `zebar`, Tauri or `window` goes in `onMount` or `$effect`. Keep URLs relative (`fetch("config.json")`), since Zebar serves the pack directory as the site root.
+- **Three kinds of window.** `/` is the bar, `/flyout` a single window kept hidden until a flyout opens, and `/settings` the settings window. Each is a widget in `zpack.json`, and starts only the providers it needs. The autotiler and binding modes stay on the bar. `docs/architecture.md` has the rules for flyouts.
 - **State lives in `src/lib/state/`.** Components are in `src/lib/components/` and pure helpers in `src/lib/utils/`. `config` (`config.svelte.ts`) and `providers` (`providers.svelte.ts`) are module-level `$state` objects that components read directly. `configStatus.loaded` tells effects when `config` holds the user's settings instead of the defaults. Settings can change while the bar runs, so read them reactively instead of once. `providers.*` fields are `null` until the first output, and `providers.glazewm` stays `null` when GlazeWM isn't running.
 - **Settings are one document in `localStorage`.** A widget can't write files and a marketplace install gets a new folder per version, so this is what survives updates. `src/lib/state/config.svelte.ts` owns it, and windows stay in step over `BroadcastChannel`.
-  - The Zod schema in `src/lib/config_schema.ts` is the source of truth for types, defaults and validation, and its descriptions become the editor hints in `schema.json`.
+  - The Zod schema in `src/lib/config_schema.ts` is the source of truth for types, defaults and validation, and its descriptions become the editor hints in `schema.json`, which is also what the settings window builds its forms from.
+  - Anything that saves a setting goes through `updateConfig()` or `updateSetting()`.
   - `config.json` is only a way in: when its text changes, its keys are merged into the document. `static/config.json` must stay empty apart from `$schema` and `version`, and `pnpm check` fails otherwise.
   - `custom.css` does the same for `theme.customCss`. It's optional and must not ship in `static/`, because an update would then count as a change and wipe the user's CSS.
   - Changing the shape of the document means raising `CONFIG_VERSION` and adding a step in `src/lib/config_migrations.ts`.
@@ -45,8 +47,6 @@ Use `pnpm dev:once`, not `pnpm build`, to confirm a change compiles: `build/` is
 - **Zebar grants capabilities in `zpack.json`.** `zebar.shellExec` only runs commands that match `privileges.shellCommands`, and Tauri window calls are limited by the permissions Zebar ships with.
 
 Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mode. They are subpath imports from `package.json`, so they need the file extension (`#lib/state/config.svelte.ts`). SvelteKit is configured through `sveltekit()` in `vite.config.ts`. Icons are imported one at a time from `@tabler/icons-svelte/icons/*` and `@lucide/svelte/icons/*` to keep them bundled and tree-shaken. `src/lib/icon_loader.ts` maps process names to icons.
-
-`src/routes/test/` is a sandbox for multi-window experiments, not part of the bar.
 
 ## Working rules for Claude
 
@@ -59,6 +59,7 @@ Import paths: `#lib/*` is `src/lib/*` and `#static/*` is `static/*` in every mod
   - **Docs only:** `pnpm exec prettier --check <files>`.
   - **Code:** `pnpm verify`.
   - **Risky** (`zpack.json` privileges, config loading or schema, provider wiring, the autotiler, CI workflows, dependency bumps): the same checks, plus a specific list for the owner to try. Include multiple monitors, GlazeWM stopped and an invalid `config.json` where they apply.
+- Never enable the `systray` provider in a real Zebar, in `dev_static/` or anywhere else: it can break the Windows tray until Explorer restarts. Tray work is tested on the mock's data.
 - Claude can't see the widget in Zebar. `pnpm dev:mock` shows the UI in a browser, but not docking, click-through, Tauri calls or several monitors. Say what is unverified, and give the owner concrete things to check after reloading.
 
 ## Workflows
