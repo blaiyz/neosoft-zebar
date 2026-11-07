@@ -433,6 +433,28 @@ const taskbarIntegration = z
   })
   .prefault({});
 
+const performance = z
+  .object({
+    animations: z
+      .enum(["all", "interactive", "none"])
+      .default("all")
+      .describe(
+        [
+          "Which animations run. Fewer animations take less CPU and GPU, which matters for something that's always on screen.",
+          "`all`- Everything animates.",
+          "`interactive`- Only what you do animates: hovering and clicking the bar, its flyouts and settings, and switching windows and workspaces in GlazeWM. Otherwise new readings, like CPU and memory, change without easing, and the equalizer rests.",
+          "`none`- Nothing animates."
+        ].join("\n\n")
+      ),
+    keepFlyoutsReady: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, it starts as the pointer rests on the bar and closes a minute after the last flyout closes, which saves around 40 MB of memory in between. A flyout opened before it's ready takes about a second."
+      )
+  })
+  .prefault({});
+
 /** In milliseconds. Zebar takes a whole number, and spins on 0. */
 const interval = (fallback: number) => z.int().min(100).default(fallback);
 
@@ -494,6 +516,7 @@ export const configSchema = z.object({
     .boolean()
     .default(false)
     .describe("Enable click-through by default."),
+  performance,
   taskbarIntegration: taskbarIntegration.describe(
     [
       "Whether to integrate with the windows taskbar.",

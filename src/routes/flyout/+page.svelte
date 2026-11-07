@@ -1,13 +1,19 @@
 <script lang="ts">
   import FlyoutPanel from "#lib/components/flyouts/FlyoutPanel.svelte";
   import { flyoutProviders, flyoutViews } from "#lib/flyouts.ts";
-  import { config, skipConfigFades } from "#lib/state/config.svelte.ts";
+  import {
+    config,
+    configStatus,
+    skipConfigFades
+  } from "#lib/state/config.svelte.ts";
   import {
     closeFlyout,
     flyoutWindow,
     openFlyout,
+    startFlyoutWindow,
     type FlyoutRequest
   } from "#lib/state/flyouts.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import { initProviders } from "#lib/state/providers.svelte.ts";
   import { readRegion } from "#lib/state/region.svelte.ts";
   import { holdSingleWindow } from "#lib/state/single_window.ts";
@@ -28,6 +34,15 @@
 
   /** The most a frame gets to reach the screen, in milliseconds. */
   const PAINT_TIMEOUT = 100;
+
+  /**
+   * How long the window stays with nothing to show before it closes, when flyouts
+   * aren't kept ready, in milliseconds.
+   */
+  const IDLE_TIME = 60_000;
+
+  /** Long enough for every other window to hear that this one has stopped. */
+  const HANDOVER_TIME = 100;
 
   let request = $state.raw<FlyoutRequest | null>(null);
   let closing = $state(false);
@@ -86,10 +101,7 @@
   const hide = async () => {
     closing = true;
     await new Promise<void>((resolve) => {
-      const timer = setTimeout(
-        resolve,
-        exitTime(config.bar.transitionDuration)
-      );
+      const timer = setTimeout(resolve, exitTime(motion.duration));
       skipExit = () => {
         clearTimeout(timer);
         resolve();
@@ -121,6 +133,35 @@
    */
   let holding = $state(false);
 
+  let lock: ReturnType<typeof holdSingleWindow> | undefined;
+
+  /**
+   * Bars start a new window once they've heard that this one has stopped. One that
+   * asked for a flyout just before then found this one running, so this starts the
+   * next one for it.
+   */
+  const closeWindow = async () => {
+    holding = false;
+    lock?.release();
+    await new Promise((resolve) => setTimeout(resolve, HANDOVER_TIME));
+    if (openFlyout.value) await startFlyoutWindow();
+    await currentWidget().close();
+  };
+
+  $effect(() => {
+    if (!holding || request || openFlyout.value) return;
+    if (!configStatus.loaded || config.performance.keepFlyoutsReady) return;
+
+    const timer = setTimeout(() => {
+      closeWindow().catch((error: unknown) => {
+        console.error("Error closing the flyout window:", error);
+      });
+    }, IDLE_TIME);
+    return () => {
+      clearTimeout(timer);
+    };
+  });
+
   /** Only clears the request if it's still this one. A new one may be on its way. */
   const close = () => {
     if (holding && openFlyout.value?.id === request?.id) closeFlyout();
@@ -145,21 +186,17 @@
   onMount(() => {
     const widget = currentWidget();
 
-    const stopHolding = holdSingleWindow(
-      WINDOW_LOCK,
-      flyoutWindow,
-      async () => {
-        holding = true;
-        void readRegion();
-        for (const { load } of Object.values(flyoutViews)) void load();
-        if (!openFlyout.value) await widget.tauriWindow.hide();
-      }
-    );
+    lock = holdSingleWindow(WINDOW_LOCK, flyoutWindow, async () => {
+      holding = true;
+      void readRegion();
+      for (const { load } of Object.values(flyoutViews)) void load();
+      if (!openFlyout.value) await widget.tauriWindow.hide();
+    });
 
     const unlisten = widget.tauriWindow.listen("tauri://blur", onBlur);
 
     return () => {
-      stopHolding();
+      lock?.stop();
       void unlisten.then((stop) => {
         stop();
       });

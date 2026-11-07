@@ -5,7 +5,11 @@
   import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
   import { config, configStatus } from "#lib/state/config.svelte.ts";
-  import { closeFlyout, initFlyoutWindow } from "#lib/state/flyouts.svelte.ts";
+  import {
+    closeFlyout,
+    initFlyoutWindow,
+    openFlyout
+  } from "#lib/state/flyouts.svelte.ts";
   import { initHistory } from "#lib/state/history.svelte.ts";
   import {
     barArrangement,
@@ -16,11 +20,13 @@
     initMonitor,
     isOnPrimaryMonitor
   } from "#lib/state/monitor.svelte.ts";
+  import { trackActivity } from "#lib/state/motion.svelte.ts";
   import {
     barProviders,
     initProviders,
     providers
   } from "#lib/state/providers.svelte.ts";
+  import { settingsWindow } from "#lib/state/settings_window.svelte.ts";
   import { applyBackgroundEffect } from "#lib/window_effects.ts";
   import { onMount } from "svelte";
 
@@ -56,6 +62,23 @@
   initLayout();
   initHistory();
   initFlyoutWindow();
+  trackActivity({
+    // A flyout and the settings are part of the bar, and change how it looks.
+    busy: () => openFlyout.value !== null || settingsWindow.value,
+    // What changes in GlazeWM when someone switches windows or workspaces, opens or
+    // closes a window, or changes its mode.
+    changes: () => {
+      return JSON.stringify([
+        glazewm?.focusedContainer?.id,
+        glazewm?.displayedWorkspace?.id,
+        glazewm?.focusedWorkspace?.id,
+        glazewm?.allWindows?.length,
+        glazewm?.tilingDirection,
+        glazewm?.isPaused,
+        glazewm?.bindingModes?.map(({ name }) => name)
+      ]);
+    }
+  });
 
   $effect(() => {
     if (configStatus.loaded) {

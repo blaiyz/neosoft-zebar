@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PartId } from "#lib/sections.ts";
-  import { config } from "#lib/state/config.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import { layout, partTarget, trackPart } from "#lib/state/layout.svelte.ts";
   import type { Snippet } from "svelte";
   import { tick, untrack } from "svelte";
@@ -53,9 +53,12 @@
   $effect(() => {
     if (!when) {
       entered = false;
-      const timer = setTimeout(() => {
-        rendered = false;
-      }, config.bar.transitionDuration);
+      const timer = setTimeout(
+        () => {
+          rendered = false;
+        },
+        untrack(() => motion.duration)
+      );
       return () => {
         clearTimeout(timer);
       };

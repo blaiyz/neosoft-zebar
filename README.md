@@ -107,6 +107,8 @@ To see the description and value options for each field, open `config.json` in V
 
 **Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
 
+**Performance:** the bar is always on screen, so `performance.animations` can cut how much it animates. `interactive` only animates what you do, like hovering the bar or switching workspaces, and `none` turns animations off. Turning off `performance.keepFlyoutsReady` saves around 40 MB by closing the flyout window when it's unused, at the cost of a short wait on some opens. Longer `providers.refreshIntervals` save CPU and GPU too. These are on the Behavior page of the settings window.
+
 When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way.
 
 Right-clicking the clock switches the date on or off, and saves it. Turning it on sets `clock.fullDate` to `"preferred"`: other sections give way to it, but it can still collapse if they can't make enough room, and if there's no room for it at all, the click does nothing. Clicking the weather switches the unit, which is saved too. Saved settings apply to every monitor.

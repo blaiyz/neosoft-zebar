@@ -528,6 +528,23 @@
       "description": "Enable click-through by default.",
       "type": "boolean"
     },
+    "performance": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "animations": {
+          "default": "all",
+          "description": "Which animations run. Fewer animations take less CPU and GPU, which matters for something that's always on screen.\n\n`all`- Everything animates.\n\n`interactive`- Only what you do animates: hovering and clicking the bar, its flyouts and settings, and switching windows and workspaces in GlazeWM. Otherwise new readings, like CPU and memory, change without easing, and the equalizer rests.\n\n`none`- Nothing animates.",
+          "type": "string",
+          "enum": ["all", "interactive", "none"]
+        },
+        "keepFlyoutsReady": {
+          "default": true,
+          "description": "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, it starts as the pointer rests on the bar and closes a minute after the last flyout closes, which saves around 40 MB of memory in between. A flyout opened before it's ready takes about a second.",
+          "type": "boolean"
+        }
+      }
+    },
     "taskbarIntegration": {
       "description": "Whether to integrate with the windows taskbar.\n\nRight now, this feature only adds an area at the center of the widget that contains the window icons. Please see README for more information.",
       "default": {},

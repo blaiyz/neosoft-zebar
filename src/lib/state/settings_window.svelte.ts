@@ -43,11 +43,12 @@ export function closeSettings() {
  * one closes itself, which also covers Zebar's tray menu opening another.
  */
 export function runSettingsWindow() {
-  return holdSingleWindow(WINDOW_LOCK, settingsWindow, () => {
+  const { stop } = holdSingleWindow(WINDOW_LOCK, settingsWindow, () => {
     if (requests) {
       requests.onmessage = ({ data }: MessageEvent<unknown>) => {
         if (data === CLOSE) closeSettings();
       };
     }
   });
+  return stop;
 }

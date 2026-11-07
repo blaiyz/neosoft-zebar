@@ -5,13 +5,14 @@
     configStatus,
     loadConfig
   } from "#lib/state/config.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import { applyTheme, exitTime } from "#lib/theme.ts";
   import { onMount, type Snippet } from "svelte";
   import "../app.css";
 
   let { children }: { children: Snippet } = $props();
 
-  let duration = $derived(config.bar.transitionDuration);
+  let duration = $derived(motion.duration);
 
   $effect(() => {
     if (configStatus.loaded)
@@ -51,6 +52,7 @@
 
 <div
   class="h-full"
+  class:still={motion.still}
   style:--transition-duration="{duration}ms"
   style:--time-soft="{duration * 1.25}ms"
   style:--time-melt="{duration * 1.9}ms"
