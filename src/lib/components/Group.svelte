@@ -124,6 +124,7 @@
 
   /* Where a wider flyout's underside meets the side of this group. */
   .fillet {
+    --fill: hsl(var(--bg));
     position: absolute;
     width: var(--radius);
     height: var(--radius);
@@ -158,7 +159,7 @@
     background: radial-gradient(
       circle at 0 100%,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -167,7 +168,7 @@
     background: radial-gradient(
       circle at 100% 100%,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -176,7 +177,7 @@
     background: radial-gradient(
       circle at 0 0,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -185,7 +186,7 @@
     background: radial-gradient(
       circle at 100% 0,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 </style>

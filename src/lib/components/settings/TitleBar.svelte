@@ -2,6 +2,7 @@
   import X from "@lucide/svelte/icons/x";
   import { PhysicalPosition } from "@tauri-apps/api/dpi";
   import type { Snippet } from "svelte";
+  import { closeSettings } from "#lib/state/settings_window.svelte.ts";
   import { currentWidget } from "zebar";
 
   type Drag = {
@@ -67,7 +68,7 @@
   <button
     class="flex size-9 items-center justify-center rounded-full text-lg transition hover:bg-zb-surface-2 hover:text-zb-icon"
     aria-label="Close"
-    onclick={() => void currentWidget().close()}
+    onclick={closeSettings}
   >
     <X />
   </button>
@@ -91,6 +92,7 @@
 
   .dock::before,
   .dock::after {
+    --fill: var(--surface-2);
     content: "";
     position: absolute;
     top: 0;
@@ -103,7 +105,7 @@
     background: radial-gradient(
       circle at 0 100%,
       transparent calc(var(--radius) - 0.5px),
-      var(--surface-2) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -112,7 +114,7 @@
     background: radial-gradient(
       circle at 100% 100%,
       transparent calc(var(--radius) - 0.5px),
-      var(--surface-2) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 </style>

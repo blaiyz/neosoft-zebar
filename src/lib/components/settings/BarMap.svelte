@@ -88,11 +88,9 @@
 
 <style>
   .wall {
-    background: linear-gradient(
-      100deg,
-      color-mix(in srgb, hsl(var(--volume-start)) 34%, hsl(var(--bg))),
-      color-mix(in srgb, hsl(var(--volume-end)) 34%, hsl(var(--bg)))
-    );
+    --fill: color-mix(in srgb, hsl(var(--volume-start)) 34%, hsl(var(--bg)));
+    --fill-end: color-mix(in srgb, hsl(var(--volume-end)) 34%, hsl(var(--bg)));
+    background: linear-gradient(100deg, var(--fill), var(--fill-end));
   }
 
   .bar {

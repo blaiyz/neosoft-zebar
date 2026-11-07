@@ -115,7 +115,7 @@
       "name": "settings",
       "htmlPath": "./settings.html",
       "zOrder": "normal",
-      "shownInTaskbar": true,
+      "shownInTaskbar": false,
       "focused": true,
       "resizable": false,
       "transparent": true,

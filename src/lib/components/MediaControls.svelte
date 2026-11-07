@@ -51,10 +51,14 @@
   // What the text would like to be, which invisible copies of it report. It's the
   // title or the time, whichever is wider, as the two swap places on hover.
   let textWidth = $state(0);
+  let titleWidth = $state(0);
   let timeWidth = $state(0);
   let rem = $state(16);
   let titleLimit = $derived(part ? partTarget(part) : undefined);
   let hovered = $state(false);
+  let titleHovered = $state(false);
+  // The title shows the time instead under the pointer.
+  let timeShown = $derived(titleHovered || peek);
 
   let progress = $derived(
     Math.round((session.position / session.endTime) * 100) || 0
@@ -78,6 +82,38 @@
   let untucked = $derived(
     style === "tucked" && (hovered || peek) && skips && width > 0
   );
+  let shownWidth = $derived(untucked ? width - tuckedRoom : width);
+
+  // A title that fits once the area has finished changing size isn't cut short
+  // with an ellipsis on the way there, and fades out at the edge instead.
+  let fits = $derived(titleWidth + TITLE_PADDING * rem <= shownWidth + 1);
+
+  /**
+   * Whether the pointer is anywhere above or below the element, as well as on it.
+   * The group around it pads it and clips anything outside, so a pointer pushed to
+   * the edge of the screen would otherwise leave it. Only on the bar, which is what
+   * sets `part`: a preview would light up from anywhere in its column.
+   */
+  const hoverColumn =
+    (report: (over: boolean) => void): Attachment<HTMLElement> =>
+    (element) => {
+      const onMove = ({ clientX }: PointerEvent) => {
+        const { left, right } = element.getBoundingClientRect();
+        report(clientX >= left && clientX < right);
+      };
+      const onLeave = () => {
+        report(false);
+      };
+
+      const root = document.documentElement;
+      addEventListener("pointermove", onMove);
+      root.addEventListener("pointerleave", onLeave);
+      return () => {
+        removeEventListener("pointermove", onMove);
+        root.removeEventListener("pointerleave", onLeave);
+        report(false);
+      };
+    };
 
   const reportWidth =
     (report: (width: number) => void): Attachment<HTMLElement> =>
@@ -116,7 +152,11 @@
 
 {#snippet title()}
   <button
-    class="group relative flex h-full min-w-0 items-center overflow-hidden transition hover:text-zb-accent"
+    {@attach part && hoverColumn((over) => (titleHovered = over))}
+    class={[
+      "relative flex h-full min-w-0 items-center overflow-hidden transition",
+      titleHovered && "text-zb-accent"
+    ]}
     aria-label="Toggle"
     onclick={ontoggle}
   >
@@ -126,14 +166,19 @@
           "relative flex items-center justify-center px-2",
           layout.ready && "transition-[width] ease-(--ease)"
         ]}
-        style:width="{untucked ? width - tuckedRoom : width}px"
+        style:width="{shownWidth}px"
       >
         <span
           {@attach reportWidth((next) => (textWidth = next))}
           class="invisible absolute grid whitespace-nowrap"
           aria-hidden="true"
         >
-          <span class="[grid-area:1/1]">{session.title}</span>
+          <span
+            {@attach reportWidth((next) => (titleWidth = next))}
+            class="w-max [grid-area:1/1]"
+          >
+            {session.title}
+          </span>
           <span
             {@attach reportWidth((next) => (timeWidth = next))}
             class="w-max tabular-nums [grid-area:1/1]"
@@ -143,18 +188,19 @@
         </span>
         <span
           class={[
-            "truncate transition group-hover:translate-y-full group-hover:opacity-0",
-            peek && "translate-y-full opacity-0"
+            "transition",
+            fits ? "fade-end" : "truncate",
+            timeShown && "translate-y-full opacity-0"
           ]}
         >
-          <p class="truncate">{session.title}</p>
+          <p class={fits ? "whitespace-nowrap" : "truncate"}>{session.title}</p>
         </span>
         <span
           class={[
             "absolute inset-y-0 right-2 left-2 inline-flex items-center justify-center whitespace-nowrap tabular-nums",
-            "transition-all group-hover:translate-y-0 group-hover:opacity-100",
-            !peek && "-translate-y-full",
-            !peek && session.title && "opacity-0"
+            "transition-all",
+            !timeShown && "-translate-y-full",
+            !timeShown && session.title && "opacity-0"
           ]}
         >
           {secondsToHms(session.position)}/{secondsToHms(session.endTime)}
@@ -168,8 +214,7 @@
   class="relative mr-3 flex h-full items-center"
   role="group"
   aria-label="Media"
-  onpointerenter={() => (hovered = true)}
-  onpointerleave={() => (hovered = false)}
+  {@attach part && hoverColumn((over) => (hovered = over))}
 >
   {#if style === "pill"}
     <BeadPill>
@@ -238,6 +283,20 @@
 </div>
 
 <style>
+  /* Reaches into the space beside the title, and fades out over it, so a title with
+    room to spare is never faded itself. */
+  .fade-end {
+    overflow: hidden;
+    margin-right: -0.5rem;
+    padding-right: 0.5rem;
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 0.5rem),
+      transparent
+    );
+    white-space: nowrap;
+  }
+
   .fill {
     position: absolute;
     inset: 0 auto 0 0;
