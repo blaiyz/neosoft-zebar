@@ -51,6 +51,7 @@
   style:--time-soft="{duration * 1.25}ms"
   style:--time-melt="{duration * 1.9}ms"
   style:--time-exit="{exitTime(duration)}ms"
+  style:--fly-from={config.bar.direction === "top" ? "-20px" : "20px"}
 >
   {@render children()}
 </div>

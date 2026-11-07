@@ -9,7 +9,7 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 - Smooth animations
 - Media controls
 - A settings window with live preview, and sharing of settings and themes as a file
-- Flyouts for audio devices, the calendar, network and system details, and power options
+- Flyouts for audio devices, media players, the calendar, network and system details, and power options
 - Customizable layout and appearance
 - Built-in auto-tiler
 - Multi-monitor support
@@ -101,7 +101,7 @@ To see the description and value options for each field, open `config.json` in V
 
 **Mistakes don't break the bar.** A value that isn't valid is ignored and everything else still applies. A warning icon appears in the bar until the file is fixed. Hover over it to see which settings were ignored.
 
-**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
+**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `disk` and `keyboard` are off until you turn them on. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
 
 **Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
 
@@ -118,15 +118,16 @@ Some settings have to be configured in `zpack.json`, which is the configuration 
 
 Clicking a section opens a popup beside it, which closes when you click anywhere else:
 
-| Section                | Flyout                                                                     |
-| ---------------------- | -------------------------------------------------------------------------- |
-| Volume                 | A slider and mute button for every playback and recording device           |
-| Clock                  | A calendar with week numbers                                               |
-| Network                | Addresses, link speed, totals and a graph of recent traffic                |
-| CPU, memory or battery | Recent usage, disks, battery health and uptime                             |
-| Power                  | Lock, sleep, sign out, restart and shut down, which all ask you to confirm |
+| Section                      | Flyout                                                                     |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| Volume                       | A slider and mute button for every playback and recording device           |
+| Clock                        | A calendar with week numbers                                               |
+| Network                      | Addresses, link speed, totals and a graph of recent traffic                |
+| CPU, memory, disk or battery | Recent usage, disks, battery health and uptime                             |
+| Media title                  | Every player, with its artist, album, progress and controls                |
+| Power                        | Lock, sleep, sign out, restart and shut down, which all ask you to confirm |
 
-Restarting and shutting down wait a minute, and the Power flyout can cancel them. Scrolling over the volume icon still changes the volume.
+Restarting and shutting down wait a minute, and the Power flyout can cancel them. Scrolling changes the volume over the volume icon, the workspace over the workspaces, and the player over the media section.
 
 ### System tray (experimental)
 

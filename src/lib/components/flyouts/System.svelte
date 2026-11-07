@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { config } from "#lib/state/config.svelte.ts";
   import { history } from "#lib/state/history.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import {
@@ -6,6 +7,7 @@
     formatDuration,
     formatMeasure
   } from "#lib/utils/format.ts";
+  import { batteryTone } from "#lib/utils/levels.ts";
   import Graph from "./Graph.svelte";
   import Row from "./Row.svelte";
   import Well from "./Well.svelte";
@@ -22,11 +24,9 @@
   const usedPercent = (available: number, total: number) =>
     total > 0 ? ((total - available) / total) * 100 : 0;
 
-  let batteryTone = $derived.by(() => {
-    const charge = battery?.chargePercent ?? 100;
-    if (charge <= 20) return "--battery-low";
-    return charge <= 50 ? "--battery-mid" : "--battery-good";
-  });
+  let chargeTone = $derived(
+    batteryTone(battery?.chargePercent ?? 100, config.battery)
+  );
 </script>
 
 <Well title="Processor" tone="--cpu">
@@ -85,7 +85,7 @@
 {/if}
 
 {#if battery?.state && battery.state !== "unknown"}
-  <Well title="Battery" tone={batteryTone}>
+  <Well title="Battery" tone={chargeTone}>
     <Row label="Charge">{Math.round(battery.chargePercent)}%</Row>
     {#if battery.timeTillEmpty !== null}
       <Row label="Time left">{formatDuration(battery.timeTillEmpty)}</Row>

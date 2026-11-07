@@ -11,6 +11,7 @@
   import { initProviders } from "#lib/state/providers.svelte.ts";
   import { readRegion } from "#lib/state/region.svelte.ts";
   import { exitTime } from "#lib/theme.ts";
+  import { invoke } from "@tauri-apps/api/core";
   import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
   import { onMount, tick } from "svelte";
   import { currentWidget } from "zebar";
@@ -70,6 +71,12 @@
     await tauriWindow.setPosition(new PhysicalPosition(next.x, next.y));
     await tauriWindow.setSize(new PhysicalSize(next.width, next.height));
     await tauriWindow.show();
+    // Showing a window rewrites its style, which drops the tool window style that
+    // Zebar gave it to keep it off the taskbar, and Windows gives it a button there.
+    // This is Zebar's own command, which its client doesn't export.
+    await invoke("set_skip_taskbar", { skip: true }).catch((error: unknown) => {
+      console.error("Error keeping the flyout off the taskbar:", error);
+    });
     shownAt = performance.now();
     request = next;
   };
@@ -90,10 +97,21 @@
     await conceal();
   };
 
+  /** The same flyout, moved to keep up with its opener. */
+  const move = async (next: FlyoutRequest) => {
+    const { tauriWindow } = currentWidget();
+    await tauriWindow.setPosition(new PhysicalPosition(next.x, next.y));
+    if (next.width !== request?.width || next.height !== request.height) {
+      await tauriWindow.setSize(new PhysicalSize(next.width, next.height));
+    }
+    request = next;
+  };
+
   /** Takes each change in turn, so that a quick close can't be overtaken by the open. */
   const followRequest = async (next: FlyoutRequest | null) => {
-    if (next?.id === request?.id) return;
-    await (next ? show(next) : hide());
+    if (next === request) return;
+    if (next && next.id === request?.id) await move(next);
+    else if (next?.id !== request?.id) await (next ? show(next) : hide());
   };
 
   /** Only clears the request if it's still this one. A new one may be on its way. */

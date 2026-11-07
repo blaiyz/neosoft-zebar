@@ -85,9 +85,11 @@ function buildOutputMap() {
       type: ContainerType.WORKSPACE,
       id: `workspace-${name}`,
       name,
+      displayName: null,
       isDisplayed,
       hasFocus: isDisplayed,
-      children: isDisplayed ? windows : []
+      // The last one stands for a kept-alive workspace, which can be empty.
+      children: isDisplayed ? windows : name === "3" ? [] : windows.slice(1, 2)
     };
   });
   const monitor = {
@@ -97,6 +99,29 @@ function buildOutputMap() {
     hasFocus: true,
     children: workspaces
   };
+
+  const sessions = [
+    {
+      sessionId: "Spotify.exe",
+      title: "Mock Song",
+      artist: "Mock Artist",
+      albumTitle: "Mock Album",
+      position: 72 + ((Date.now() / 1000) % 60),
+      endTime: 210,
+      isPlaying: state.isPlaying,
+      isCurrentSession: true
+    },
+    {
+      sessionId: "MSEdge",
+      title: "A Video With a Longer Title",
+      artist: null,
+      albumTitle: null,
+      position: 30,
+      endTime: 600,
+      isPlaying: false,
+      isCurrentSession: false
+    }
+  ];
 
   const playbackDevices = state.devices.filter(
     (device) => device.type === "playback"
@@ -154,6 +179,7 @@ function buildOutputMap() {
       focusedContainer: windows[0],
       tilingDirection: state.tilingDirection,
       bindingModes: [],
+      isPaused: false,
       runCommand
     },
     memory: {
@@ -205,16 +231,13 @@ function buildOutputMap() {
     },
     weather: { status: "cloudy_day", celsiusTemp: 22, fahrenheitTemp: 72 },
     media: {
-      currentSession: {
-        title: "Mock Song",
-        position: 72 + ((Date.now() / 1000) % 60),
-        endTime: 210,
-        isPlaying: state.isPlaying
-      },
+      currentSession: sessions[0],
+      allSessions: sessions,
       previous: () => console.log("[mock] previous track"),
       next: () => console.log("[mock] next track"),
       togglePlayPause: () => update({ isPlaying: !state.isPlaying })
     },
+    keyboard: { layout: "en-US" },
     audio: {
       defaultPlaybackDevice: playbackDevices[0],
       defaultRecordingDevice: recordingDevices[0],

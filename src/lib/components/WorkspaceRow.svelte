@@ -114,12 +114,13 @@
           ]}
           aria-hidden="true"
         >
-          {item.name}
+          {item.label}
         </div>
         <button
           class={[
             "workspace absolute left-0 flex w-max items-center justify-center border border-transparent p-1",
             item.current && "current font-semibold",
+            item.empty && "empty",
             width
           ]}
           style:--c="hsl(var(--ws-{item.color}))"
@@ -127,7 +128,7 @@
           onclick={() => onpick?.(item)}
         >
           {#if style === "string"}<i></i>{/if}
-          <span>{item.name}</span>
+          <span>{item.label}</span>
         </button>
       </div>
     {/snippet}
@@ -175,7 +176,13 @@
       background-color var(--transition-duration) var(--ease),
       min-width var(--transition-duration) var(--ease),
       padding var(--transition-duration) var(--ease),
+      opacity var(--transition-duration) var(--ease),
       scale var(--time-soft) var(--spring-soft);
+  }
+
+  /* A kept-alive workspace with nothing on it. */
+  .workspace.empty:not(.current, :hover) {
+    opacity: 0.55;
   }
 
   .workspace:active {

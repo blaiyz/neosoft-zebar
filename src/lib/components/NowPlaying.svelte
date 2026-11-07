@@ -1,31 +1,35 @@
 <script lang="ts">
+  import { getAppIcon } from "#lib/icon_loader.ts";
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
   import { config } from "#lib/state/config.svelte.ts";
+  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
+  import { chooseSession, shownSession } from "#lib/state/media.svelte.ts";
+  import { playhead } from "#lib/state/playhead.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { onDestroy, untrack } from "svelte";
   import type { MediaSession } from "zebar";
   import Collapsible from "./Collapsible.svelte";
   import MediaControls from "./MediaControls.svelte";
 
-  /** How far a reading can be from where this has counted to, in seconds. */
-  const SEEK_TOLERANCE = 2;
-  /** How often the time moves on between readings, in milliseconds. */
-  const TICK_TIME = 250;
+  /** How far to scroll for the next player, which is one notch of a mouse wheel. */
+  const SCROLL_STEP = 100;
 
   let media = $derived(providers.media);
+  let playing = $derived(shownSession(media));
+
   let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
-  let shownSession = $state<MediaSession | null>(null);
+  let visibleSession = $state<MediaSession | null>(null);
   // Stays after the session ends, to show while the section closes.
   let lastSession = $state.raw<MediaSession | null>(null);
-  let active = $derived(media !== null && shownSession !== null);
+  let active = $derived(media !== null && visibleSession !== null);
 
   $effect(() => {
-    const session = media?.currentSession;
-    const prevSession: MediaSession | null = untrack(() => shownSession);
+    const session = playing;
+    const prevSession: MediaSession | null = untrack(() => visibleSession);
     if (session) {
       clearTimeout(mediaTimeout);
       mediaTimeout = undefined;
-      shownSession = session;
+      visibleSession = session;
       lastSession = session;
       return;
     }
@@ -35,55 +39,58 @@
       }
       mediaTimeout = setTimeout(() => {
         mediaTimeout = undefined;
-        shownSession = null;
+        visibleSession = null;
       }, 2000);
     } else {
-      shownSession = null;
+      visibleSession = null;
     }
   });
 
-  // The provider only reports each percent of a track, so the time counts up by
-  // itself in between. A reading close to it is left alone, to keep it from stepping
-  // back, and anything further off is a seek.
-  let position = $state(0);
-  let countedTitle: string | null = null;
+  const head = playhead(() => lastSession);
+  let session = $derived(
+    lastSession && { ...lastSession, position: head.position }
+  );
+  let target = $derived(
+    lastSession ? { sessionId: lastSession.sessionId } : undefined
+  );
 
-  $effect(() => {
-    if (!lastSession) return;
-    const { title, isPlaying, endTime, position: reading } = lastSession;
+  let scrolled = 0;
 
-    const isOff = Math.abs(reading - untrack(() => position)) > SEEK_TOLERANCE;
-    if (!isPlaying || isOff || title !== countedTitle) position = reading;
-    countedTitle = title;
-    if (!isPlaying) return;
+  /** Goes round the players, when there's more than one. */
+  const onWheel = (event: WheelEvent) => {
+    const sessions = media?.allSessions ?? [];
+    if (!config.media.scrollSessions || sessions.length < 2) return;
+    event.preventDefault();
 
-    let last = performance.now();
-    const timer = setInterval(() => {
-      const now = performance.now();
-      position = Math.min(endTime, position + (now - last) / 1000);
-      last = now;
-    }, TICK_TIME);
+    scrolled += event.deltaY;
+    if (Math.abs(scrolled) < SCROLL_STEP) return;
+    const step = Math.sign(scrolled);
+    scrolled = 0;
 
-    return () => {
-      clearInterval(timer);
-    };
-  });
-
-  let session = $derived(lastSession && { ...lastSession, position });
+    const index = sessions.findIndex(
+      ({ sessionId }) => sessionId === lastSession?.sessionId
+    );
+    const next = sessions.at((index + step) % sessions.length);
+    if (next) chooseSession(media, next.sessionId);
+  };
 
   onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
 <Collapsible when={active} anchor="end">
   {#if session}
-    <MediaControls
-      style={config.media.style}
-      {session}
-      skips={!toggleModes.clickThrough}
-      part="media.title"
-      onprevious={() => media?.previous()}
-      ontoggle={() => media?.togglePlayPause()}
-      onnext={() => media?.next()}
-    />
+    <div class="flex h-full items-center" onwheel={onWheel}>
+      <MediaControls
+        style={config.media.style}
+        {session}
+        skips={!toggleModes.clickThrough}
+        part="media.title"
+        icon={config.media.appIcon ? getAppIcon(session.sessionId) : undefined}
+        opens={config.media.titleOpensFlyout ? opensFlyout("media") : undefined}
+        onprevious={() => media?.previous(target)}
+        ontoggle={() => media?.togglePlayPause(target)}
+        onnext={() => media?.next(target)}
+      />
+    </div>
   {/if}
 </Collapsible>

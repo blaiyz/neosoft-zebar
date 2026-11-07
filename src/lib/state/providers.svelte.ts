@@ -43,6 +43,12 @@ function createProviderConfig({ sections, providers }: Config) {
       }
     }),
     ...(sections.tray !== false && { systray: { type: "systray" as const } }),
+    ...(sections.keyboard !== false && {
+      keyboard: {
+        type: "keyboard" as const,
+        refreshInterval: refreshIntervals.keyboard
+      }
+    }),
     disk: { type: "disk", refreshInterval: refreshIntervals.disk },
     host: { type: "host" }
   } satisfies ProviderGroupConfig;
@@ -64,7 +70,8 @@ const providers: ProviderOutputs = $state({
   audio: null,
   systray: null,
   disk: null,
-  host: null
+  host: null,
+  keyboard: null
 });
 
 const running: Partial<
@@ -134,28 +141,35 @@ function syncProviders(
   }
 }
 
-/** What the bar itself shows. */
-const barProviders: readonly ProviderName[] = [
+/** What the bar itself shows. The flyouts read the disks whatever the bar shows. */
+const barProviders = ({ sections }: Config): ProviderName[] => [
   "audio",
   "battery",
   "cpu",
   "date",
   "glazewm",
+  "keyboard",
   "media",
   "memory",
   "network",
   "systray",
-  "weather"
+  "weather",
+  ...(sections.disk === false ? [] : ["disk" as const])
 ];
 
 /**
  * Call while a component initializes. A window starts the providers in `wanted`,
  * except for those that the sections they belong to have turned off.
  */
-function initProviders(wanted: readonly ProviderName[]) {
+function initProviders(
+  wanted: readonly ProviderName[] | ((config: Config) => ProviderName[])
+) {
   $effect(() => {
     if (configStatus.loaded) {
-      syncProviders(createProviderConfig(config), wanted);
+      syncProviders(
+        createProviderConfig(config),
+        typeof wanted === "function" ? wanted(config) : wanted
+      );
     }
   });
 }

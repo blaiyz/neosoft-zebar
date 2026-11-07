@@ -269,13 +269,13 @@
 
     @starting-style {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(var(--fly-from));
     }
   }
 
   .face.fly.leaving {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--fly-from));
   }
 
   .face.leaving {

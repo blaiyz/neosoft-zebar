@@ -24,6 +24,12 @@ export const flyoutViews = {
     providers: [],
     load: () => import("#lib/components/flyouts/Calendar.svelte")
   },
+  media: {
+    width: 24,
+    height: 30,
+    providers: ["media"],
+    load: () => import("#lib/components/flyouts/Media.svelte")
+  },
   network: {
     width: 25,
     height: 35,

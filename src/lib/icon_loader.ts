@@ -100,7 +100,10 @@ const ICONS: { appNames: string[]; icon: Icon }[] = [
   { appNames: ["QQ"], icon: BrandQq },
   { appNames: ["Xbox"], icon: BrandXbox },
   { appNames: ["Microsoft To Do"], icon: Check },
-  { appNames: ["Media Player", "AppleMusic", "Cider"], icon: Music },
+  {
+    appNames: ["Media Player", "AppleMusic", "Cider", "ZuneMusic"],
+    icon: Music
+  },
   { appNames: ["Typora"], icon: Markdown },
   { appNames: ["Obsidian", "zotero"], icon: Notebook },
   {
@@ -130,4 +133,21 @@ export function getProcessIcon(window: Window): Icon {
     ({ names }) => names.has(title) || names.has(processName)
   );
   return entry?.icon ?? Background;
+}
+
+/**
+ * The icon for the app behind a media session. Its id is the app's executable, like
+ * `Spotify.exe`, or a Store app's id, like `Microsoft.ZuneMusic_8wekyb3d8bbwe!App`.
+ */
+export function getAppIcon(sessionId: string): Icon {
+  const app = (sessionId.split("!")[0] ?? "")
+    .toLowerCase()
+    .replace(/\.exe$/, "")
+    .replace(/_[a-z0-9]{13}$/, "");
+  const names = [app, app.split(".").at(-1) ?? app];
+
+  const entry = lowerCaseIcons.find((icon) =>
+    names.some((name) => icon.names.has(name))
+  );
+  return entry?.icon ?? Music;
 }

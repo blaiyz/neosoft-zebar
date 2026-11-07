@@ -3,7 +3,8 @@ import { config } from "#lib/state/config.svelte.ts";
 import { remToPx } from "#lib/state/layout.svelte.ts";
 import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
 import { RemoteState } from "#lib/state/remote_state.svelte.ts";
-import { currentMonitor } from "@tauri-apps/api/window";
+import type { PhysicalPosition } from "@tauri-apps/api/dpi";
+import { currentMonitor, type Monitor } from "@tauri-apps/api/window";
 import type { Attachment } from "svelte/attachments";
 import { currentWidget, startWidget } from "zebar";
 
@@ -13,6 +14,9 @@ const EDGE_MARGIN = 8;
 const FLOAT_MARGIN = 0.5;
 /** How long a bar gives the flyout window to make itself known, in milliseconds. */
 const WINDOW_CHECK_TIME = 1000;
+/** What a press lands on that has a job of its own, and so doesn't open a flyout. */
+const INTERACTIVE =
+  "button, a, input, select, textarea, [role='button'], [role='slider']";
 
 /**
  * How one side of a flyout meets the group of the bar that it grows out of.
@@ -24,6 +28,7 @@ const WINDOW_CHECK_TIME = 1000;
 export type MeltEdge = "flare" | "flush" | "overhang";
 
 export type FlyoutRequest = {
+  /** Which opening this is. It stays the same while the flyout follows its opener. */
   id: number;
   view: FlyoutId;
   /** Whether it's above the bar, so its panel belongs at the end of its window. */
@@ -148,11 +153,60 @@ function meltOnto(
   return { left: clamp(left, lowest, highest), width };
 }
 
+/**
+ * Places a flyout that's following its opener, keeping the way each side meets the
+ * group. A side can only go from one way to another with a jump of up to two radii,
+ * so it stays as it is for as long as it can. `null` if it can't, as when the group
+ * has become too narrow for it.
+ */
+function keepEdges(
+  center: number,
+  width: number,
+  group: { left: number; right: number },
+  monitorWidth: number,
+  radius: number,
+  edges: { left: MeltEdge; right: MeltEdge }
+) {
+  if (edges.left === "flush" && edges.right === "flush") {
+    return { left: group.left, width: group.right - group.left };
+  }
+
+  const snap = radius * 2;
+  // The range the flyout's left end can be in.
+  let low = Math.min(EDGE_MARGIN, group.left);
+  let high = Math.max(monitorWidth - width - EDGE_MARGIN, group.right - width);
+  const atLeast = (value: number) => {
+    low = Math.max(low, value);
+  };
+  const atMost = (value: number) => {
+    high = Math.min(high, value);
+  };
+  const exactly = (value: number) => {
+    atLeast(value);
+    atMost(value);
+  };
+
+  if (edges.left === "flush") exactly(group.left);
+  else if (edges.left === "flare") atLeast(group.left + snap);
+  else atMost(group.left - snap);
+
+  const fromRight = group.right - width;
+  if (edges.right === "flush") exactly(fromRight);
+  else if (edges.right === "flare") atMost(fromRight - snap);
+  else atLeast(fromRight + snap);
+
+  if (low > high + 0.5) return null;
+  return { left: clamp(center - width / 2, low, high), width };
+}
+
 /** `gap` is how far inside the end of the group a flyout's side is. */
 function meltEdge(gap: number): MeltEdge {
   if (Math.abs(gap) < 0.5) return "flush";
   return gap > 0 ? "flare" : "overhang";
 }
+
+/** Where the bar's window is, which stays put while a flyout is open. */
+type BarPlace = { monitor: Monitor; position: PhysicalPosition };
 
 /**
  * Tauri reports physical pixels from the corner of the desktop, while sizes in rem
@@ -160,13 +214,13 @@ function meltEdge(gap: number): MeltEdge {
  * The height comes off a physical position, so that rounding can't open a gap between
  * the flyout and the bar.
  */
-async function showFlyout(view: FlyoutId, opener: Element) {
-  const [monitor, position] = await Promise.all([
-    currentMonitor(),
-    currentWidget().tauriWindow.outerPosition()
-  ]);
-  if (!monitor) return;
-
+function placeFlyout(
+  view: FlyoutId,
+  opener: Element,
+  id: number,
+  { monitor, position }: BarPlace,
+  following?: FlyoutRequest
+): FlyoutRequest {
   const scale = monitor.scaleFactor;
   const barLeft = (position.x - monitor.position.x) / scale;
   const barTop = (position.y - monitor.position.y) / scale;
@@ -202,7 +256,15 @@ async function showFlyout(view: FlyoutId, opener: Element) {
       left: barLeft + groupBox.left,
       right: barLeft + groupBox.right
     };
-    const placed = meltOnto(center, viewWidth, box, monitorWidth, radius);
+    const kept =
+      following?.left && following.right
+        ? keepEdges(center, viewWidth, box, monitorWidth, radius, {
+            left: following.left,
+            right: following.right
+          })
+        : null;
+    const placed =
+      kept ?? meltOnto(center, viewWidth, box, monitorWidth, radius);
     edges = {
       left: meltEdge(placed.left - box.left),
       right: meltEdge(box.right - placed.left - placed.width)
@@ -224,11 +286,10 @@ async function showFlyout(view: FlyoutId, opener: Element) {
   }
 
   const physicalHeight = Math.round(height * scale);
-  const id = Date.now();
 
   if (melts) Object.assign(melt, { id, group, ...edges });
 
-  openFlyout.value = {
+  return {
     id,
     view,
     opensUp,
@@ -240,6 +301,69 @@ async function showFlyout(view: FlyoutId, opener: Element) {
     width: Math.round(width * scale),
     height: physicalHeight
   };
+}
+
+const samePlace = (a: FlyoutRequest, b: FlyoutRequest) =>
+  a.x === b.x &&
+  a.y === b.y &&
+  a.width === b.width &&
+  a.height === b.height &&
+  a.left === b.left &&
+  a.right === b.right;
+
+let stopFollowing: (() => void) | undefined;
+
+/**
+ * Moves the open flyout with its opener, whose section can change width while it's
+ * open, as when the next track has a longer title. Anything that moves it also
+ * resizes the opener or its group. Once a frame at most.
+ */
+function followOpener(
+  view: FlyoutId,
+  opener: Element,
+  id: number,
+  place: BarPlace
+) {
+  stopFollowing?.();
+  let frame = 0;
+
+  const observer = new ResizeObserver(() => {
+    if (openFlyout.value?.id !== id) {
+      stop();
+      return;
+    }
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      const current = openFlyout.value;
+      if (current?.id !== id || !opener.isConnected) return;
+      const next = placeFlyout(view, opener, id, place, current);
+      if (!samePlace(current, next)) openFlyout.value = next;
+    });
+  });
+
+  const stop = () => {
+    observer.disconnect();
+    cancelAnimationFrame(frame);
+    if (stopFollowing === stop) stopFollowing = undefined;
+  };
+
+  observer.observe(opener);
+  const group = opener.closest("[data-bar-group]");
+  if (group) observer.observe(group);
+  stopFollowing = stop;
+}
+
+async function showFlyout(view: FlyoutId, opener: Element) {
+  const [monitor, position] = await Promise.all([
+    currentMonitor(),
+    currentWidget().tauriWindow.outerPosition()
+  ]);
+  if (!monitor) return;
+
+  const place = { monitor, position };
+  const id = Date.now();
+  openFlyout.value = placeFlyout(view, opener, id, place);
+  followOpener(view, opener, id, place);
 
   // If it hasn't started or has been closed, it finds the request when it starts.
   if (!flyoutWindow.value) await startFlyoutWindow();
@@ -252,6 +376,10 @@ async function showFlyout(view: FlyoutId, opener: Element) {
  * also arrives before an open flyout loses focus, while it can still be told apart
  * from one that has closed. A click from the keyboard has no press, and a `detail`
  * of 0.
+ *
+ * A press above or below it counts too, as long as it lands on nothing else that
+ * takes presses, because the group around it pads it and the pointer is often at the
+ * edge of the screen.
  */
 export const opensFlyout =
   (view: FlyoutId): Attachment<HTMLElement> =>
@@ -277,11 +405,28 @@ export const opensFlyout =
       if (detail === 0) toggle();
     };
 
+    /** A collapsed section is still there, clipped, so it's asked what's showing. */
+    const onPressInColumn = (event: PointerEvent) => {
+      const { target, button, clientX } = event;
+      if (button !== 0 || !(target instanceof Element)) return;
+      if (element.contains(target) || target.closest(INTERACTIVE)) return;
+
+      const { left, right, top, height } = element.getBoundingClientRect();
+      if (clientX < left || clientX >= right) return;
+      const shown = document.elementFromPoint(clientX, top + height / 2);
+      if (!shown || !element.contains(shown)) return;
+
+      event.stopPropagation();
+      toggle();
+    };
+
     element.addEventListener("pointerdown", onPointerDown);
     element.addEventListener("click", onClick);
+    addEventListener("pointerdown", onPressInColumn, { capture: true });
 
     return () => {
       element.removeEventListener("pointerdown", onPointerDown);
       element.removeEventListener("click", onClick);
+      removeEventListener("pointerdown", onPressInColumn, { capture: true });
     };
   };

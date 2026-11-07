@@ -60,15 +60,25 @@
     </div>
   </div>
   {#if animate}
+    <!-- Three digits are smaller, so that a full meter still fits in its dial. -->
     <span
-      class="number absolute inset-0 flex items-center justify-center tabular-nums"
+      class={[
+        "number absolute inset-0 flex items-center justify-center tabular-nums",
+        normalizedPercent >= 100 && "text-[0.85em]"
+      ]}
     >
-      {normalizedPercent}%
+      {normalizedPercent}<span class="text-[0.7em]">%</span>
     </span>
   {/if}
 </div>
 
 <style>
+  .meter {
+    transition:
+      color var(--transition-duration) var(--ease),
+      stroke var(--transition-duration) var(--ease);
+  }
+
   .progress {
     transition: stroke-dashoffset var(--time-melt) var(--spring-melt);
   }

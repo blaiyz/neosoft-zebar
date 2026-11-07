@@ -38,6 +38,9 @@
   --color-zb-memory: hsl(var(--memory));
   --color-zb-cpu: hsl(var(--cpu));
   --color-zb-cpu-high-usage: hsl(var(--cpu-high-usage));
+  --color-zb-memory-high-usage: hsl(var(--memory-high-usage));
+  --color-zb-disk: hsl(var(--disk));
+  --color-zb-disk-high-usage: hsl(var(--disk-high-usage));
   --color-zb-battery-good: hsl(var(--battery-good));
   --color-zb-battery-mid: hsl(var(--battery-mid));
   --color-zb-battery-low: hsl(var(--battery-low));
@@ -51,8 +54,10 @@
   --color-zb-accent: hsl(var(--accent));
   --color-zb-tiling-direction: hsl(var(--tiling-direction));
   --color-zb-click-through: hsl(var(--click-through));
+  --color-zb-paused: hsl(var(--paused));
   --color-zb-network: hsl(var(--network));
   --color-zb-weather: hsl(var(--weather));
+  --color-zb-keyboard: hsl(var(--keyboard));
   --color-zb-volume-start: hsl(var(--volume-start));
   --color-zb-volume-end: hsl(var(--volume-end));
   --color-zb-volume-inner: hsl(var(--volume-inner));
