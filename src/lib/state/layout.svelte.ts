@@ -1,6 +1,7 @@
 import {
   arrange,
   collapseSteps,
+  partIds,
   partSide,
   type PartId,
   type SectionId
@@ -84,6 +85,13 @@ function isPinned(part: PartId, section: SectionId | undefined) {
   return section !== undefined && config.sections[section] !== "auto";
 }
 
+/** The parts that keep their width whatever the room, as the settings have them. */
+const pinned = $derived(
+  collapseSteps
+    .filter(({ part, section }) => isPinned(part, section))
+    .map(({ part }) => part)
+);
+
 /**
  * Reads the bar as it is now, and works out what it would need at its widest. A
  * width that has given way, or is on its way there, is added back on to what its
@@ -120,9 +128,9 @@ function readFit(): FitInput<PartId> | null {
     right: widthOf(right) - centerGiven / 2 - gap - occupied("after")
   };
 
-  const steps = collapseSteps.flatMap(({ part, section, toFloor, partial }) => {
+  const steps = collapseSteps.flatMap(({ part, toFloor, partial }) => {
     const measure = parts.get(part);
-    if (!measure || isPinned(part, section)) return [];
+    if (!measure || pinned.includes(part)) return [];
 
     return {
       part,
@@ -193,11 +201,11 @@ function update() {
   const movable = new Set(input.steps.map(({ part }) => part));
   const held = { ...targets };
   let released = false;
-  for (const [part, width] of Object.entries(targets)) {
-    if (width === undefined) continue;
+  for (const part of partIds) {
+    if (targets[part] === undefined) continue;
     // Something with no width has nothing to come back to, and would skip the wait.
-    if (movable.has(part as PartId) && input.widths[part as PartId]) continue;
-    held[part as PartId] = undefined;
+    if (movable.has(part) && input.widths[part]) continue;
+    held[part] = undefined;
     released = true;
   }
 
@@ -296,12 +304,12 @@ export function initLayout() {
   $effect(() => {
     if (!configStatus.loaded) return;
 
-    // What a fit reads besides sizes, which the observer reports.
+    // What a fit reads besides sizes, which the observer reports. The monitor is
+    // here because a section that has already given way doesn't change size when
+    // it's hidden for not being on the primary one, until its content leaves.
     void JSON.stringify([
       arranged,
-      config.sections,
-      config.clock.fullDate,
-      config.workspaces,
+      pinned,
       config.taskbarIntegration.enabled,
       isOnPrimaryMonitor(),
       preferences

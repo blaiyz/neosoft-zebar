@@ -85,11 +85,15 @@ function startFlyoutWindow() {
  * to show anything. Call once from the bar. A reload brings back a window that was
  * already running, which is what the wait is for.
  *
- * Also lets go of the bar's shape when the flyout it was for has gone.
+ * Also lets go of the bar's shape, and of the opener it followed, when the flyout
+ * they were for has gone.
  */
 export function initFlyoutWindow() {
   $effect(() => {
-    if (openFlyout.value?.id !== melt.id) melt.group = null;
+    const current = openFlyout.value?.id;
+    if (current !== melt.id) melt.group = null;
+    // Nothing to follow once the flyout has gone, or another bar has opened one.
+    if (current !== openedHere) stopFollowing?.();
   });
 
   $effect(() => {
@@ -167,11 +171,15 @@ function keepEdges(
   radius: number,
   edges: { left: MeltEdge; right: MeltEdge }
 ) {
+  const snap = radius * 2;
+  // It only takes on the group's width while that's close to its own.
   if (edges.left === "flush" && edges.right === "flush") {
-    return { left: group.left, width: group.right - group.left };
+    const groupWidth = group.right - group.left;
+    return Math.abs(width - groupWidth) < snap
+      ? { left: group.left, width: groupWidth }
+      : null;
   }
 
-  const snap = radius * 2;
   // The range the flyout's left end can be in.
   let low = Math.min(EDGE_MARGIN, group.left);
   let high = Math.max(monitorWidth - width - EDGE_MARGIN, group.right - width);
@@ -335,7 +343,10 @@ function followOpener(
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
       const current = openFlyout.value;
-      if (current?.id !== id || !opener.isConnected) return;
+      if (current?.id !== id || !opener.isConnected) {
+        stop();
+        return;
+      }
       const next = placeFlyout(view, opener, id, place, current);
       if (!samePlace(current, next)) openFlyout.value = next;
     });
@@ -353,6 +364,9 @@ function followOpener(
   stopFollowing = stop;
 }
 
+/** The request this bar made last, since another monitor's bar can open one too. */
+let openedHere: number | undefined;
+
 async function showFlyout(view: FlyoutId, opener: Element) {
   const [monitor, position] = await Promise.all([
     currentMonitor(),
@@ -362,6 +376,7 @@ async function showFlyout(view: FlyoutId, opener: Element) {
 
   const place = { monitor, position };
   const id = Date.now();
+  openedHere = id;
   openFlyout.value = placeFlyout(view, opener, id, place);
   followOpener(view, opener, id, place);
 
@@ -385,7 +400,8 @@ export const opensFlyout =
   (view: FlyoutId): Attachment<HTMLElement> =>
   (element) => {
     const toggle = () => {
-      if (openFlyout.value?.view === view) {
+      const current = openFlyout.value;
+      if (current?.view === view && current.id === openedHere) {
         closeFlyout();
         return;
       }

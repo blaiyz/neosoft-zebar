@@ -26,14 +26,9 @@ const focusedWindowId = $derived(focusedWindow?.id || null);
 
 export function initAutotiler() {
   $effect(() => {
-    // Trigger effect when focusedWindowId changes (MUST BE FIRST!!!)
-    // Using ID to avoid unnecessary updates
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    focusedWindowId;
-    if (!config.autoTiling) {
-      // Auto-tiling is disabled
-      return;
-    }
+    // Runs again when another window gets focus, which its ID tells apart from an
+    // update of the same window.
+    if (!focusedWindowId || !config.autoTiling) return;
     const monitor = untrack(() => currentMonitor);
     const window = untrack(() => focusedWindow);
 

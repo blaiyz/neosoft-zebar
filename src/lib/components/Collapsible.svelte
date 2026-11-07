@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { PartId } from "#lib/sections.ts";
+  import { config } from "#lib/state/config.svelte.ts";
   import { layout, partTarget, trackPart } from "#lib/state/layout.svelte.ts";
   import type { Snippet } from "svelte";
-  import { untrack } from "svelte";
+  import { tick, untrack } from "svelte";
   import type { ClassValue } from "svelte/elements";
 
   /**
@@ -11,8 +12,9 @@
    * The width animates through a grid track going between `0fr` and `1fr`, which
    * takes its size from the content on every frame. Unlike `AnimatedList`, which
    * sets a width and transitions to it, it can't lag behind content that's changing
-   * width. The content stays rendered at its full width inside the clipped track,
-   * so a hidden part can still be measured.
+   * width. Content collapsed for room stays rendered at its full width inside the
+   * clipped track, so it can still be measured. Content hidden by `when` leaves the
+   * page once it has closed, so that it stops working.
    */
   type Props = {
     /** The part of the bar this is, if the bar can collapse it. */
@@ -40,10 +42,46 @@
     children
   }: Props = $props();
 
-  let open = $derived(when && (!part || partTarget(part) !== 0));
-
   let track = $state<HTMLElement>();
   let content = $state<HTMLElement>();
+
+  let rendered = $state(untrack(() => when));
+  /** Whether `when` has been true for long enough to open from closed. */
+  let entered = $state(untrack(() => when));
+  let open = $derived(entered && (!part || partTarget(part) !== 0));
+
+  $effect(() => {
+    if (!when) {
+      entered = false;
+      const timer = setTimeout(() => {
+        rendered = false;
+      }, config.bar.transitionDuration);
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+
+    // Still there on its way out, or before anything animates, it opens at once.
+    if (untrack(() => rendered || !layout.ready)) {
+      rendered = true;
+      entered = true;
+      return;
+    }
+
+    rendered = true;
+    // A transition starts from the style the content had once it was on the page,
+    // which reading the layout settles without waiting for a frame that a hidden
+    // window wouldn't get.
+    let cancelled = false;
+    void tick().then(() => {
+      if (cancelled) return;
+      track?.getBoundingClientRect();
+      entered = true;
+    });
+    return () => {
+      cancelled = true;
+    };
+  });
 
   $effect(() => {
     if (!part || !track || !content) return;
@@ -75,7 +113,7 @@
 >
   <div class="clip">
     <div bind:this={content} class={["content", className]}>
-      {@render children()}
+      {#if rendered}{@render children()}{/if}
     </div>
   </div>
 </div>
@@ -124,6 +162,11 @@
   .track.fly:not(.open) > .clip > .content {
     opacity: 0;
     transform: translateY(var(--fly-from));
+  }
+
+  /* Nothing hidden keeps animating. */
+  .track:not(.open) > .clip > .content :global(*) {
+    animation-play-state: paused;
   }
 
   .track.animated > .clip > .content {

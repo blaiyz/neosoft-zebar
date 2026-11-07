@@ -10,6 +10,7 @@
   } from "#lib/state/flyouts.svelte.ts";
   import { initProviders } from "#lib/state/providers.svelte.ts";
   import { readRegion } from "#lib/state/region.svelte.ts";
+  import { holdSingleWindow } from "#lib/state/single_window.ts";
   import { exitTime } from "#lib/theme.ts";
   import { invoke } from "@tauri-apps/api/core";
   import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
@@ -114,9 +115,15 @@
     else if (next?.id !== request?.id) await (next ? show(next) : hide());
   };
 
+  /**
+   * Whether this is the one flyout window. A second one does nothing with requests
+   * while it waits to find out that it isn't, and then closes itself.
+   */
+  let holding = $state(false);
+
   /** Only clears the request if it's still this one. A new one may be on its way. */
   const close = () => {
-    if (openFlyout.value?.id === request?.id) closeFlyout();
+    if (holding && openFlyout.value?.id === request?.id) closeFlyout();
   };
 
   const onBlur = () => {
@@ -124,7 +131,7 @@
   };
 
   $effect(() => {
-    if (!openFlyout.known) return;
+    if (!holding || !openFlyout.known) return;
 
     const next = openFlyout.value;
     if (next) skipExit();
@@ -137,37 +144,22 @@
 
   onMount(() => {
     const widget = currentWidget();
-    let running = false;
 
-    const onPageHide = () => {
-      if (running) flyoutWindow.value = false;
-    };
-    addEventListener("pagehide", onPageHide);
-
-    void navigator.locks.request(
+    const stopHolding = holdSingleWindow(
       WINDOW_LOCK,
-      { ifAvailable: true },
-      async (lock) => {
-        if (!lock) {
-          await widget.close();
-          return;
-        }
-
-        running = true;
-        flyoutWindow.value = true;
+      flyoutWindow,
+      async () => {
+        holding = true;
         void readRegion();
         for (const { load } of Object.values(flyoutViews)) void load();
         if (!openFlyout.value) await widget.tauriWindow.hide();
-
-        // Held for as long as the window lives.
-        await new Promise(() => {});
       }
     );
 
     const unlisten = widget.tauriWindow.listen("tauri://blur", onBlur);
 
     return () => {
-      removeEventListener("pagehide", onPageHide);
+      stopHolding();
       void unlisten.then((stop) => {
         stop();
       });

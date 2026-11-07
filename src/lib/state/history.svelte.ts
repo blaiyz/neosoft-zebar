@@ -25,17 +25,20 @@ export const history = new RemoteState<History>("history", {
   upload: []
 });
 
-function record(series: keyof History, read: () => number | undefined) {
+type Reading = [series: keyof History, value: number];
+
+/** Adds readings to the end of their series, in one write. */
+function record(read: () => Reading[] | null) {
   $effect(() => {
-    const value = read();
-    if (value === undefined || !isOnPrimaryMonitor()) return;
+    const readings = read();
+    if (!readings || !isOnPrimaryMonitor()) return;
 
     untrack(() => {
-      const readings = [...history.value[series], value];
-      history.value = {
-        ...history.value,
-        [series]: readings.slice(-HISTORY_LENGTH)
-      };
+      const next = { ...history.value };
+      for (const [series, value] of readings) {
+        next[series] = [...next[series], value].slice(-HISTORY_LENGTH);
+      }
+      history.value = next;
     });
   });
 }
@@ -45,8 +48,22 @@ function record(series: keyof History, read: () => number | undefined) {
  * records, because every bar sees the same numbers.
  */
 export function initHistory() {
-  record("cpu", () => providers.cpu?.usage);
-  record("memory", () => providers.memory?.usage);
-  record("download", () => providers.network?.traffic?.received.bytes);
-  record("upload", () => providers.network?.traffic?.transmitted.bytes);
+  record(() => {
+    const usage = providers.cpu?.usage;
+    return usage === undefined ? null : [["cpu", usage]];
+  });
+  record(() => {
+    const usage = providers.memory?.usage;
+    return usage === undefined ? null : [["memory", usage]];
+  });
+  // Both directions come from the same reading, so they're written together.
+  record(() => {
+    const traffic = providers.network?.traffic;
+    return traffic
+      ? [
+          ["download", traffic.received.bytes],
+          ["upload", traffic.transmitted.bytes]
+        ]
+      : null;
+  });
 }

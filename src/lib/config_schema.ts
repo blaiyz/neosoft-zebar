@@ -433,22 +433,25 @@ const taskbarIntegration = z
   })
   .prefault({});
 
+/** In milliseconds. Zebar takes a whole number, and spins on 0. */
+const interval = (fallback: number) => z.int().min(100).default(fallback);
+
 const refreshIntervals = z
   .object({
-    cpu: z.number().default(2000),
-    memory: z.number().default(5000),
-    battery: z.number().default(60000),
-    weather: z.number().default(900000),
-    network: z.number().default(2000),
-    disk: z.number().default(60000),
-    keyboard: z.number().default(1000)
+    cpu: interval(2000),
+    memory: interval(5000),
+    battery: interval(60000),
+    weather: interval(900000),
+    network: interval(2000),
+    disk: interval(60000),
+    keyboard: interval(1000)
   })
   .prefault({});
 
 const providers = z
   .object({
     refreshIntervals: refreshIntervals.describe(
-      "The refresh intervals for some providers."
+      "The refresh intervals for some providers, in milliseconds (at least 100)."
     ),
     logErrors: z
       .boolean()
