@@ -18,7 +18,7 @@ A setting lives in several places, and missing one usually fails silently.
 - [ ] Check it shows in the settings window. A key in a group that a page in `src/lib/components/settings/` shows gets a form by itself, with its description. A new group needs a line on a page, and a list or free-form object needs its own control.
 - [ ] To save it from a click, use `updateSetting()`, never a local copy.
 - [ ] Read it through the `config` object. It holds the defaults until `configStatus.loaded`, and it can change at any time, so read it in a template, `$derived` or `$effect`, never once. If an effect shouldn't run on the defaults, check `configStatus.loaded` (see `src/lib/state/binding_modes.svelte.ts`).
-- [ ] A new section: add it to `src/lib/sections.ts`, in `partSides` and at the point in `collapseSteps` where it should give way as well, and to `src/lib/components/section_components.ts`, and its provider to `src/lib/state/providers.svelte.ts`, which starts it unless the section is `false`.
+- [ ] A new section: add it to `src/lib/sections.ts`, in `sectionIds`, `defaultArrangement`, and `partIds` and at the point in `collapseSteps` where it should give way as well, with its colors in `ownColors` in `SectionsPage.svelte` and an icon in `BarMap.svelte`, and to `src/lib/components/section_components.ts`, and its provider to `src/lib/state/providers.svelte.ts`, which starts it unless the section is `false`.
 
 Stored documents won't have the new key, so its default applies to them. The default has to preserve today's behavior unless the change is meant to alter it. Every key needs a default, and that is what keeps partial documents valid.
 

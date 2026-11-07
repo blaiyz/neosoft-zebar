@@ -1,18 +1,16 @@
 <script lang="ts">
   import Group from "#lib/components/Group.svelte";
-  import LeftGroup from "#lib/components/LeftGroup.svelte";
   import ProcessIcons from "#lib/components/ProcessIcons.svelte";
-  import RightGroup from "#lib/components/RightGroup.svelte";
-  import Workspaces from "#lib/components/Workspaces.svelte";
+  import SectionRow from "#lib/components/SectionRow.svelte";
   import { initAutotiler } from "#lib/state/autotiler.svelte.ts";
   import { initBindingModes } from "#lib/state/binding_modes.svelte.ts";
   import { config, configStatus } from "#lib/state/config.svelte.ts";
   import { closeFlyout, initFlyoutWindow } from "#lib/state/flyouts.svelte.ts";
   import { initHistory } from "#lib/state/history.svelte.ts";
   import {
+    barArrangement,
     initLayout,
-    trackColumn,
-    trackContent
+    trackColumn
   } from "#lib/state/layout.svelte.ts";
   import {
     initMonitor,
@@ -27,6 +25,25 @@
   import { onMount } from "svelte";
 
   let glazewm = $derived(providers.glazewm);
+  let arrangement = $derived(barArrangement());
+  let taskbar = $derived(config.taskbarIntegration.enabled);
+
+  // With taskbar integration, the middle group is in two around the taskbar's icons.
+  let split = $derived(arrangement.middle.indexOf("taskbar"));
+  let before = $derived(arrangement.middle.slice(0, split));
+  let after = $derived(arrangement.middle.slice(split + 1));
+  let middle = $derived(
+    arrangement.middle.filter((item) => item !== "taskbar")
+  );
+
+  /** The warning about ignored settings goes at the start of the first group. */
+  let warningIn = $derived(
+    arrangement.left.length > 0
+      ? "left"
+      : middle.length > 0
+        ? "middle"
+        : "right"
+  );
   let gradientDirection = $derived(
     config.bar.gradient === "bottom"
       ? "bg-linear-to-t/srgb"
@@ -92,37 +109,66 @@
         class="flex h-full min-w-0 justify-start"
         {@attach trackColumn("left")}
       >
-        <Group
-          leftCurve={!config.bar.attachSides}
-          class="h-full max-w-full"
-          innerClass={[
-            "flex h-full items-center px-4",
-            isOnPrimaryMonitor() && "pl-zlby"
-          ]}
-        >
-          <LeftGroup />
-        </Group>
+        {#if arrangement.left.length > 0}
+          <Group
+            leftCurve={!config.bar.attachSides}
+            class="h-full max-w-full"
+            innerClass={[
+              "flex h-full items-center px-4",
+              isOnPrimaryMonitor() && "pl-zlby"
+            ]}
+          >
+            <SectionRow
+              items={arrangement.left}
+              content="left"
+              warning={warningIn === "left"}
+            />
+          </Group>
+        {/if}
       </div>
-      <div class="flex h-full items-center">
-        <Group
-          rightCurve={!config.taskbarIntegration.enabled}
-          class={[
-            "h-full",
-            config.taskbarIntegration.enabled &&
-              "translate-x-[-99%] justify-self-end [&&]:absolute"
-          ]}
-          innerClass={[
-            "h-full",
-            config.taskbarIntegration.enabled ? "pl-3" : "px-3"
-          ]}
-        >
-          <div class="h-full w-max" {@attach trackContent("center")}>
-            <Workspaces />
-          </div>
-        </Group>
-        {#if config.taskbarIntegration.enabled}
-          <Group leftCurve={false} class="px-2">
+      <div class="relative flex h-full items-center">
+        {#if taskbar}
+          <!-- The taskbar's icons stay in the centre, and the rest float either side. -->
+          {#if before.length > 0}
+            <Group
+              rightCurve={false}
+              class="right-full h-full translate-x-[1%] [&&]:absolute"
+              innerClass="h-full pl-3"
+            >
+              <SectionRow
+                items={before}
+                content="before"
+                warning={warningIn === "middle"}
+              />
+            </Group>
+          {/if}
+          <Group
+            leftCurve={before.length === 0}
+            rightCurve={after.length === 0}
+            class="px-2"
+          >
             <ProcessIcons />
+          </Group>
+          {#if after.length > 0}
+            <Group
+              leftCurve={false}
+              class="left-full h-full -translate-x-[1%] [&&]:absolute"
+              innerClass="h-full pr-3"
+            >
+              <SectionRow
+                items={after}
+                content="after"
+                warning={warningIn === "middle" && before.length === 0}
+              />
+            </Group>
+          {/if}
+        {:else if middle.length > 0}
+          <Group class="h-full" innerClass="h-full px-3">
+            <SectionRow
+              items={middle}
+              content="center"
+              warning={warningIn === "middle"}
+            />
           </Group>
         {/if}
       </div>
@@ -130,16 +176,22 @@
         class="flex h-full min-w-0 justify-end"
         {@attach trackColumn("right")}
       >
-        <Group
-          rightCurve={!config.bar.attachSides}
-          class="h-full max-w-full"
-          innerClass={[
-            "flex h-full items-center justify-end pr-4 pl-2",
-            isOnPrimaryMonitor() && "pr-zrby"
-          ]}
-        >
-          <RightGroup />
-        </Group>
+        {#if arrangement.right.length > 0}
+          <Group
+            rightCurve={!config.bar.attachSides}
+            class="h-full max-w-full"
+            innerClass={[
+              "flex h-full items-center justify-end pr-4 pl-2",
+              isOnPrimaryMonitor() && "pr-zrby"
+            ]}
+          >
+            <SectionRow
+              items={arrangement.right}
+              content="right"
+              warning={warningIn === "right"}
+            />
+          </Group>
+        {/if}
       </div>
     </div>
   </div>

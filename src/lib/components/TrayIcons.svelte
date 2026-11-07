@@ -16,7 +16,7 @@
 </script>
 
 {#if systray}
-  <div class="mr-1 flex h-full items-center">
+  <div class="flex h-full items-center">
     <AnimatedList items={pinned} key={({ key }: { key: string }) => key}>
       {#snippet item({ icon })}
         <TrayIconButton {icon} class="mx-1 transition hover:scale-125" />

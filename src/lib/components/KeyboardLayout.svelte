@@ -13,7 +13,7 @@
 
 {#if shown}
   <div
-    class="flex h-full items-center px-2 text-sm font-semibold tracking-wide text-zb-keyboard"
+    class="flex h-full items-center text-sm font-semibold tracking-wide text-zb-keyboard"
     aria-label="Keyboard layout {layout}"
   >
     {shown}
