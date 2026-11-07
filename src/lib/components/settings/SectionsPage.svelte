@@ -29,7 +29,7 @@
         field.description === sharedDescription ? "" : field.description
     }));
 
-  let selected = $state<BarPart>("clock");
+  let selected = $state<BarPart>("workspaces");
   let section = $derived(selected === "workspaces" ? null : selected);
   let fields = $derived([
     ...(section ? showField(section) : []),

@@ -122,7 +122,10 @@ function syncProviders(
     if (current?.key === key) continue;
 
     if (current) {
-      void current.stop();
+      // Zebar runs one provider for each config, shared by every window that asks
+      // for it, and the first window to stop it stops it for all of them. The
+      // others' stops then fail, which is expected.
+      current.stop().catch(() => {});
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete running[name];
     }

@@ -99,6 +99,7 @@
 
   :root {
     font-size: var(--font-size);
+    line-height: 1.15;
   }
 
   button {
@@ -184,7 +185,36 @@
   line-height: 1.6;
 }
 
-/* What a change of theme fades through, which stays out of the way of the pointer. */
+/* Colors for gradients drawn by hand. Being registered as colors, unlike the theme's
+  triplets, they can ease from one theme's colors to another's. */
+@property --fill {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
+@property --fill-end {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: transparent;
+}
+
+/* `config.svelte.ts` sets this while the theme's colors change, and every color eases
+  across. For that moment it replaces the transitions elements have of their own. */
+:root.recoloring,
+:root.recoloring *,
+:root.recoloring ::before,
+:root.recoloring ::after {
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    caret-color, fill, stroke, box-shadow, --fill, --fill-end,
+    --tw-gradient-from, --tw-gradient-via, --tw-gradient-to !important;
+  transition-duration: var(--time-fade) !important;
+  transition-timing-function: var(--ease) !important;
+  transition-delay: 0s !important;
+}
+
+/* What a change of look fades through, which stays out of the way of the pointer. */
 ::view-transition {
   pointer-events: none;
 }

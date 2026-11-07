@@ -145,7 +145,7 @@ const sections = z
       .literal([true, false, "auto"])
       .default(false)
       .describe(
-        "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts."
+        "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts. Turning it off stops the provider, which gives the native tray back, but Zebar can only start it once each time it runs, so turning it on again needs a restart of Zebar."
       ),
     volume: section,
     weather: section,

@@ -134,6 +134,11 @@
     border-radius: inherit;
   }
 
+  /* A scrollbar isn't clipped to rounded corners, so it stops short of them. */
+  .scroller::-webkit-scrollbar-track {
+    margin-block: var(--radius);
+  }
+
   .up.closing .panel {
     translate: 0 100%;
   }
@@ -180,6 +185,7 @@
   }
 
   .flare {
+    --fill: hsl(var(--bg));
     position: absolute;
     width: var(--radius);
     height: var(--radius);
@@ -219,7 +225,7 @@
     background: radial-gradient(
       circle at 0 0,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -228,7 +234,7 @@
     background: radial-gradient(
       circle at 100% 0,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -237,7 +243,7 @@
     background: radial-gradient(
       circle at 0 100%,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 
@@ -246,7 +252,7 @@
     background: radial-gradient(
       circle at 100% 100%,
       transparent calc(var(--radius) - 0.5px),
-      hsl(var(--bg)) var(--radius)
+      var(--fill) var(--radius)
     );
   }
 

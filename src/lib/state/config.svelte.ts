@@ -50,13 +50,20 @@ let fades = true;
 const FADE_WAIT = 200;
 /** The newest settings, until they've been applied. */
 let waiting: ReturnType<typeof parseDocument> | null = null;
+let recoloring: ReturnType<typeof setTimeout> | undefined;
 
-/** For a window that spends its time hidden, where a fade would have to wait. */
+/**
+ * For a window that spends its time hidden, where a fade would have to wait, or one
+ * whose controls animate their own changes, which a fade would cover up.
+ */
 function skipConfigFades() {
   fades = false;
 }
 
-/** The settings that change the look all at once, with no animation of their own. */
+/**
+ * The settings that change the look all at once, with no animation of their own.
+ * The theme's colors are left out, as they ease across instead.
+ */
 const lookOf = ({
   theme,
   bar,
@@ -66,7 +73,10 @@ const lookOf = ({
   taskbarIntegration
 }: Config) =>
   JSON.stringify([
-    theme,
+    theme.fontFamily,
+    theme.fontSize,
+    theme.radius,
+    theme.customCss,
     media.style,
     workspaces.style,
     bar.gradient,
@@ -125,11 +135,29 @@ function readDocument(): ConfigDocument {
   }
 }
 
+const colorsOf = ({ theme }: Config) =>
+  JSON.stringify([theme.preset, theme.colors]);
+
+/** Eases every color to the theme's new ones, through a class `app.css` styles. */
+function recolor() {
+  const root = document.documentElement;
+  root.classList.add("recoloring");
+
+  clearTimeout(recoloring);
+  const time = parseFloat(
+    getComputedStyle(root).getPropertyValue("--time-fade")
+  );
+  recoloring = setTimeout(() => {
+    root.classList.remove("recoloring");
+  }, time || 0);
+}
+
 function applyWaiting() {
   if (!waiting) return;
 
   const { config: parsed, issues } = waiting;
   waiting = null;
+  if (configStatus.loaded && colorsOf(parsed) !== colorsOf(config)) recolor();
   syncState(config, parsed);
   configStatus.issues = [...issues, ...fileIssues];
   configStatus.canUndo = localStorage.getItem(BACKUP_KEY) !== null;

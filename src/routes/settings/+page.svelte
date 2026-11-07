@@ -5,11 +5,14 @@
   import BehaviorPage from "#lib/components/settings/BehaviorPage.svelte";
   import SectionsPage from "#lib/components/settings/SectionsPage.svelte";
   import TitleBar from "#lib/components/settings/TitleBar.svelte";
+  import { skipConfigFades } from "#lib/state/config.svelte.ts";
+  import { runSettingsWindow } from "#lib/state/settings_window.svelte.ts";
   import FileJson from "@lucide/svelte/icons/file-json";
   import LayoutGrid from "@lucide/svelte/icons/layout-grid";
   import Palette from "@lucide/svelte/icons/palette";
   import PanelTop from "@lucide/svelte/icons/panel-top";
   import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
+  import { onMount } from "svelte";
 
   const pages = [
     {
@@ -35,6 +38,10 @@
   ];
 
   let current = $state.raw(pages[0]);
+
+  // Its controls show their own changes, and a fade would cover them up.
+  skipConfigFades();
+  onMount(runSettingsWindow);
 </script>
 
 <div

@@ -23,7 +23,7 @@
       {/snippet}
     </AnimatedList>
     <button
-      class="flex h-full items-center text-lg transition hover:text-zb-accent"
+      class="ml-1 flex h-full items-center text-lg transition hover:text-zb-accent"
       aria-label="System tray"
       {@attach opensFlyout("tray")}
     >
