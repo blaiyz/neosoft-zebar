@@ -1,5 +1,7 @@
 import type { Config } from "#lib/config_schema.ts";
 import { config, configStatus } from "#lib/state/config.svelte.ts";
+import { motion } from "#lib/state/motion.svelte.ts";
+import { untrack } from "svelte";
 import {
   createProvider,
   type ProviderGroup,
@@ -96,9 +98,12 @@ function setOutput<Name extends ProviderName>(
 
 /** The last output stays for as long as its section takes to close. */
 function clearOutput(name: ProviderName) {
-  setTimeout(() => {
-    if (!running.has(name)) setOutput(name, null);
-  }, config.bar.transitionDuration);
+  setTimeout(
+    () => {
+      if (!running.has(name)) setOutput(name, null);
+    },
+    untrack(() => motion.duration)
+  );
 }
 
 function startProvider<Name extends ProviderName>(

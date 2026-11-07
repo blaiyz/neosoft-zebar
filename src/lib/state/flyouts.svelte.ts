@@ -1,7 +1,8 @@
 import { flyoutViews, type FlyoutId } from "#lib/flyouts.ts";
-import { config } from "#lib/state/config.svelte.ts";
+import { config, configStatus } from "#lib/state/config.svelte.ts";
 import { remToPx } from "#lib/state/layout.svelte.ts";
 import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
+import { motion } from "#lib/state/motion.svelte.ts";
 import { RemoteState } from "#lib/state/remote_state.svelte.ts";
 import type { PhysicalPosition } from "@tauri-apps/api/dpi";
 import { currentMonitor, type Monitor } from "@tauri-apps/api/window";
@@ -14,6 +15,11 @@ const EDGE_MARGIN = 8;
 const FLOAT_MARGIN = 0.5;
 /** How long a bar gives the flyout window to make itself known, in milliseconds. */
 const WINDOW_CHECK_TIME = 1000;
+/**
+ * How long the pointer rests on a bar before the flyout window starts, when it isn't
+ * kept ready, in milliseconds. Passing over the bar doesn't start it.
+ */
+const REST_TIME = 300;
 /** What a press lands on that has a job of its own, and so doesn't open a flyout. */
 const INTERACTIVE =
   "button, a, input, select, textarea, [role='button'], [role='slider']";
@@ -64,11 +70,18 @@ export function closeFlyout() {
   if (openFlyout.value) openFlyout.value = null;
 }
 
+/** How long a window takes to say that it's running, at most, in milliseconds. */
+const STARTUP_TIME = 5000;
+let startedAt = -Infinity;
+
 /**
  * It takes its real place when it has something to show. A second one closes itself,
- * so nothing needs to stop this from being called twice.
+ * so nothing needs to stop this from being called twice, but one that this window
+ * started a moment ago isn't started again while it gets going.
  */
-function startFlyoutWindow() {
+export function startFlyoutWindow() {
+  if (performance.now() - startedAt < STARTUP_TIME) return Promise.resolve();
+  startedAt = performance.now();
   return startWidget("flyout", {
     anchor: "top_left",
     offsetX: "0px",
@@ -82,8 +95,10 @@ function startFlyoutWindow() {
 
 /**
  * Starts the flyout window ahead of time, because a new window takes around a second
- * to show anything. Call once from the bar. A reload brings back a window that was
- * already running, which is what the wait is for.
+ * to show anything. Call once from the bar. Kept ready, it starts with the bar on the
+ * primary monitor, after a wait, because a reload brings back a window that was
+ * already running. Otherwise it starts when the pointer rests on any bar, as it does
+ * on its way to a flyout, and closes itself once it's been unused for a while.
  *
  * Also lets go of the bar's shape, and of the opener it followed, when the flyout
  * they were for has gone.
@@ -97,12 +112,19 @@ export function initFlyoutWindow() {
   });
 
   $effect(() => {
-    const timer = setTimeout(() => {
-      if (flyoutWindow.value || !isOnPrimaryMonitor()) return;
-      startFlyoutWindow().catch((error: unknown) => {
-        console.error("Error starting the flyout window:", error);
-      });
-    }, WINDOW_CHECK_TIME);
+    if (!configStatus.loaded) return;
+    const ready = config.performance.keepFlyoutsReady;
+    if (ready ? !isOnPrimaryMonitor() : !motion.hovered) return;
+
+    const timer = setTimeout(
+      () => {
+        if (flyoutWindow.value) return;
+        startFlyoutWindow().catch((error: unknown) => {
+          console.error("Error starting the flyout window:", error);
+        });
+      },
+      ready ? WINDOW_CHECK_TIME : REST_TIME
+    );
 
     return () => {
       clearTimeout(timer);

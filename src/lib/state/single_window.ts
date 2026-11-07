@@ -6,8 +6,6 @@ import type { RemoteState } from "./remote_state.svelte.ts";
  * it lives, says so in `running`, and calls `start`. Any other closes itself. The
  * browser lets go of a lock however the window ends, so a window that crashed
  * doesn't block the next one.
- *
- * Returns what removes its listener.
  */
 export function holdSingleWindow(
   lock: string,
@@ -15,6 +13,7 @@ export function holdSingleWindow(
   start?: () => void | Promise<void>
 ) {
   let holding = false;
+  let letGo = () => {};
 
   const onPageHide = () => {
     if (holding) running.value = false;
@@ -34,11 +33,27 @@ export function holdSingleWindow(
     } catch (error) {
       console.error("Error starting the window:", error);
     }
-    // Held for as long as the window lives, whatever starting it did.
-    await new Promise(() => {});
+    // Held for as long as the window lives, whatever starting it did, unless it
+    // lets go first.
+    await new Promise<void>((resolve) => {
+      letGo = resolve;
+    });
   });
 
-  return () => {
-    removeEventListener("pagehide", onPageHide);
+  return {
+    /** Removes its listener. */
+    stop: () => {
+      removeEventListener("pagehide", onPageHide);
+    },
+    /**
+     * Says that the window has stopped, and lets go of the lock, for a window that's
+     * about to close itself. A new one can then start without waiting for it to go.
+     */
+    release: () => {
+      if (!holding) return;
+      holding = false;
+      running.value = false;
+      letGo();
+    }
   };
 }

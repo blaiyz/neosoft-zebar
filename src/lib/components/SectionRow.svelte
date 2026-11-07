@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pillSections, sectionPart, type BarItem } from "#lib/sections.ts";
-  import { config } from "#lib/state/config.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import {
     isSectionShown,
     layout,
@@ -30,8 +30,8 @@
   // The taskbar's room is part of the bar's middle, not of a row.
   let shown = $derived(items.filter((item) => item !== "taskbar"));
 
-  const motion = () => ({
-    duration: layout.ready ? config.bar.transitionDuration : 0,
+  const reorder = () => ({
+    duration: layout.ready ? motion.duration : 0,
     easing: cubicOut
   });
 
@@ -51,7 +51,7 @@
 >
   {#if warning}<ConfigWarning />{/if}
   {#each shown as item (item)}
-    <div class="flex h-full flex-none items-center" animate:flip={motion()}>
+    <div class="flex h-full flex-none items-center" animate:flip={reorder()}>
       <Arrival late={settled && layout.ready}>
         {#if item === "buttons"}
           <Collapsible when={pillShown}>

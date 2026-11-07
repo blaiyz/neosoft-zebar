@@ -97,4 +97,8 @@
   .bar {
     transition: width 1s linear;
   }
+
+  :global(.still) .bar {
+    transition: none;
+  }
 </style>

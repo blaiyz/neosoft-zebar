@@ -138,18 +138,23 @@ function readDocument(): ConfigDocument {
 const colorsOf = ({ theme }: Config) =>
   JSON.stringify([theme.preset, theme.colors]);
 
+/** How long a fade takes in this window, in milliseconds. `+layout.svelte` sets it. */
+const fadeTime = () =>
+  parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--time-fade")
+  ) || 0;
+
 /** Eases every color to the theme's new ones, through a class `app.css` styles. */
 function recolor() {
+  const time = fadeTime();
+  if (time === 0) return;
+
   const root = document.documentElement;
   root.classList.add("recoloring");
-
   clearTimeout(recoloring);
-  const time = parseFloat(
-    getComputedStyle(root).getPropertyValue("--time-fade")
-  );
   recoloring = setTimeout(() => {
     root.classList.remove("recoloring");
-  }, time || 0);
+  }, time);
 }
 
 function applyWaiting() {
@@ -175,6 +180,7 @@ function applyDocument(next: ConfigDocument) {
   if (
     fades &&
     configStatus.loaded &&
+    fadeTime() > 0 &&
     lookOf(waiting.config) !== lookOf(config)
   ) {
     const transition = document.startViewTransition(() => {

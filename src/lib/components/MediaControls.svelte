@@ -381,6 +381,12 @@
     opacity: 1;
   }
 
+  /* Resting, they stand at one height in the middle of their range. */
+  :global(.still) .bars.playing i {
+    height: 0.8rem;
+    animation: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .bars.playing i {
       height: 0.8rem;

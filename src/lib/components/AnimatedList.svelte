@@ -1,5 +1,5 @@
 <script lang="ts" generics="T">
-  import { config } from "#lib/state/config.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import type { Snippet } from "svelte";
   import { onDestroy, untrack } from "svelte";
   import type { Attachment } from "svelte/attachments";
@@ -100,7 +100,7 @@
     entry.leaving = true;
     entry.removal = setTimeout(() => {
       entries = entries.filter((other) => other !== entry);
-    }, config.bar.transitionDuration);
+    }, motion.duration);
   };
 
   const reconcile = (next: T[]) => {
