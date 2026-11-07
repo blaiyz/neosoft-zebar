@@ -93,8 +93,8 @@
 </Well>
 
 <style>
-  /* Moves on with every tick, so it glides rather than springs. */
+  /* Glides for as long as the playhead's tick, so it moves on without stopping. */
   .bar {
-    transition: width 250ms linear;
+    transition: width 1s linear;
   }
 </style>

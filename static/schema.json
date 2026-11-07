@@ -577,37 +577,51 @@
       "type": "object",
       "properties": {
         "refreshIntervals": {
-          "description": "The refresh intervals for some providers.",
+          "description": "The refresh intervals for some providers, in milliseconds (at least 100).",
           "default": {},
           "type": "object",
           "properties": {
             "cpu": {
               "default": 2000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "memory": {
               "default": 5000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "battery": {
               "default": 60000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "weather": {
               "default": 900000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "network": {
               "default": 2000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "disk": {
               "default": 60000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             },
             "keyboard": {
               "default": 1000,
-              "type": "number"
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 9007199254740991
             }
           }
         },

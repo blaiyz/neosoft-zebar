@@ -1,11 +1,10 @@
 <script lang="ts">
+  import { colorPicker } from "#lib/state/color_picker.svelte.ts";
   import { config, updateSetting } from "#lib/state/config.svelte.ts";
   import type { Swatch } from "#lib/theme_palette.ts";
-  import { hexToHsl, hslToHex } from "#lib/utils/color.ts";
-  import { throttle } from "#lib/utils/throttle.ts";
+  import { hslToHex } from "#lib/utils/color.ts";
   import Pipette from "@lucide/svelte/icons/pipette";
   import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
-  import { onDestroy } from "svelte";
 
   type Props = {
     /** The theme color it sets. */
@@ -17,30 +16,9 @@
 
   let { name, label, palette }: Props = $props();
 
-  /** How often a color being picked is saved, in milliseconds. */
-  const SAVE_EVERY = 200;
-
   const path = $derived(`theme.colors.${name}`);
   let override = $derived(config.theme.colors[name]);
-
-  let value = $state("");
-  /** While the picker is open, it shows the color, not what's been saved so far. */
-  let picking = false;
-
-  // The color comes from the stylesheets, which update after the settings do.
-  $effect(() => {
-    void JSON.stringify([config.theme.preset, override]);
-
-    const frame = requestAnimationFrame(() => {
-      if (picking) return;
-      value = getComputedStyle(document.documentElement)
-        .getPropertyValue(`--${name}`)
-        .trim();
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-    };
-  });
+  const picker = colorPicker(() => name);
 
   /**
    * What a swatch saves: nothing for this color's own, so that it follows the
@@ -59,25 +37,6 @@
       ? swatch.sources.includes(name)
       : override === swatch.value ||
         swatch.sources.some((source) => override === `var(--${source})`);
-
-  const save = throttle((color: string) => {
-    updateSetting(path, color);
-  }, SAVE_EVERY);
-
-  const pickCustom = (picked: string) => {
-    const [, alpha] = value.split("/");
-    const suffix = alpha === undefined ? "" : ` /${alpha}`;
-    picking = true;
-    value = `${hexToHsl(picked)}${suffix}`;
-    save(value);
-  };
-
-  const finishPicking = () => {
-    picking = false;
-    save.flush();
-  };
-
-  onDestroy(save.flush);
 
   let custom = $derived(
     override !== undefined && !palette.some((swatch) => isPicked(swatch))
@@ -100,7 +59,7 @@
     {/each}
     <label
       class={["swatch custom", custom && "on"]}
-      style:--swatch="hsl({value})"
+      style:--swatch="hsl({picker.value})"
       title="Any color"
     >
       <Pipette />
@@ -108,12 +67,12 @@
         class="sr-only"
         type="color"
         aria-label="{label}: any color"
-        value={hslToHex(value)}
+        value={hslToHex(picker.value)}
         oninput={(event) => {
-          pickCustom(event.currentTarget.value);
+          picker.pick(event.currentTarget.value);
         }}
-        onchange={finishPicking}
-        onblur={finishPicking}
+        onchange={picker.finish}
+        onblur={picker.finish}
       />
     </label>
   </div>

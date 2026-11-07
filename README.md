@@ -78,7 +78,7 @@ To work on the look of the bar in a normal browser, `pnpm run dev:mock` starts a
 
 Neosoft Zebar keeps its settings in Zebar's storage, not in the folder of the installed pack, so they survive updates. There are two ways to change them, and they can be mixed.
 
-**The settings window** opens from the gear at the left end of the bar, or from the `settings` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Undo there goes back to before the last import or reset.
+**The settings window** opens from the gear at the left end of the bar, or from the `settings` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Exports leave out which tray icons are pinned and their order, since those are your PC's apps. Undo there goes back to before the last import or reset.
 
 **`config.json`** ships together with the bundle. Edit it and reload Zebar with **Empty cache & reload configs** from its tray menu.
 
@@ -101,7 +101,7 @@ To see the description and value options for each field, open `config.json` in V
 
 **Mistakes don't break the bar.** A value that isn't valid is ignored and everything else still applies. A warning icon appears in the bar until the file is fixed. Hover over it to see which settings were ignored.
 
-**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `disk` and `keyboard` are off until you turn them on. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
+**Sections** can be `true` (always shown), `false` (removed, along with the data it collects, except the disks, which the System flyout always shows) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `disk` and `keyboard` are off until you turn them on. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
 
 **Arranging:** drag sections between the left, middle and right groups on the Sections page of the settings window. The workspaces move the same way, and the settings, power and heart buttons move together. With taskbar integration, the taskbar's icons stay in the centre, and what you put in the middle group sits either side of them. In `config.json` this is `arrangement`, a list for each group.
 

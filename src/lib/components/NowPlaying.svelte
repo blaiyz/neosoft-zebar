@@ -6,7 +6,6 @@
   import { chooseSession, shownSession } from "#lib/state/media.svelte.ts";
   import { playhead } from "#lib/state/playhead.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
-  import { onDestroy, untrack } from "svelte";
   import type { MediaSession } from "zebar";
   import Collapsible from "./Collapsible.svelte";
   import MediaControls from "./MediaControls.svelte";
@@ -17,36 +16,32 @@
   let media = $derived(providers.media);
   let playing = $derived(shownSession(media));
 
-  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
-  let visibleSession = $state<MediaSession | null>(null);
+  /** How long the section waits after the last session ends, in milliseconds. */
+  const LINGER_TIME = 2000;
+
+  let visible = $state(false);
   // Stays after the session ends, to show while the section closes.
   let lastSession = $state.raw<MediaSession | null>(null);
-  let active = $derived(media !== null && visibleSession !== null);
+  let active = $derived(media !== null && visible);
 
+  // A gap between two sessions, as when a player switches tracks, doesn't close it.
   $effect(() => {
-    const session = playing;
-    const prevSession: MediaSession | null = untrack(() => visibleSession);
-    if (session) {
-      clearTimeout(mediaTimeout);
-      mediaTimeout = undefined;
-      visibleSession = session;
-      lastSession = session;
+    if (playing) {
+      lastSession = playing;
+      visible = true;
       return;
     }
-    if (prevSession) {
-      if (mediaTimeout) {
-        return;
-      }
-      mediaTimeout = setTimeout(() => {
-        mediaTimeout = undefined;
-        visibleSession = null;
-      }, 2000);
-    } else {
-      visibleSession = null;
-    }
+    const timer = setTimeout(() => {
+      visible = false;
+    }, LINGER_TIME);
+    return () => {
+      clearTimeout(timer);
+    };
   });
 
-  const head = playhead(() => lastSession);
+  // Stops counting once the section is going, so a session that ended while it
+  // played doesn't keep a timer running.
+  const head = playhead(() => (visible ? lastSession : null));
   let session = $derived(
     lastSession && { ...lastSession, position: head.position }
   );
@@ -73,8 +68,6 @@
     const next = sessions.at((index + step) % sessions.length);
     if (next) chooseSession(media, next.sessionId);
   };
-
-  onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
 <Collapsible when={active} anchor="end">

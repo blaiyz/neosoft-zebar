@@ -15,17 +15,7 @@
   let open = $state(untrack(() => !late));
 
   onMount(() => {
-    if (open) return;
-
-    // A transition needs a paint at the old value before it can start.
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => {
-        open = true;
-      });
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-    };
+    open = true;
   });
 </script>
 

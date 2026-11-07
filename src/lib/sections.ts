@@ -19,6 +19,12 @@ export const sectionIds = [
 ] as const;
 export type SectionId = (typeof sectionIds)[number];
 
+/** Whether `value` is one of `list`, which narrows it to the list's type. */
+export const isOneOf = <T extends string>(
+  list: readonly T[],
+  value: string
+): value is T => list.some((item) => item === value);
+
 /**
  * What can be arranged on the bar: the pill of buttons as one, every other section,
  * the workspaces, and the room kept for the taskbar's window icons.
@@ -27,7 +33,7 @@ export const barItems = [
   "buttons",
   ...sectionIds.filter(
     (id): id is Exclude<SectionId, (typeof pillSections)[number]> =>
-      !(pillSections as readonly string[]).includes(id)
+      !isOneOf(pillSections, id)
   ),
   "workspaces",
   "taskbar"
@@ -77,7 +83,7 @@ export function arrange(stored: Arrangement): Arrangement {
 }
 
 /** The pieces of the bar that give way when it runs out of room. */
-const partIds = [
+export const partIds = [
   "power",
   "heart",
   "cpu",
@@ -105,16 +111,14 @@ export type BarPart = SectionId | "workspaces" | "taskbar";
 
 /** The part that a whole section collapses as. The network's are inside it. */
 export const sectionPart = (id: SectionId) =>
-  id !== "network" && (partIds as readonly string[]).includes(id)
-    ? (id as PartId)
-    : undefined;
+  id !== "network" && isOneOf(partIds, id) ? id : undefined;
 
 /** The item a part belongs to, which is the one it moves with. */
 export function itemOf(part: BarPart | PartId): BarItem {
-  const owner = part.split(".")[0] as BarPart;
-  return (pillSections as readonly string[]).includes(owner)
-    ? "buttons"
-    : (owner as BarItem);
+  const owner = part.split(".")[0] ?? part;
+  if (isOneOf(pillSections, owner)) return "buttons";
+  if (isOneOf(barItems, owner)) return owner;
+  throw new Error(`No item on the bar holds ${part}`);
 }
 
 /**

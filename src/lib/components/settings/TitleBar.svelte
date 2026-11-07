@@ -22,13 +22,15 @@
    * under the pointer. They're read first, as the event's values can't be relied on
    * after waiting for the window's position.
    */
-  const onPointerDown = async (event: PointerEvent) => {
+  const onPointerDown = async (
+    event: PointerEvent & { currentTarget: HTMLElement }
+  ) => {
     const onButton =
       event.target instanceof Element && event.target.closest("button");
     if (event.button !== 0 || onButton) return;
 
     const { pointerId, screenX: startX, screenY: startY } = event;
-    const handle = event.currentTarget as HTMLElement;
+    const handle = event.currentTarget;
     handle.setPointerCapture(pointerId);
 
     const origin = await currentWidget().tauriWindow.outerPosition();

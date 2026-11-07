@@ -3,6 +3,7 @@
   import {
     arrange,
     barGroups,
+    isOneOf,
     itemOf,
     pillSections,
     type Arrangement,
@@ -101,8 +102,10 @@
 
   let bead = $derived.by(() => {
     const item = itemOf(selected);
-    const offset = (pillSections as readonly string[]).indexOf(selected);
-    return leftOf(item) + Math.max(0, offset) * layout.item;
+    const offset = isOneOf(pillSections, selected)
+      ? pillSections.indexOf(selected)
+      : 0;
+    return leftOf(item) + offset * layout.item;
   });
 
   // Nothing animates until the map has its width, so that it doesn't fly in.

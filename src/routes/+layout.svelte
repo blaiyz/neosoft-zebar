@@ -32,8 +32,12 @@
    */
   const dropClickFocus = ({ detail }: MouseEvent) => {
     const focused = document.activeElement;
-    if (detail > 0 && focused?.matches("button, a, [role='slider']")) {
-      (focused as HTMLElement).blur();
+    if (
+      detail > 0 &&
+      focused instanceof HTMLElement &&
+      focused.matches("button, a, [role='slider']")
+    ) {
+      focused.blur();
     }
   };
 

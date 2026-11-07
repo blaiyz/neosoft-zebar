@@ -228,7 +228,12 @@ function updateSetting(path: string, value: unknown) {
 
 /** The settings as a file, holding only what differs from the defaults. */
 function exportConfig(scope: "all" | "theme") {
-  const changed = differences($state.snapshot(config), defaultConfig);
+  const current = $state.snapshot(config);
+  // The tray's icons are this PC's apps, so a shared file leaves them out by
+  // counting them as unchanged.
+  const { pinned, order } = current.tray;
+  const reference = mergeDocuments(defaultConfig, { tray: { pinned, order } });
+  const changed = differences(current, reference);
   const document = scope === "theme" ? { theme: changed.theme ?? {} } : changed;
 
   return JSON.stringify({ ...document, version: CONFIG_VERSION }, null, 2);

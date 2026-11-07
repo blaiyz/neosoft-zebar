@@ -156,9 +156,12 @@
         place();
       };
 
+      // Untracked, so that the attachment only runs again for a new element.
       const { width: startWidth, height: startHeight } =
         element.getBoundingClientRect();
-      update(startWidth, startHeight);
+      untrack(() => {
+        update(startWidth, startHeight);
+      });
 
       const observer = new ResizeObserver(([resized]) => {
         const size = resized?.borderBoxSize[0];

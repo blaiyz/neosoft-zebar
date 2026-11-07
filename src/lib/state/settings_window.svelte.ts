@@ -1,5 +1,6 @@
 import { currentWidget, startWidgetPreset } from "zebar";
 import { RemoteState } from "./remote_state.svelte.ts";
+import { holdSingleWindow } from "./single_window.ts";
 
 /** Whether the settings window is open, which only that window sets. */
 export const settingsWindow = new RemoteState("settings.window", false);
@@ -42,36 +43,11 @@ export function closeSettings() {
  * one closes itself, which also covers Zebar's tray menu opening another.
  */
 export function runSettingsWindow() {
-  let running = false;
-
-  const onPageHide = () => {
-    if (running) settingsWindow.value = false;
-  };
-  addEventListener("pagehide", onPageHide);
-
-  if (requests) {
-    requests.onmessage = ({ data }: MessageEvent<unknown>) => {
-      if (running && data === CLOSE) closeSettings();
-    };
-  }
-
-  void navigator.locks.request(
-    WINDOW_LOCK,
-    { ifAvailable: true },
-    async (lock) => {
-      if (!lock) {
-        await currentWidget().close();
-        return;
-      }
-
-      running = true;
-      settingsWindow.value = true;
-      // Held for as long as the window lives.
-      await new Promise(() => {});
+  return holdSingleWindow(WINDOW_LOCK, settingsWindow, () => {
+    if (requests) {
+      requests.onmessage = ({ data }: MessageEvent<unknown>) => {
+        if (data === CLOSE) closeSettings();
+      };
     }
-  );
-
-  return () => {
-    removeEventListener("pagehide", onPageHide);
-  };
+  });
 }

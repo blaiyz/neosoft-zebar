@@ -60,7 +60,7 @@ function toControl(property: Property): Control | null {
 
   const types = [property.type].flat();
   if (types.includes("boolean")) return { type: "toggle" };
-  if (types.includes("number")) {
+  if (types.includes("number") || types.includes("integer")) {
     return { type: "number", minimum: property.minimum };
   }
   if (types.includes("string")) {

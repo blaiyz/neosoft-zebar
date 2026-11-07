@@ -13,12 +13,18 @@
   const COLOR_COLUMNS = 3;
 
   let cssTimer: ReturnType<typeof setTimeout> | undefined;
+  let typedCss: string | undefined;
+
+  const saveCss = () => {
+    clearTimeout(cssTimer);
+    if (typedCss !== undefined) updateSetting("theme.customCss", typedCss);
+    typedCss = undefined;
+  };
 
   const onCssInput = (css: string) => {
     clearTimeout(cssTimer);
-    cssTimer = setTimeout(() => {
-      updateSetting("theme.customCss", css);
-    }, CSS_DELAY);
+    typedCss = css;
+    cssTimer = setTimeout(saveCss, CSS_DELAY);
   };
 
   const label = (preset: string) => preset.replaceAll("-", " ");
@@ -30,9 +36,9 @@
     )
   );
 
-  onDestroy(() => {
-    clearTimeout(cssTimer);
-  });
+  // Leaving the page or the field saves what was typed last, since closing the
+  // window doesn't wait for the timer.
+  onDestroy(saveCss);
 </script>
 
 <SettingsGroup title="Theme">
@@ -92,7 +98,8 @@
     value={config.theme.customCss}
     oninput={(event) => {
       onCssInput(event.currentTarget.value);
-    }}></textarea>
+    }}
+    onchange={saveCss}></textarea>
 </SettingsGroup>
 
 <style>

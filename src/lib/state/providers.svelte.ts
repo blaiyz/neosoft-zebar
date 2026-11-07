@@ -58,25 +58,34 @@ type ProviderConfig = Required<ReturnType<typeof createProviderConfig>>;
 export type ProviderName = keyof ProviderConfig;
 type ProviderOutputs = ProviderGroup<ProviderConfig>["outputMap"];
 
-const providers: ProviderOutputs = $state({
-  battery: null,
-  cpu: null,
-  date: null,
-  glazewm: null,
-  memory: null,
-  network: null,
-  weather: null,
-  media: null,
-  audio: null,
-  systray: null,
-  disk: null,
-  host: null,
-  keyboard: null
-});
+/**
+ * Every output is replaced whole and never changed, so only the outputs themselves
+ * are reactive. A deep proxy would wrap each new one again on every reading.
+ */
+class Outputs implements ProviderOutputs {
+  battery: ProviderOutputs["battery"] = $state.raw(null);
+  cpu: ProviderOutputs["cpu"] = $state.raw(null);
+  date: ProviderOutputs["date"] = $state.raw(null);
+  glazewm: ProviderOutputs["glazewm"] = $state.raw(null);
+  memory: ProviderOutputs["memory"] = $state.raw(null);
+  network: ProviderOutputs["network"] = $state.raw(null);
+  weather: ProviderOutputs["weather"] = $state.raw(null);
+  media: ProviderOutputs["media"] = $state.raw(null);
+  audio: ProviderOutputs["audio"] = $state.raw(null);
+  systray: ProviderOutputs["systray"] = $state.raw(null);
+  disk: ProviderOutputs["disk"] = $state.raw(null);
+  host: ProviderOutputs["host"] = $state.raw(null);
+  keyboard: ProviderOutputs["keyboard"] = $state.raw(null);
+}
 
-const running: Partial<
-  Record<ProviderName, { key: string; stop: () => Promise<void> }>
-> = {};
+const providers: ProviderOutputs = new Outputs();
+
+// Nothing reads this reactively.
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
+const running = new Map<
+  ProviderName,
+  { key: string; stop: () => Promise<void> }
+>();
 
 function setOutput<Name extends ProviderName>(
   name: Name,
@@ -88,7 +97,7 @@ function setOutput<Name extends ProviderName>(
 /** The last output stays for as long as its section takes to close. */
 function clearOutput(name: ProviderName) {
   setTimeout(() => {
-    if (!running[name]) setOutput(name, null);
+    if (!running.has(name)) setOutput(name, null);
   }, config.bar.transitionDuration);
 }
 
@@ -109,7 +118,7 @@ function startProvider<Name extends ProviderName>(
     }
   });
 
-  running[name] = { key, stop: () => provider.stop() };
+  running.set(name, { key, stop: () => provider.stop() });
 }
 
 /**
@@ -120,12 +129,10 @@ function syncProviders(
   available: Partial<ProviderConfig>,
   wanted: readonly ProviderName[]
 ) {
-  const names = Object.keys(providers) as ProviderName[];
-
-  for (const name of names) {
+  for (const name of new Set([...running.keys(), ...wanted])) {
     const providerConfig = wanted.includes(name) ? available[name] : undefined;
     const key = providerConfig && JSON.stringify(providerConfig);
-    const current = running[name];
+    const current = running.get(name);
     if (current?.key === key) continue;
 
     if (current) {
@@ -133,44 +140,41 @@ function syncProviders(
       // for it, and the first window to stop it stops it for all of them. The
       // others' stops then fail, which is expected.
       current.stop().catch(() => {});
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete running[name];
+      running.delete(name);
     }
     if (providerConfig && key) startProvider(name, providerConfig, key);
     else if (current) clearOutput(name);
   }
 }
 
-/** What the bar itself shows. The flyouts read the disks whatever the bar shows. */
-const barProviders = ({ sections }: Config): ProviderName[] => [
+/**
+ * What the bar itself shows, and the disks whatever the bar shows, since the
+ * flyouts read them too. Zebar stops a provider for every window at once, so a
+ * window must never stop one that another still wants.
+ */
+const barProviders: readonly ProviderName[] = [
   "audio",
   "battery",
   "cpu",
   "date",
+  "disk",
   "glazewm",
   "keyboard",
   "media",
   "memory",
   "network",
   "systray",
-  "weather",
-  ...(sections.disk === false ? [] : ["disk" as const])
+  "weather"
 ];
 
 /**
  * Call while a component initializes. A window starts the providers in `wanted`,
  * except for those that the sections they belong to have turned off.
  */
-function initProviders(
-  wanted: readonly ProviderName[] | ((config: Config) => ProviderName[])
-) {
+function initProviders(wanted: readonly ProviderName[]) {
   $effect(() => {
-    if (configStatus.loaded) {
-      syncProviders(
-        createProviderConfig(config),
-        typeof wanted === "function" ? wanted(config) : wanted
-      );
-    }
+    if (configStatus.loaded)
+      syncProviders(createProviderConfig(config), wanted);
   });
 }
 

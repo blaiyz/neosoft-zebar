@@ -38,18 +38,6 @@
           {
             "program": "cmd",
             "argsRegex": "^/c start https://github\\.com/blaiyz/neosoft-zebar$"
-          },
-          {
-            "program": "shutdown",
-            "argsRegex": "^/(a|l|(s|r) /t 60)$"
-          },
-          {
-            "program": "rundll32",
-            "argsRegex": "^user32\\.dll,LockWorkStation$"
-          },
-          {
-            "program": "powershell",
-            "argsRegex": "^-NoProfile -Command Add-Type -AssemblyName System\\.Windows\\.Forms; \\[System\\.Windows\\.Forms\\.Application\\]::SetSuspendState\\('Suspend', \\$false, \\$false\\)$"
           }
         ]
       },
@@ -90,10 +78,6 @@
           {
             "program": "reg",
             "argsRegex": "^query HKCU\\\\Control Panel\\\\International$"
-          },
-          {
-            "program": "cmd",
-            "argsRegex": "^/c start https://github\\.com/blaiyz/neosoft-zebar$"
           },
           {
             "program": "shutdown",

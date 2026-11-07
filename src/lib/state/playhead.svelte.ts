@@ -3,8 +3,12 @@ import type { MediaSession } from "zebar";
 
 /** How far a reading can be from where this has counted to, in seconds. */
 const SEEK_TOLERANCE = 2;
-/** How often the time moves on between readings, in milliseconds. */
-const TICK_TIME = 250;
+/** How late after each whole second the time moves on, in milliseconds. */
+const TICK_MARGIN = 20;
+
+/** How long until a position reaches its next whole second, in milliseconds. */
+const untilNextSecond = (seconds: number) =>
+  (1 - (seconds % 1)) * 1000 + TICK_MARGIN;
 
 type Track = Pick<MediaSession, "title" | "isPlaying" | "endTime" | "position">;
 
@@ -16,7 +20,8 @@ type Track = Pick<MediaSession, "title" | "isPlaying" | "endTime" | "position">;
  * Call while a component initializes.
  */
 export function playhead(read: () => Track | null | undefined) {
-  let position = $state(0);
+  // Starts where the track is, so that nothing shown moves up to it from 0.
+  let position = $state(untrack(() => read()?.position ?? 0));
   let countedTitle: string | null = null;
 
   $effect(() => {
@@ -29,15 +34,23 @@ export function playhead(read: () => Track | null | undefined) {
     countedTitle = title;
     if (!isPlaying) return;
 
+    // Once a second, as the shown time changes, which is all the bar shows.
     let last = performance.now();
-    const timer = setInterval(() => {
+    const tick = () => {
       const now = performance.now();
       position = Math.min(endTime, position + (now - last) / 1000);
       last = now;
-    }, TICK_TIME);
+      timer = setTimeout(tick, untilNextSecond(position));
+    };
+    let timer = setTimeout(tick, untilNextSecond(untrack(() => position)));
 
+    // A reading arrives between ticks, so the time since the last one still counts.
     return () => {
-      clearInterval(timer);
+      clearTimeout(timer);
+      position = Math.min(
+        endTime,
+        position + (performance.now() - last) / 1000
+      );
     };
   });
 

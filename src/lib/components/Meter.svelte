@@ -1,6 +1,13 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
   import type { ClassValue } from "svelte/elements";
+
+  /**
+   * How far a reading has to move, in percent, for the ring to ease there. A smaller
+   * change is a pixel or two, which looks the same when it jumps, and easing it
+   * would draw a frame every 16 ms for half a second on every reading.
+   */
+  const EASE_FROM = 3;
 
   type Props = {
     percent: number;
@@ -21,6 +28,14 @@
   const strokeDashoffset = $derived(
     circumference * (1 - normalizedPercent / 100)
   );
+
+  let eases = $state(true);
+  let previous = untrack(() => normalizedPercent);
+  $effect.pre(() => {
+    const next = normalizedPercent;
+    eases = Math.abs(next - previous) >= EASE_FROM;
+    previous = next;
+  });
 </script>
 
 <div class={["meter relative flex aspect-square items-center", className]}>
@@ -41,7 +56,7 @@
         fill="transparent"
       ></circle>
       <circle
-        class="progress"
+        class={["progress", eases && "eases"]}
         stroke-width={strokeWidth}
         stroke-linecap="round"
         r={radius}
@@ -79,7 +94,7 @@
       stroke var(--transition-duration) var(--ease);
   }
 
-  .progress {
+  .progress.eases {
     transition: stroke-dashoffset var(--time-melt) var(--spring-melt);
   }
 

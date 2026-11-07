@@ -86,21 +86,21 @@
     }, HOLD_TIME);
   };
 
-  const fromPointer = ({ clientX, currentTarget }: PointerEvent) => {
-    const { left, width } = (
-      currentTarget as HTMLElement
-    ).getBoundingClientRect();
+  type PointerOnSlider = PointerEvent & { currentTarget: HTMLElement };
+
+  const fromPointer = ({ clientX, currentTarget }: PointerOnSlider) => {
+    const { left, width } = currentTarget.getBoundingClientRect();
     hold(((clientX - left) / width) * max);
   };
 
-  const onPointerDown = (event: PointerEvent) => {
+  const onPointerDown = (event: PointerOnSlider) => {
     if (event.button !== 0) return;
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    event.currentTarget.setPointerCapture(event.pointerId);
     dragging = true;
     fromPointer(event);
   };
 
-  const onPointerMove = (event: PointerEvent) => {
+  const onPointerMove = (event: PointerOnSlider) => {
     if (dragging) fromPointer(event);
   };
 

@@ -8,6 +8,7 @@
   import SkipBack from "@lucide/svelte/icons/skip-back";
   import SkipForward from "@lucide/svelte/icons/skip-forward";
   import type { Icon } from "@tabler/icons-svelte";
+  import { untrack } from "svelte";
   import type { Attachment } from "svelte/attachments";
   import type { MediaSession } from "zebar";
   import BeadButton from "./BeadButton.svelte";
@@ -66,6 +67,12 @@
   let titleHovered = $state(false);
   // The title shows the time instead under the pointer.
   let timeShown = $derived(titleHovered || peek);
+  // Only kept up to date while it shows, so that it isn't laid out every second
+  // unseen. It keeps its last value while it hides.
+  let timePosition = $state(untrack(() => session.position));
+  $effect.pre(() => {
+    if (timeShown) timePosition = session.position;
+  });
 
   let progress = $derived(
     Math.round((session.position / session.endTime) * 100) || 0
@@ -212,7 +219,7 @@
             !timeShown && session.title && "opacity-0"
           ]}
         >
-          {secondsToHms(session.position)}/{secondsToHms(session.endTime)}
+          {secondsToHms(timePosition)}/{secondsToHms(session.endTime)}
         </span>
       </div>
     </Collapsible>
@@ -314,9 +321,11 @@
     transition: width var(--time-melt) var(--spring-melt);
   }
 
+  /* Its size is fixed, so the bars changing height lay out nothing around it. */
   .bars {
     position: relative;
     display: flex;
+    contain: size layout;
     width: 2.5rem;
     height: 2rem;
     flex: none;
