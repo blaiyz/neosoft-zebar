@@ -103,6 +103,8 @@ To see the description and value options for each field, open `config.json` in V
 
 **Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `disk` and `keyboard` are off until you turn them on. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
 
+**Arranging:** drag sections between the left, middle and right groups on the Sections page of the settings window. The workspaces move the same way, and the settings, power and heart buttons move together. With taskbar integration, the taskbar's icons stay in the centre, and what you put in the middle group sits either side of them. In `config.json` this is `arrangement`, a list for each group.
+
 **Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
 
 When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way.
@@ -154,7 +156,7 @@ Pick a preset with `theme.preset`:
 | `nord`                                                                              | [Nord](https://www.nordtheme.com/)               |
 | `material`                                                                          | [Material](https://m2.material.io/design/color/) |
 
-To change individual colors, use `theme.colors`, with HSL-encoded colors without commas. A color can also point at any color in the [bundled palettes](src/themes). The names are in [`presets.css`](src/themes/presets.css).
+To change individual colors, use `theme.colors`, with HSL-encoded colors without commas. A color can also point at another with `var(--name)`: one of the theme's own, such as `var(--ws-2)`, which follows the preset, or any color in the [bundled palettes](src/themes). The Sections page of the settings window has each section's colors, with the theme's own as swatches. The names are in [`presets.css`](src/themes/presets.css).
 
 ```json
 {

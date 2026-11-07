@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { sectionIds } from "./sections.ts";
+import { barItems, defaultArrangement, sectionIds } from "./sections.ts";
 
 /** Raised whenever the document changes shape, with a step in `config_migrations.ts`. */
 export const CONFIG_VERSION = 2;
@@ -113,7 +113,7 @@ const theme = z
       .record(z.string(), z.string())
       .default({})
       .describe(
-        'Overrides for individual colors, as HSL without commas. For example `{ "accent": "300 100% 50%" }`. See the README for the names.'
+        'Overrides for individual colors, as HSL without commas, or another color as `var(--name)`. For example `{ "accent": "300 100% 50%", "cpu": "var(--ws-2)" }`. See the README for the names.'
       ),
     fontFamily: z
       .string()
@@ -171,6 +171,23 @@ const sections = z
     clock: z.boolean().default(true)
   })
   .prefault({});
+
+const arrangedItems = (group: keyof typeof defaultArrangement) =>
+  z.array(z.enum(barItems)).default(() => [...defaultArrangement[group]]);
+
+const arrangement = z
+  .object({
+    left: arrangedItems("left"),
+    middle: arrangedItems("middle"),
+    right: arrangedItems("right")
+  })
+  .prefault({})
+  .describe(
+    [
+      "Which group of the bar each item is in, in order. The items are `buttons` (the settings, power and heart buttons, which move together), `workspaces`, `taskbar` (the room kept for the taskbar's window icons, which only takes effect with taskbar integration) and every other section by name.",
+      "The middle group is centred. With taskbar integration, `taskbar` stays in the centre, and what's before and after it in `middle` sits on either side of it. An item left out goes back to the end of the group it starts in, and `taskbar` can only be in `middle`."
+    ].join("\n\n")
+  );
 
 const workspaces = z
   .object({
@@ -453,6 +470,7 @@ export const configSchema = z.object({
   bar,
   theme,
   sections,
+  arrangement,
   workspaces,
   cpu,
   memory,

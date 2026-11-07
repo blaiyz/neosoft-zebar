@@ -89,7 +89,7 @@
         },
         "colors": {
           "default": {},
-          "description": "Overrides for individual colors, as HSL without commas. For example `{ \"accent\": \"300 100% 50%\" }`. See the README for the names.",
+          "description": "Overrides for individual colors, as HSL without commas, or another color as `var(--name)`. For example `{ \"accent\": \"300 100% 50%\", \"cpu\": \"var(--ws-2)\" }`. See the README for the names.",
           "type": "object",
           "propertyNames": {
             "type": "string"
@@ -192,6 +192,89 @@
         "clock": {
           "default": true,
           "type": "boolean"
+        }
+      }
+    },
+    "arrangement": {
+      "description": "Which group of the bar each item is in, in order. The items are `buttons` (the settings, power and heart buttons, which move together), `workspaces`, `taskbar` (the room kept for the taskbar's window icons, which only takes effect with taskbar integration) and every other section by name.\n\nThe middle group is centred. With taskbar integration, `taskbar` stays in the centre, and what's before and after it in `middle` sits on either side of it. An item left out goes back to the end of the group it starts in, and `taskbar` can only be in `middle`.",
+      "default": {},
+      "type": "object",
+      "properties": {
+        "left": {
+          "default": ["buttons", "cpu", "memory", "disk", "battery", "network"],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
+        },
+        "middle": {
+          "default": ["workspaces", "taskbar"],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
+        },
+        "right": {
+          "default": [
+            "media",
+            "tray",
+            "keyboard",
+            "volume",
+            "weather",
+            "clock"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
         }
       }
     },

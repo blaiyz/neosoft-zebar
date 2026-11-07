@@ -36,7 +36,7 @@
 
 <Reveal when={micMuted}>
   <button
-    class="flex h-full items-center px-1 text-lg text-zb-volume-start transition hover:text-zb-accent"
+    class="flex h-full items-center pr-2 text-lg text-zb-volume-start transition hover:text-zb-accent"
     aria-label="Unmute the microphone"
     onclick={() => {
       if (microphone) {
@@ -49,11 +49,11 @@
 </Reveal>
 {#if device}
   <button
-    class="relative mr-1 flex h-full items-center stroke-2 text-lg transition hover:text-zb-accent"
+    class="relative flex h-full items-center stroke-2 text-lg transition hover:text-zb-accent"
     aria-label="Volume"
     onwheel={onMouseWheel}
     {@attach opensFlyout("audio")}
   >
-    <VolumeIcon class="mr-2 ml-1" />
+    <VolumeIcon />
   </button>
 {/if}

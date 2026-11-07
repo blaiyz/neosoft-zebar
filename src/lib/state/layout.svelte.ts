@@ -1,4 +1,5 @@
 import {
+  arrange,
   collapseSteps,
   partSide,
   type PartId,
@@ -28,6 +29,11 @@ export type PartMeasure = {
 
 type Targets = Partial<Record<PartId, number | undefined>>;
 type Column = FitSide | "center";
+/**
+ * What a group holds. With taskbar integration, the middle group is in two, one
+ * before the taskbar's icons and one after.
+ */
+type Content = Column | "before" | "after";
 
 /** Whether the first fit has painted, so that the bar doesn't animate into shape. */
 export const layout = $state({ ready: false });
@@ -39,7 +45,12 @@ const preferences = $state<Partial<Record<PartId, boolean>>>({});
 // eslint-disable-next-line svelte/prefer-svelte-reactivity
 const parts = new Map<PartId, PartMeasure>();
 const columns: Partial<Record<Column, HTMLElement>> = {};
-const contents: Partial<Record<Column, HTMLElement>> = {};
+const contents: Partial<Record<Content, HTMLElement | undefined>> = {};
+
+const arranged = $derived(arrange(config.arrangement));
+
+/** Where each item is on the bar, with anything missing or repeated sorted out. */
+export const barArrangement = () => arranged;
 
 let observer: ResizeObserver | undefined;
 let growTimer: ReturnType<typeof setTimeout> | undefined;
@@ -80,36 +91,33 @@ function isPinned(part: PartId, section: SectionId | undefined) {
  */
 function readFit(): FitInput<PartId> | null {
   const { left, right } = columns;
-  if (!left || !right || !contents.left || !contents.right) return null;
+  if (!left || !right) return null;
 
   const taskbar = config.taskbarIntegration.enabled;
   const widths: FitInput<PartId>["widths"] = {};
-  const needed = {
-    left: occupiedWidth(contents.left),
-    right: occupiedWidth(contents.right)
+  const occupied = (content: Content) => {
+    const element = contents[content];
+    return element ? occupiedWidth(element) : 0;
   };
+  const needed = { left: occupied("left"), right: occupied("right") };
   let centerGiven = 0;
 
   for (const [part, measure] of parts) {
     const full = measure.full();
     const given = full - measure.rendered();
-    const side = partSide(part, taskbar);
+    const side = partSide(part, arranged, taskbar);
 
     widths[part] = full;
     if (side === "center") centerGiven += given;
     else needed[side] += given;
   }
 
-  // With taskbar integration the workspaces float over the end of the left column.
-  const floating = taskbar ? contents.center : undefined;
+  // With taskbar integration, what's either side of its icons floats over the
+  // inner end of a column.
   const gap = remToPx(GROUP_GAP);
   const capacity = {
-    left:
-      widthOf(left) -
-      centerGiven / 2 -
-      gap -
-      (floating ? occupiedWidth(floating) : 0),
-    right: widthOf(right) - centerGiven / 2 - gap
+    left: widthOf(left) - centerGiven / 2 - gap - occupied("before"),
+    right: widthOf(right) - centerGiven / 2 - gap - occupied("after")
   };
 
   const steps = collapseSteps.flatMap(({ part, section, toFloor, partial }) => {
@@ -118,7 +126,7 @@ function readFit(): FitInput<PartId> | null {
 
     return {
       part,
-      side: partSide(part, taskbar),
+      side: partSide(part, arranged, taskbar),
       to: toFloor ? (measure.floor?.() ?? 0) : 0,
       partial: partial ?? false,
       last: preferences[part] ?? false
@@ -252,10 +260,17 @@ export const trackColumn = (column: Column) => (element: HTMLElement) => {
   return observe([element]);
 };
 
-/** Attaches to what a column holds, which has to keep its natural width. */
-export const trackContent = (column: Column) => (element: HTMLElement) => {
-  contents[column] = element;
-  return observe([element]);
+/** Attaches to what a group holds, which has to keep its natural width. */
+export const trackContent = (content: Content) => (element: HTMLElement) => {
+  contents[content] = element;
+  const stop = observe([element]);
+
+  return () => {
+    stop();
+    if (contents[content] === element) contents[content] = undefined;
+    // What else is going with it hasn't let go of its parts yet.
+    queueMicrotask(update);
+  };
 };
 
 /**
@@ -283,6 +298,7 @@ export function initLayout() {
 
     // What a fit reads besides sizes, which the observer reports.
     void JSON.stringify([
+      arranged,
       config.sections,
       config.clock.fullDate,
       config.workspaces,
