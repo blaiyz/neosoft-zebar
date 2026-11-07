@@ -1,10 +1,17 @@
 /** The sections of the bar, in the order they appear on each side. */
 export const pillSections = ["settings", "power", "heart"] as const;
-export const meterSections = ["cpu", "memory", "battery", "network"] as const;
+export const meterSections = [
+  "cpu",
+  "memory",
+  "disk",
+  "battery",
+  "network"
+] as const;
 export const leftSections = [...pillSections, ...meterSections] as const;
 export const rightSections = [
   "media",
   "tray",
+  "keyboard",
   "volume",
   "weather",
   "clock"
@@ -19,12 +26,15 @@ const partSides = {
   heart: "left",
   cpu: "left",
   memory: "left",
+  disk: "left",
   battery: "left",
   network: "left",
   "network.ssid": "left",
+  "network.graph": "left",
   "network.rates": "left",
   "media.title": "right",
   tray: "right",
+  keyboard: "right",
   volume: "right",
   weather: "right",
   "clock.date": "right",
@@ -60,13 +70,16 @@ type CollapseStep = {
 /** What gives way first when the bar runs out of room, lowest value first. */
 export const collapseSteps: CollapseStep[] = [
   { part: "heart", section: "heart" },
+  { part: "network.graph", section: "network" },
   { part: "clock.date" },
   { part: "network.ssid", section: "network" },
   { part: "workspaces.thin", toFloor: true },
   { part: "power", section: "power" },
   { part: "media.title", section: "media", toFloor: true, partial: true },
+  { part: "disk", section: "disk" },
   { part: "memory", section: "memory" },
   { part: "battery", section: "battery" },
+  { part: "keyboard", section: "keyboard" },
   { part: "network.rates", section: "network" },
   { part: "cpu", section: "cpu" },
   { part: "weather", section: "weather" },

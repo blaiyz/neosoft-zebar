@@ -26,7 +26,7 @@
 
 {#if weather}
   <button
-    class="hover:text-zb-accent"
+    class="text-zb-weather hover:text-zb-accent"
     onclick={() =>
       updateSetting("weather.unit", useCelsius ? "fahrenheit" : "celsius")}
   >

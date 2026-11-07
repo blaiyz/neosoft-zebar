@@ -12,8 +12,11 @@
 
   let { request, closing, onclose }: Props = $props();
 
-  // Each request gets a panel of its own, so that nothing carries over from the last.
-  const { view, opensUp, left, right } = untrack(() => request);
+  // Each opening gets a panel of its own, so that nothing carries over from the last.
+  // The edges can change while it follows its opener.
+  const { view, opensUp } = untrack(() => request);
+  let left = $derived(request.left);
+  let right = $derived(request.right);
 
   let panel = $state<HTMLElement>();
 

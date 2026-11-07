@@ -7,7 +7,9 @@
   import { getWindows } from "#lib/utils/glaze_wm_utils.ts";
   import ArrowRightLeft from "@lucide/svelte/icons/arrow-right-left";
   import MousePointer2Off from "@lucide/svelte/icons/mouse-pointer-2-off";
+  import Pause from "@lucide/svelte/icons/pause";
   import {
+    workspaceColor,
     workspaceGaps,
     workspaceWidth,
     type WorkspaceItem
@@ -27,6 +29,8 @@
   const ICON_SLOTS = 4;
   /** The width of the `+N`, in rem. */
   const MORE_WIDTH = 1.75;
+  /** How far to scroll for one workspace, which is one notch of a mouse wheel. */
+  const SCROLL_STEP = 100;
 
   let glazewm = $derived(providers.glazewm);
 
@@ -38,18 +42,49 @@
   );
   let style = $derived(config.workspaces.style);
 
+  let workspaces = $derived(glazewm?.currentWorkspaces ?? []);
+  // GlazeWM answers Zebar's first question about it with a bare `true` or `false`,
+  // which Zebar reads as an object, so it's missing until GlazeWM's first pause event.
+  let paused = $derived(glazewm?.isPaused === true);
   let items = $derived(
-    (glazewm?.currentWorkspaces ?? []).map(
-      ({ id, name, isDisplayed }: Workspace): WorkspaceItem => ({
+    workspaces.map(
+      ({
         id,
         name,
-        color:
-          (glazewm?.allWorkspaces.findIndex((other) => other.id === id) ?? 0) +
-          1,
-        current: isDisplayed
+        displayName,
+        isDisplayed,
+        children
+      }: Workspace): WorkspaceItem => ({
+        id,
+        label: displayName || name,
+        color: workspaceColor(
+          name,
+          glazewm?.allWorkspaces.findIndex((other) => other.id === id) ?? 0
+        ),
+        current: isDisplayed,
+        empty: config.workspaces.dimEmpty && children.length === 0
       })
     )
   );
+
+  let scrolled = 0;
+
+  /** Goes through this monitor's workspaces, and stops at either end. */
+  const onWheel = (event: WheelEvent) => {
+    if (!glazewm || !config.workspaces.scrollToSwitch) return;
+    event.preventDefault();
+
+    scrolled += event.deltaY;
+    if (Math.abs(scrolled) < SCROLL_STEP) return;
+    const step = Math.sign(scrolled);
+    scrolled = 0;
+
+    const current = workspaces.findIndex(({ isDisplayed }) => isDisplayed);
+    const next = workspaces[current + step];
+    if (current >= 0 && next) {
+      void glazewm.runCommand(`focus --workspace ${next.name}`);
+    }
+  };
 
   let windows = $derived(
     glazewm?.displayedWorkspace ? getWindows(glazewm.displayedWorkspace) : []
@@ -116,7 +151,7 @@
           workspaceWidth(style, thinned, item.current)
         ]}
       >
-        {item.name}
+        {item.label}
       </div>
     {/each}
   </div>
@@ -139,14 +174,20 @@
         </div>
       {/if}
     </div>
-    <WorkspaceRow
-      bind:element={buttons}
-      {items}
-      {style}
-      {thin}
-      onpick={({ name }: WorkspaceItem) =>
-        glazewm.runCommand(`focus --workspace ${name}`)}
-    />
+    <div class="flex h-full items-center" onwheel={onWheel}>
+      <WorkspaceRow
+        bind:element={buttons}
+        {items}
+        {style}
+        {thin}
+        onpick={({ id }: WorkspaceItem) => {
+          const workspace = workspaces.find((other) => other.id === id);
+          if (workspace) {
+            void glazewm.runCommand(`focus --workspace ${workspace.name}`);
+          }
+        }}
+      />
+    </div>
     <button
       aria-label="tiling-direction"
       class="mx-1 flex items-center justify-center text-zb-tiling-direction"
@@ -163,6 +204,11 @@
     </button>
     <Reveal when={toggleModes.clickThrough}>
       <MousePointer2Off class="mx-1 text-zb-click-through" />
+    </Reveal>
+    <!-- GlazeWM's own pause, from `wm-toggle-pause`, which stops it managing windows.
+       Zebar only learns of it from GlazeWM's event, so it's unknown until then. -->
+    <Reveal when={config.workspaces.showPaused && paused}>
+      <Pause class="mx-1 text-zb-paused" />
     </Reveal>
     <AnimatedList
       items={glazewm.bindingModes.filter((mode) => mode.name !== "ct")}
@@ -186,14 +232,20 @@
       <AnimatedList items={shownWindows} key={(child: Window) => child.id}>
         {#snippet item(child: Window)}
           {@const Icon = getProcessIcon(child)}
-          <span
+          <button
             class={[
-              "ml-1 flex items-center text-xl",
+              "ml-1 flex h-full items-center text-xl transition-colors hover:text-zb-accent",
               child.hasFocus ? "text-zb-focused-process" : "text-zb-process"
             ]}
+            aria-label={child.title || child.processName}
+            onclick={() => {
+              if (config.workspaces.clickToFocus) {
+                void glazewm.runCommand(`focus --container-id ${child.id}`);
+              }
+            }}
           >
             <Icon />
-          </span>
+          </button>
         {/snippet}
       </AnimatedList>
       <AnimatedList

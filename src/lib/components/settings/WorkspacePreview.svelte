@@ -15,7 +15,7 @@
   let items = $derived(
     Array.from({ length: COUNT }, (_, index) => ({
       id: String(index),
-      name: String(index + 1),
+      label: String(index + 1),
       color: index + 1,
       current: index === current
     }))

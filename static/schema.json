@@ -52,10 +52,12 @@
               "heart",
               "cpu",
               "memory",
+              "disk",
               "battery",
               "network",
               "media",
               "tray",
+              "keyboard",
               "volume",
               "weather",
               "clock"
@@ -147,6 +149,11 @@
           "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
           "enum": [true, false, "auto"]
         },
+        "disk": {
+          "default": false,
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room. Off by default.",
+          "enum": [true, false, "auto"]
+        },
         "battery": {
           "default": "auto",
           "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
@@ -165,6 +172,11 @@
         "tray": {
           "default": false,
           "description": "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts. Turning it off stops the provider, which gives the native tray back, but Zebar can only start it once each time it runs, so turning it on again needs a restart of Zebar.",
+          "enum": [true, false, "auto"]
+        },
+        "keyboard": {
+          "default": false,
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room. Off by default.",
           "enum": [true, false, "auto"]
         },
         "volume": {
@@ -197,6 +209,113 @@
           "default": "auto",
           "description": "Whether workspace buttons are thin. `auto` makes them thin when space runs out.",
           "enum": [true, false, "auto"]
+        },
+        "scrollToSwitch": {
+          "default": true,
+          "description": "Whether scrolling over the workspaces goes to the next or previous one.",
+          "type": "boolean"
+        },
+        "dimEmpty": {
+          "default": true,
+          "description": "Whether workspaces with no windows are dimmed. Only those that GlazeWM keeps alive can be empty without being shown.",
+          "type": "boolean"
+        },
+        "clickToFocus": {
+          "default": true,
+          "description": "Whether clicking a window's icon focuses that window.",
+          "type": "boolean"
+        },
+        "showPaused": {
+          "default": true,
+          "description": "Whether an icon shows while GlazeWM is paused with `wm-toggle-pause`.",
+          "type": "boolean"
+        }
+      }
+    },
+    "cpu": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "highUsage": {
+          "default": 80,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "memory": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "highUsage": {
+          "default": 80,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "disk": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "mountPoint": {
+          "default": "C:\\",
+          "description": "The drive the meter shows, as Windows names it, like `C:\\`. The System flyout lists every drive.",
+          "type": "string"
+        },
+        "highUsage": {
+          "default": 90,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "battery": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "midCharge": {
+          "default": 50,
+          "description": "The charge, in percent, at or below which the meter turns its middle color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "lowCharge": {
+          "default": 20,
+          "description": "The charge, in percent, at or below which the meter turns its low color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "network": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "units": {
+          "default": "bytes",
+          "description": "Whether rates are in bytes, like `2.93 MiB/s`, or bits, like `24.6 Mb/s`.",
+          "type": "string",
+          "enum": ["bytes", "bits"]
+        },
+        "graph": {
+          "default": "auto",
+          "description": "A graph of the last minute of traffic beside the rates. `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "dimBelow": {
+          "default": 4,
+          "description": "Rates below this many KiB/s are dimmed, so the section is calm when little is moving. `0` never dims them.",
+          "type": "number",
+          "minimum": 0
         }
       }
     },
@@ -209,6 +328,51 @@
           "description": "How the media controls look. `pill` puts them in a pill with progress around play, `tucked` keeps back and next hidden until hovered, `capsule` fills the whole section as the track plays, and `equalizer` has bars that move while it plays.",
           "type": "string",
           "enum": ["pill", "tucked", "capsule", "equalizer"]
+        },
+        "appIcon": {
+          "default": true,
+          "description": "Whether the icon of the app that's playing shows before the title.",
+          "type": "boolean"
+        },
+        "titleOpensFlyout": {
+          "default": true,
+          "description": "Whether clicking the title opens the Media flyout, with the artist and every player. Off, it plays and pauses.",
+          "type": "boolean"
+        },
+        "scrollSessions": {
+          "default": true,
+          "description": "Whether scrolling over the media section switches between players, when more than one has something to play.",
+          "type": "boolean"
+        }
+      }
+    },
+    "volume": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "scrollStep": {
+          "default": 5,
+          "description": "How much, in percent, one step of the mouse wheel over the volume changes it.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "micIndicator": {
+          "default": false,
+          "description": "Whether a crossed-out microphone shows beside the volume while the default microphone is muted.",
+          "type": "boolean"
+        }
+      }
+    },
+    "keyboard": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "format": {
+          "default": "language",
+          "description": "`language` shows the layout's language in two letters, like `EN`, and `layout` its whole name, like `en-US`.",
+          "type": "string",
+          "enum": ["language", "layout"]
         }
       }
     },
@@ -356,6 +520,10 @@
             },
             "disk": {
               "default": 60000,
+              "type": "number"
+            },
+            "keyboard": {
+              "default": 1000,
               "type": "number"
             }
           }

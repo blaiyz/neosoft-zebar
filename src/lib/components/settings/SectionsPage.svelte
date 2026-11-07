@@ -11,8 +11,16 @@
 
   /** The parts of the bar with settings beyond whether they show. */
   const ownFields: Partial<Record<BarPart, Field[]>> = {
+    battery: fieldsOf("battery"),
     clock: fieldsOf("clock"),
+    cpu: fieldsOf("cpu"),
+    disk: fieldsOf("disk"),
+    keyboard: fieldsOf("keyboard"),
+    media: fieldsOf("media", { skip: ["style"] }),
+    memory: fieldsOf("memory"),
+    network: fieldsOf("network"),
     tray: fieldsOf("tray"),
+    volume: fieldsOf("volume"),
     weather: fieldsOf("weather"),
     workspaces: fieldsOf("workspaces", { skip: ["style"] })
   };

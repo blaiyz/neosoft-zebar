@@ -7,6 +7,7 @@
   import Play from "@lucide/svelte/icons/play";
   import SkipBack from "@lucide/svelte/icons/skip-back";
   import SkipForward from "@lucide/svelte/icons/skip-forward";
+  import type { Icon } from "@tabler/icons-svelte";
   import type { Attachment } from "svelte/attachments";
   import type { MediaSession } from "zebar";
   import BeadButton from "./BeadButton.svelte";
@@ -24,6 +25,10 @@
     part?: PartId;
     /** Shows what a pointer over it would, for a preview that can't be pointed at. */
     peek?: boolean;
+    /** The icon of the app that's playing, shown before the title. */
+    icon?: Icon | undefined;
+    /** What clicking the title opens, instead of playing and pausing. */
+    opens?: Attachment<HTMLElement> | undefined;
     onprevious?: () => void;
     ontoggle?: () => void;
     onnext?: () => void;
@@ -35,6 +40,8 @@
     skips = true,
     part,
     peek = false,
+    icon: AppIcon,
+    opens,
     onprevious,
     ontoggle,
     onnext
@@ -153,13 +160,15 @@
 {#snippet title()}
   <button
     {@attach part && hoverColumn((over) => (titleHovered = over))}
+    {@attach opens}
     class={[
       "relative flex h-full min-w-0 items-center overflow-hidden transition",
       titleHovered && "text-zb-accent"
     ]}
-    aria-label="Toggle"
-    onclick={ontoggle}
+    aria-label={opens ? "Media details" : "Toggle"}
+    onclick={opens ? undefined : ontoggle}
   >
+    {#if AppIcon}<AppIcon class="ml-2 flex-none" />{/if}
     <Collapsible {part} when={true} full={() => widest} floor={() => narrowest}>
       <div
         class={[

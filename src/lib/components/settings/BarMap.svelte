@@ -7,7 +7,9 @@
   import Clock from "@lucide/svelte/icons/clock";
   import CloudSun from "@lucide/svelte/icons/cloud-sun";
   import Cpu from "@lucide/svelte/icons/cpu";
+  import HardDrive from "@lucide/svelte/icons/hard-drive";
   import Heart from "@lucide/svelte/icons/heart";
+  import Keyboard from "@lucide/svelte/icons/keyboard";
   import Layers from "@lucide/svelte/icons/layers";
   import MemoryStick from "@lucide/svelte/icons/memory-stick";
   import Music from "@lucide/svelte/icons/music";
@@ -27,11 +29,13 @@
     heart: Heart,
     cpu: Cpu,
     memory: MemoryStick,
+    disk: HardDrive,
     battery: BatteryMedium,
     network: Wifi,
     workspaces: Layers,
     media: Music,
     tray: ChevronUp,
+    keyboard: Keyboard,
     volume: Volume2,
     weather: CloudSun,
     clock: Clock

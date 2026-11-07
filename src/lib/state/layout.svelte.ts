@@ -66,6 +66,7 @@ function occupiedWidth(content: HTMLElement) {
 
 function isPinned(part: PartId, section: SectionId | undefined) {
   if (part === "clock.date") return config.clock.fullDate === true;
+  if (part === "network.graph") return config.network.graph === true;
   if (part === "workspaces.thin") {
     return config.workspaces.thinButtons !== "auto";
   }
@@ -304,6 +305,8 @@ export function initLayout() {
 const sectionProviders: Partial<Record<SectionId, ProviderName>> = {
   battery: "battery",
   cpu: "cpu",
+  disk: "disk",
+  keyboard: "keyboard",
   memory: "memory",
   network: "network",
   tray: "systray",

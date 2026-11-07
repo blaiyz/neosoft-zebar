@@ -123,7 +123,7 @@
 
   .track.fly:not(.open) > .clip > .content {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--fly-from));
   }
 
   .track.animated > .clip > .content {

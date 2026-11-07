@@ -1,9 +1,33 @@
 const DAYS = ["Sun.", "Mon.", "Tue.", "Wed.", "Thu.", "Fri.", "Sat."];
 
-/** Keeps a network value about the same width, whatever its size. */
-export function formatNetworkValue(value: number): string {
-  const expanded = value.toFixed(4);
-  return value >= 1000 ? " " + expanded.slice(0, 4) : expanded.slice(0, 5);
+/** Bytes go up in steps of 1024, and bits in steps of 1000, as each is usually written. */
+const RATE_UNITS = {
+  bytes: { step: 1024, names: ["B/s", "KiB/s", "MiB/s", "GiB/s"] },
+  bits: { step: 1000, names: ["b/s", "kb/s", "Mb/s", "Gb/s"] }
+};
+
+/** The widest unit of each kind, which a rate's width is kept to. */
+export const widestRateUnit = { bytes: "MiB/s", bits: "Mb/s" };
+
+/**
+ * A rate given in bytes per second, to three significant digits, like `2.93` and
+ * `MiB/s`. Zebar counts in steps of 1000 bytes, so more digits would only show its
+ * rounding.
+ */
+export function formatRate(
+  bytes: number,
+  units: keyof typeof RATE_UNITS = "bytes"
+): { value: string; unit: string } {
+  const { step, names } = RATE_UNITS[units];
+  let unit = 0;
+  let value = Math.max(bytes, 0) * (units === "bits" ? 8 : 1);
+  while (value >= 999.5 && unit < names.length - 1) {
+    value /= step;
+    unit++;
+  }
+
+  const decimals = unit === 0 || value >= 99.95 ? 0 : value >= 9.995 ? 1 : 2;
+  return { value: value.toFixed(decimals), unit: names[unit] ?? "" };
 }
 
 export function secondsToHms(seconds: number): string {

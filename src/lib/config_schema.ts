@@ -25,6 +25,23 @@ const section = z
     "`true` always shows this section, `false` removes it, and `auto` shows it when there's room."
   );
 
+/** A section that's off until it's turned on. */
+const optionalSection = z
+  .literal([true, false, "auto"])
+  .default(false)
+  .describe(
+    "`true` always shows this section, `false` removes it, and `auto` shows it when there's room. Off by default."
+  );
+
+const highUsage = z
+  .number()
+  .min(0)
+  .max(100)
+  .default(80)
+  .describe(
+    "The usage, in percent, from which the meter has its high usage color."
+  );
+
 const bar = z
   .object({
     direction: z
@@ -133,6 +150,7 @@ const sections = z
     heart: section,
     cpu: section,
     memory: section,
+    disk: optionalSection,
     battery: section,
     network: z
       .literal([true, false, "auto", "interface", "statistics"])
@@ -147,6 +165,7 @@ const sections = z
       .describe(
         "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts. Turning it off stops the provider, which gives the native tray back, but Zebar can only start it once each time it runs, so turning it on again needs a restart of Zebar."
       ),
+    keyboard: optionalSection,
     volume: section,
     weather: section,
     clock: z.boolean().default(true)
@@ -166,6 +185,119 @@ const workspaces = z
       .default("auto")
       .describe(
         "Whether workspace buttons are thin. `auto` makes them thin when space runs out."
+      ),
+    scrollToSwitch: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether scrolling over the workspaces goes to the next or previous one."
+      ),
+    dimEmpty: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether workspaces with no windows are dimmed. Only those that GlazeWM keeps alive can be empty without being shown."
+      ),
+    clickToFocus: z
+      .boolean()
+      .default(true)
+      .describe("Whether clicking a window's icon focuses that window."),
+    showPaused: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether an icon shows while GlazeWM is paused with `wm-toggle-pause`."
+      )
+  })
+  .prefault({});
+
+const cpu = z.object({ highUsage }).prefault({});
+
+const memory = z.object({ highUsage }).prefault({});
+
+const disk = z
+  .object({
+    mountPoint: z
+      .string()
+      .default("C:\\")
+      .describe(
+        "The drive the meter shows, as Windows names it, like `C:\\`. The System flyout lists every drive."
+      ),
+    highUsage: highUsage.default(90)
+  })
+  .prefault({});
+
+const battery = z
+  .object({
+    midCharge: z
+      .number()
+      .min(0)
+      .max(100)
+      .default(50)
+      .describe(
+        "The charge, in percent, at or below which the meter turns its middle color."
+      ),
+    lowCharge: z
+      .number()
+      .min(0)
+      .max(100)
+      .default(20)
+      .describe(
+        "The charge, in percent, at or below which the meter turns its low color."
+      )
+  })
+  .prefault({});
+
+const network = z
+  .object({
+    units: z
+      .enum(["bytes", "bits"])
+      .default("bytes")
+      .describe(
+        "Whether rates are in bytes, like `2.93 MiB/s`, or bits, like `24.6 Mb/s`."
+      ),
+    graph: z
+      .literal([true, false, "auto"])
+      .default("auto")
+      .describe(
+        "A graph of the last minute of traffic beside the rates. `auto` shows it when there's room."
+      ),
+    dimBelow: z
+      .number()
+      .min(0)
+      .default(4)
+      .describe(
+        "Rates below this many KiB/s are dimmed, so the section is calm when little is moving. `0` never dims them."
+      )
+  })
+  .prefault({});
+
+const volume = z
+  .object({
+    scrollStep: z
+      .number()
+      .min(1)
+      .max(100)
+      .default(5)
+      .describe(
+        "How much, in percent, one step of the mouse wheel over the volume changes it."
+      ),
+    micIndicator: z
+      .boolean()
+      .default(false)
+      .describe(
+        "Whether a crossed-out microphone shows beside the volume while the default microphone is muted."
+      )
+  })
+  .prefault({});
+
+const keyboard = z
+  .object({
+    format: z
+      .enum(["language", "layout"])
+      .default("language")
+      .describe(
+        "`language` shows the layout's language in two letters, like `EN`, and `layout` its whole name, like `en-US`."
       )
   })
   .prefault({});
@@ -177,6 +309,24 @@ const media = z
       .default("pill")
       .describe(
         "How the media controls look. `pill` puts them in a pill with progress around play, `tucked` keeps back and next hidden until hovered, `capsule` fills the whole section as the track plays, and `equalizer` has bars that move while it plays."
+      ),
+    appIcon: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether the icon of the app that's playing shows before the title."
+      ),
+    titleOpensFlyout: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether clicking the title opens the Media flyout, with the artist and every player. Off, it plays and pauses."
+      ),
+    scrollSessions: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether scrolling over the media section switches between players, when more than one has something to play."
       )
   })
   .prefault({});
@@ -273,7 +423,8 @@ const refreshIntervals = z
     battery: z.number().default(60000),
     weather: z.number().default(900000),
     network: z.number().default(2000),
-    disk: z.number().default(60000)
+    disk: z.number().default(60000),
+    keyboard: z.number().default(1000)
   })
   .prefault({});
 
@@ -303,7 +454,14 @@ export const configSchema = z.object({
   theme,
   sections,
   workspaces,
+  cpu,
+  memory,
+  disk,
+  battery,
+  network,
   media,
+  volume,
+  keyboard,
   weather,
   clock,
   tray,
