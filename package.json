@@ -22,13 +22,13 @@
     "verify": "pnpm lint && pnpm check && pnpm dev:once"
   },
   "dependencies": {
-    "@fontsource-variable/montserrat": "^5.3.0",
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@lucide/svelte": "^1.0.0",
     "@tabler/icons-svelte": "^3.34.1",
     "@tauri-apps/api": "2.0.2",
     "glazewm": "^1.7.0",
     "json5": "^2.2.3",
-    "svelte-range-slider-pips": "^4.1.1",
     "zebar": "^3.3.1",
     "zod": "^4.6.7"
   },

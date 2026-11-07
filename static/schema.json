@@ -2,21 +2,530 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "direction": {
-      "default": "top",
-      "description": "The visual direction of the widget.\n\n`top`- The top of the widget has inverted corner radius, and the bottom has normal corner radius.\n\n`bottom`- The bottom of the widget has inverted corner radius, and the top has normal corner radius.\n\n`floating`- All corners of the widget have normal corner radius.",
-      "type": "string",
-      "enum": ["top", "bottom", "floating"]
+    "version": {
+      "default": 2,
+      "description": "The format of this file. Older formats are upgraded on import.",
+      "type": "number"
     },
-    "gradient": {
-      "default": "top",
-      "description": "The direction of the background gradient.\n\n`top`- From top to transparent bottom.\n\n`bottom`- From bottom to transparent top.\n\n`solid`- Solid color background.\n\n`disabled`- Background color is disabled.",
-      "type": "string",
-      "enum": ["top", "bottom", "solid", "disabled"]
+    "bar": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "direction": {
+          "default": "top",
+          "description": "The visual direction of the widget.\n\n`top`- The top of the widget has inverted corner radius, and the bottom has normal corner radius.\n\n`bottom`- The bottom of the widget has inverted corner radius, and the top has normal corner radius.\n\n`floating`- All corners of the widget have normal corner radius.",
+          "type": "string",
+          "enum": ["top", "bottom", "floating"]
+        },
+        "gradient": {
+          "default": "top",
+          "description": "The direction of the background gradient.\n\n`top`- From top to transparent bottom.\n\n`bottom`- From bottom to transparent top.\n\n`solid`- Solid color background.\n\n`disabled`- Background color is disabled.",
+          "type": "string",
+          "enum": ["top", "bottom", "solid", "disabled"]
+        },
+        "attachSides": {
+          "default": true,
+          "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`--bar-margin-x` in `theme.customCss`)",
+          "type": "boolean"
+        },
+        "backgroundEffect": {
+          "default": "inherit",
+          "description": "The background effect to use for the widget.\n\nNOTE: Anything other than inherit needs Zebar 3.2 or later. More details in the README.\n\n`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).\n`acrylic`- Use an acrylic background effect. Windows 10, 11.\n`blur`- Use a blur background effect. Windows 10, 11.\n`mica`- Use a mica background effect. Windows 11 only.",
+          "type": "string",
+          "enum": ["inherit", "acrylic", "blur", "mica"]
+        },
+        "transitionDuration": {
+          "default": 400,
+          "description": "The duration of transitions in milliseconds.",
+          "type": "number",
+          "minimum": 0
+        },
+        "primaryMonitorOnly": {
+          "default": ["network", "media", "volume"],
+          "description": "Sections that only appear on the primary monitor.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "settings",
+              "power",
+              "heart",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock"
+            ]
+          }
+        }
+      }
     },
-    "attachSides": {
+    "theme": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "preset": {
+          "default": "tau",
+          "description": "The color preset the bar starts from.",
+          "type": "string",
+          "enum": [
+            "tau",
+            "rose-pine",
+            "rose-pine-moon",
+            "rose-pine-dawn",
+            "catppuccin-mocha",
+            "catppuccin-macchiato",
+            "catppuccin-frappe",
+            "catppuccin-latte",
+            "nord",
+            "material"
+          ]
+        },
+        "colors": {
+          "default": {},
+          "description": "Overrides for individual colors, as HSL without commas, or another color as `var(--name)`. For example `{ \"accent\": \"300 100% 50%\", \"cpu\": \"var(--ws-2)\" }`. See the README for the names.",
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "fontFamily": {
+          "default": null,
+          "description": "The font of the bar, as a CSS font family. Figtree is bundled as `Figtree Variable`, and `null` uses it.",
+          "type": ["string", "null"]
+        },
+        "fontSize": {
+          "default": "14px",
+          "description": "The font size. Every part of the bar is sized from it, so to scale the bar, change this and the height in `zpack.json` together.",
+          "type": "string"
+        },
+        "radius": {
+          "default": "20px",
+          "description": "The corner radius.",
+          "type": "string"
+        },
+        "customCss": {
+          "default": "",
+          "description": "CSS added after the theme, which can override anything. A `custom.css` file beside this one sets it too, which is easier for more than a few lines.",
+          "type": "string"
+        }
+      }
+    },
+    "sections": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "settings": {
+          "default": true,
+          "description": "Whether the bar has a button for the settings window, which Zebar's tray menu opens too.",
+          "type": "boolean"
+        },
+        "power": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "heart": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "cpu": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "memory": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "disk": {
+          "default": false,
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room. Off by default.",
+          "enum": [true, false, "auto"]
+        },
+        "battery": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "network": {
+          "default": "auto",
+          "description": "Like the other sections, with `interface` to only show the connection and `statistics` to only show the transfer rates.",
+          "enum": [true, false, "auto", "interface", "statistics"]
+        },
+        "media": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "tray": {
+          "default": false,
+          "description": "The system tray, with its pinned icons in the bar. Off by default, because on Windows 10 the tray provider can break the native system tray until Explorer restarts. Turning it off stops the provider, which gives the native tray back, but Zebar can only start it once each time it runs, so turning it on again needs a restart of Zebar.",
+          "enum": [true, false, "auto"]
+        },
+        "keyboard": {
+          "default": false,
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room. Off by default.",
+          "enum": [true, false, "auto"]
+        },
+        "volume": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "weather": {
+          "default": "auto",
+          "description": "`true` always shows this section, `false` removes it, and `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "clock": {
+          "default": true,
+          "type": "boolean"
+        }
+      }
+    },
+    "arrangement": {
+      "description": "Which group of the bar each item is in, in order. The items are `buttons` (the settings, power and heart buttons, which move together), `workspaces`, `taskbar` (the room kept for the taskbar's window icons, which only takes effect with taskbar integration) and every other section by name.\n\nThe middle group is centred. With taskbar integration, `taskbar` stays in the centre, and what's before and after it in `middle` sits on either side of it. An item left out goes back to the end of the group it starts in, and `taskbar` can only be in `middle`.",
+      "default": {},
+      "type": "object",
+      "properties": {
+        "left": {
+          "default": ["buttons", "cpu", "memory", "disk", "battery", "network"],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
+        },
+        "middle": {
+          "default": ["workspaces", "taskbar"],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
+        },
+        "right": {
+          "default": [
+            "media",
+            "tray",
+            "keyboard",
+            "volume",
+            "weather",
+            "clock"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "buttons",
+              "cpu",
+              "memory",
+              "disk",
+              "battery",
+              "network",
+              "media",
+              "tray",
+              "keyboard",
+              "volume",
+              "weather",
+              "clock",
+              "workspaces",
+              "taskbar"
+            ]
+          }
+        }
+      }
+    },
+    "workspaces": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "style": {
+          "default": "track",
+          "description": "How workspaces look. `keys` are tinted buttons with a ring around the current one, `track` is one groove with a bead across it, `string` shrinks the others to dots, and `solid` fills the current one with its color.",
+          "type": "string",
+          "enum": ["keys", "track", "string", "solid"]
+        },
+        "thinButtons": {
+          "default": "auto",
+          "description": "Whether workspace buttons are thin. `auto` makes them thin when space runs out.",
+          "enum": [true, false, "auto"]
+        },
+        "scrollToSwitch": {
+          "default": true,
+          "description": "Whether scrolling over the workspaces goes to the next or previous one.",
+          "type": "boolean"
+        },
+        "dimEmpty": {
+          "default": true,
+          "description": "Whether workspaces with no windows are dimmed. Only those that GlazeWM keeps alive can be empty without being shown.",
+          "type": "boolean"
+        },
+        "clickToFocus": {
+          "default": true,
+          "description": "Whether clicking a window's icon focuses that window.",
+          "type": "boolean"
+        },
+        "showPaused": {
+          "default": true,
+          "description": "Whether an icon shows while GlazeWM is paused with `wm-toggle-pause`.",
+          "type": "boolean"
+        }
+      }
+    },
+    "cpu": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "highUsage": {
+          "default": 80,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "memory": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "highUsage": {
+          "default": 80,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "disk": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "mountPoint": {
+          "default": "C:\\",
+          "description": "The drive the meter shows, as Windows names it, like `C:\\`. The System flyout lists every drive.",
+          "type": "string"
+        },
+        "highUsage": {
+          "default": 90,
+          "description": "The usage, in percent, from which the meter has its high usage color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "battery": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "midCharge": {
+          "default": 50,
+          "description": "The charge, in percent, at or below which the meter turns its middle color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "lowCharge": {
+          "default": 20,
+          "description": "The charge, in percent, at or below which the meter turns its low color.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "network": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "units": {
+          "default": "bytes",
+          "description": "Whether rates are in bytes, like `2.93 MiB/s`, or bits, like `24.6 Mb/s`.",
+          "type": "string",
+          "enum": ["bytes", "bits"]
+        },
+        "graph": {
+          "default": "auto",
+          "description": "A graph of the last minute of traffic beside the rates. `auto` shows it when there's room.",
+          "enum": [true, false, "auto"]
+        },
+        "dimBelow": {
+          "default": 4,
+          "description": "Rates below this many KiB/s are dimmed, so the section is calm when little is moving. `0` never dims them.",
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "media": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "style": {
+          "default": "pill",
+          "description": "How the media controls look. `pill` puts them in a pill with progress around play, `tucked` keeps back and next hidden until hovered, `capsule` fills the whole section as the track plays, and `equalizer` has bars that move while it plays.",
+          "type": "string",
+          "enum": ["pill", "tucked", "capsule", "equalizer"]
+        },
+        "appIcon": {
+          "default": true,
+          "description": "Whether the icon of the app that's playing shows before the title.",
+          "type": "boolean"
+        },
+        "titleOpensFlyout": {
+          "default": true,
+          "description": "Whether clicking the title opens the Media flyout, with the artist and every player. Off, it plays and pauses.",
+          "type": "boolean"
+        },
+        "scrollSessions": {
+          "default": true,
+          "description": "Whether scrolling over the media section switches between players, when more than one has something to play.",
+          "type": "boolean"
+        }
+      }
+    },
+    "volume": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "scrollStep": {
+          "default": 5,
+          "description": "How much, in percent, one step of the mouse wheel over the volume changes it.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "micIndicator": {
+          "default": false,
+          "description": "Whether a crossed-out microphone shows beside the volume while the default microphone is muted.",
+          "type": "boolean"
+        }
+      }
+    },
+    "keyboard": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "format": {
+          "default": "language",
+          "description": "`language` shows the layout's language in two letters, like `EN`, and `layout` its whole name, like `en-US`.",
+          "type": "string",
+          "enum": ["language", "layout"]
+        }
+      }
+    },
+    "weather": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "unit": {
+          "default": "celsius",
+          "description": "The unit of the temperature. Clicking the weather switches it.",
+          "type": "string",
+          "enum": ["celsius", "fahrenheit"]
+        }
+      }
+    },
+    "clock": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "use24h": {
+          "default": "auto",
+          "description": "Whether to use a 24-hour clock. `auto` follows the system.",
+          "enum": [true, false, "auto"]
+        },
+        "showSeconds": {
+          "default": false,
+          "type": "boolean"
+        },
+        "fullDate": {
+          "default": "auto",
+          "description": "Whether to show the full date beside the time. Right-clicking the clock switches it between `preferred` and `false`.\n\n`auto`- It's the first thing to go when space runs out.\n\n`preferred`- Other sections give way to it, and it only goes if they can't make enough room.\n\n`true`- It always shows.\n\n`false`- It never shows.",
+          "enum": [true, false, "auto", "preferred"]
+        }
+      }
+    },
+    "tray": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "pinned": {
+          "default": [],
+          "description": "The tray icons shown in the bar, in their order.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "order": {
+          "default": [],
+          "description": "The order of the tray icons. Dragging them sets it.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invertIcons": {
+          "default": false,
+          "description": "Inverts the tray icons, for monochrome icons that are hard to see on a light theme.",
+          "type": "boolean"
+        }
+      }
+    },
+    "autoTiling": {
       "default": true,
-      "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`--bar-margin-x` in `config.css`)",
+      "description": "Whether to enable built-in automatic tiling of windows.",
+      "type": "boolean"
+    },
+    "clickThroughByDefault": {
+      "default": false,
+      "description": "Enable click-through by default.",
       "type": "boolean"
     },
     "taskbarIntegration": {
@@ -44,15 +553,25 @@
           "default": "monitor",
           "type": "string",
           "enum": ["workspace", "monitor", "all"]
+        },
+        "iconWidth": {
+          "default": "50px",
+          "description": "The width of one taskbar icon.",
+          "type": "string"
+        },
+        "marginLeft": {
+          "default": "1rem",
+          "description": "Space to keep clear at the left end of the bar.",
+          "type": "string"
+        },
+        "marginRight": {
+          "default": "1rem",
+          "description": "Space to keep clear at the right end of the bar.",
+          "type": "string"
         }
       }
     },
-    "transitionDuration": {
-      "default": 400,
-      "description": "The duration of transitions in milliseconds.",
-      "type": "number"
-    },
-    "providersConfig": {
+    "providers": {
       "description": "Options for the providers, including refresh intervals and error logging.",
       "default": {},
       "type": "object",
@@ -81,85 +600,23 @@
             "network": {
               "default": 2000,
               "type": "number"
+            },
+            "disk": {
+              "default": 60000,
+              "type": "number"
+            },
+            "keyboard": {
+              "default": 1000,
+              "type": "number"
             }
           }
         },
-        "enableErrorLogging": {
+        "logErrors": {
           "default": false,
-          "description": "Whether to enable error logging for providers.",
+          "description": "Whether to log provider errors to the console.",
           "type": "boolean"
         }
       }
-    },
-    "backgroundEffect": {
-      "default": "inherit",
-      "description": "The background effect to use for the widget.\n\nNOTE: Anything other than inherit needs Zebar 3.2 or later. More details in the README.\n\n`inherit`- Don't change the effect, and use the one defined in zpack.json (probably transparent).\n`acrylic`- Use an acrylic background effect. Windows 10, 11.\n`blur`- Use a blur background effect. Windows 10, 11.\n`mica`- Use a mica background effect. Windows 11 only.",
-      "type": "string",
-      "enum": ["inherit", "acrylic", "blur", "mica"]
-    },
-    "enableAutoTiling": {
-      "default": true,
-      "description": "Whether to enable built-in automatic tiling of windows.",
-      "type": "boolean"
-    },
-    "showFullDateByDefault": {
-      "default": false,
-      "description": "Whether to show the full date by default instead of just the time.\n\n(This can be toggled in the UI by clicking the date/time)",
-      "type": "boolean"
-    },
-    "clickThroughByDefault": {
-      "default": false,
-      "description": "Enable click-through by default.",
-      "type": "boolean"
-    },
-    "extendVolumeSliderByDefault": {
-      "default": false,
-      "description": "Enable volume slider by default.",
-      "type": "boolean"
-    },
-    "showHeartButton": {
-      "default": true,
-      "type": "boolean"
-    },
-    "showCpuSection": {
-      "default": true,
-      "type": "boolean"
-    },
-    "showMemorySection": {
-      "default": true,
-      "type": "boolean"
-    },
-    "showBatterySection": {
-      "default": true,
-      "type": "boolean"
-    },
-    "showNetworkSection": {
-      "default": true,
-      "enum": [true, false, "interface", "statistics"]
-    },
-    "showWeatherSection": {
-      "default": true,
-      "type": "boolean"
-    },
-    "showShutdownButton": {
-      "default": true,
-      "type": "boolean"
-    },
-    "useCelsiusByDefault": {
-      "default": true,
-      "type": "boolean"
-    },
-    "use24hClock": {
-      "default": "auto",
-      "enum": [true, false, "auto"]
-    },
-    "showSeconds": {
-      "default": false,
-      "type": "boolean"
-    },
-    "useThinnerWorkspaceButtons": {
-      "default": false,
-      "type": "boolean"
     }
   }
 }

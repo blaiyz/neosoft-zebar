@@ -1,33 +1,36 @@
 <script lang="ts">
+  import { getAppIcon } from "#lib/icon_loader.ts";
   import { toggleModes } from "#lib/state/binding_modes.svelte.ts";
   import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
+  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
+  import { chooseSession, shownSession } from "#lib/state/media.svelte.ts";
+  import { playhead } from "#lib/state/playhead.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
-  import { secondsToHms } from "#lib/utils/format.ts";
-  import Pause from "@lucide/svelte/icons/pause";
-  import Play from "@lucide/svelte/icons/play";
-  import SkipBack from "@lucide/svelte/icons/skip-back";
-  import SkipForward from "@lucide/svelte/icons/skip-forward";
   import { onDestroy, untrack } from "svelte";
-  import { fly } from "svelte/transition";
   import type { MediaSession } from "zebar";
-  import Meter from "./Meter.svelte";
-  import SmoothDiv from "./SmoothDiv.svelte";
+  import Collapsible from "./Collapsible.svelte";
+  import MediaControls from "./MediaControls.svelte";
+
+  /** How far to scroll for the next player, which is one notch of a mouse wheel. */
+  const SCROLL_STEP = 100;
 
   let media = $derived(providers.media);
-  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
-  let shownSession = $state<MediaSession | null>(null);
+  let playing = $derived(shownSession(media));
 
-  // The buttons only exist while click-through is off, so this applies during their outro.
-  let leavingClass = $derived(toggleModes.clickThrough && "absolute");
+  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
+  let visibleSession = $state<MediaSession | null>(null);
+  // Stays after the session ends, to show while the section closes.
+  let lastSession = $state.raw<MediaSession | null>(null);
+  let active = $derived(media !== null && visibleSession !== null);
 
   $effect(() => {
-    const session = media?.currentSession;
-    const prevSession: MediaSession | null = untrack(() => shownSession);
+    const session = playing;
+    const prevSession: MediaSession | null = untrack(() => visibleSession);
     if (session) {
       clearTimeout(mediaTimeout);
       mediaTimeout = undefined;
-      shownSession = session;
+      visibleSession = session;
+      lastSession = session;
       return;
     }
     if (prevSession) {
@@ -36,89 +39,58 @@
       }
       mediaTimeout = setTimeout(() => {
         mediaTimeout = undefined;
-        shownSession = null;
+        visibleSession = null;
       }, 2000);
     } else {
-      shownSession = null;
+      visibleSession = null;
     }
   });
+
+  const head = playhead(() => lastSession);
+  let session = $derived(
+    lastSession && { ...lastSession, position: head.position }
+  );
+  let target = $derived(
+    lastSession ? { sessionId: lastSession.sessionId } : undefined
+  );
+
+  let scrolled = 0;
+
+  /** Goes round the players, when there's more than one. */
+  const onWheel = (event: WheelEvent) => {
+    const sessions = media?.allSessions ?? [];
+    if (!config.media.scrollSessions || sessions.length < 2) return;
+    event.preventDefault();
+
+    scrolled += event.deltaY;
+    if (Math.abs(scrolled) < SCROLL_STEP) return;
+    const step = Math.sign(scrolled);
+    scrolled = 0;
+
+    const index = sessions.findIndex(
+      ({ sessionId }) => sessionId === lastSession?.sessionId
+    );
+    const next = sessions.at((index + step) % sessions.length);
+    if (next) chooseSession(media, next.sessionId);
+  };
 
   onDestroy(() => clearTimeout(mediaTimeout));
 </script>
 
-<SmoothDiv class="flex justify-end">
-  {#if isOnPrimaryMonitor() && media && shownSession}
-    <div
-      transition:fly={{ y: 20, duration: config.transitionDuration }}
-      class="relative flex items-stretch"
-    >
-      {#if !toggleModes.clickThrough}
-        <button
-          class="relative flex items-center justify-end transition hover:scale-125 hover:text-zb-accent"
-          aria-label="Previous"
-          onclick={() => media.previous()}
-          transition:fly={{ y: 20, duration: config.transitionDuration }}
-        >
-          <SkipBack class={[leavingClass, "mx-2"]} />
-        </button>
-      {/if}
-      <button
-        class="group relative inline-flex items-center justify-center gap-x-2 overflow-hidden px-1 transition hover:text-zb-accent"
-        aria-label="Toggle"
-        onclick={() => media.togglePlayPause()}
-      >
-        <Meter
-          animate={false}
-          class="h-8 stroke-zb-accent"
-          percent={Math.round(
-            (shownSession.position / shownSession.endTime) * 100
-          )}
-        >
-          {#if shownSession.isPlaying}
-            <Pause class="transition group-hover:scale-125" />
-          {:else}
-            <Play class="transition group-hover:scale-125" />
-          {/if}
-        </Meter>
-        <SmoothDiv
-          innerClass="relative flex max-w-24 min-w-24 items-center justify-center sm:max-w-48 md:max-w-64 lg:max-w-xs xl:max-w-sm"
-        >
-          <span
-            class="truncate transition group-hover:translate-y-full group-hover:opacity-0"
-          >
-            <p class="truncate">
-              {shownSession.title}
-            </p>
-          </span>
-          <span
-            class={[
-              "absolute inset-0 inline-flex -translate-y-full items-center justify-center",
-              shownSession.title && "opacity-0",
-              "transition-all group-hover:translate-y-0 group-hover:opacity-100"
-            ]}
-          >
-            {secondsToHms(shownSession.position)}/{secondsToHms(
-              shownSession.endTime
-            )}
-          </span>
-        </SmoothDiv>
-      </button>
-      <SmoothDiv
-        height={false}
-        class="flex justify-end"
-        innerClass="flex justify-end"
-      >
-        {#if !toggleModes.clickThrough}
-          <button
-            class="relative flex h-full items-center justify-end transition hover:scale-125 hover:text-zb-accent"
-            aria-label="Next"
-            onclick={() => media.next()}
-            transition:fly={{ y: 20, duration: config.transitionDuration }}
-          >
-            <SkipForward class={[leavingClass, "mx-2"]} />
-          </button>
-        {/if}
-      </SmoothDiv>
+<Collapsible when={active} anchor="end">
+  {#if session}
+    <div class="flex h-full items-center" onwheel={onWheel}>
+      <MediaControls
+        style={config.media.style}
+        {session}
+        skips={!toggleModes.clickThrough}
+        part="media.title"
+        icon={config.media.appIcon ? getAppIcon(session.sessionId) : undefined}
+        opens={config.media.titleOpensFlyout ? opensFlyout("media") : undefined}
+        onprevious={() => media?.previous(target)}
+        ontoggle={() => media?.togglePlayPause(target)}
+        onnext={() => media?.next(target)}
+      />
     </div>
   {/if}
-</SmoothDiv>
+</Collapsible>

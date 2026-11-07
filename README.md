@@ -8,7 +8,8 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 - System information meters with dynamic coloring and animations
 - Smooth animations
 - Media controls
-- Configuration using CSS variables and a JSON file
+- A settings window with live preview, and sharing of settings and themes as a file
+- Flyouts for audio devices, media players, the calendar, network and system details, and power options
 - Customizable layout and appearance
 - Built-in auto-tiler
 - Multi-monitor support
@@ -34,7 +35,7 @@ https://github.com/user-attachments/assets/47b0a9ae-4f7d-4784-a224-cdf0b10943aa
 
 ### Simple Installation
 
-For both installation methods, you can adjust `config.css` and `config.json` as needed (see [Configuration](#-configuration) and [CSS & Themes](#-css--themes))
+For both installation methods, you can change the settings as needed (see [Configuration](#-configuration) and [Themes](#-themes))
 
 #### Marketplace
 
@@ -75,272 +76,123 @@ To work on the look of the bar in a normal browser, `pnpm run dev:mock` starts a
 
 ## 🔧 Configuration
 
-General configuration is defined in `config.json`, which ships together with the Neosoft Zebar bundle. The default configuration is:
+Neosoft Zebar keeps its settings in Zebar's storage, not in the folder of the installed pack, so they survive updates. There are two ways to change them, and they can be mixed.
 
-```json
+**The settings window** opens from the gear at the left end of the bar, or from the `settings` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Undo there goes back to before the last import or reset.
+
+**`config.json`** ships together with the bundle. Edit it and reload Zebar with **Empty cache & reload configs** from its tray menu.
+
+Only write what you want to change. Everything else keeps its default, and a new release can improve those defaults for you:
+
+```jsonc
 {
   "$schema": "./schema.json",
-  "direction": "top",
-  "gradient": "top",
-  "attachSides": true,
-  "taskbarIntegration": {
-    "enabled": false,
-    "extraIcons": 0,
-    "primaryMonitorSelection": "all",
-    "secondaryMonitorSelection": "monitor"
-  },
-  "transitionDuration": 400,
-  "providersConfig": {
-    "refreshIntervals": {
-      "cpu": 2000,
-      "memory": 5000,
-      "battery": 60000,
-      "weather": 900000,
-      "network": 2000
-    },
-    "enableErrorLogging": false
-  },
-  "backgroundEffect": "inherit",
-  "enableAutoTiling": true,
-  "clickThroughByDefault": false,
-  "showShutdownButton": true,
-  "showHeartButton": true,
-  "showCpuSection": true,
-  "showMemorySection": true,
-  "showBatterySection": true,
-  "showNetworkSection": true,
-  "extendVolumeSliderByDefault": false,
-  "showWeatherSection": true,
-  "useCelsiusByDefault": true,
-  "showFullDateByDefault": false,
-  "use24hClock": "auto",
-  "showSeconds": false,
-  "useThinnerWorkspaceButtons": false
+  "version": 2,
+  "bar": { "direction": "bottom", "gradient": "solid" },
+  "theme": { "preset": "nord" },
+  "sections": { "cpu": true, "power": false },
+  "clock": { "showSeconds": true }
 }
 ```
 
-In order to see the description and value options for each field, you need to open `config.json` in VSCode (or any editor that supports json schemas), which then detects the schema (shipped together in `schema.json`) and provides intellisense for each field.
+To see the description and value options for each field, open `config.json` in VSCode (or any editor that supports json schemas), which detects the schema (shipped together in `schema.json`) and provides intellisense for each field.
 
-Some settings might need to be configured in `zpack.json`, which is the configuration file Zebar uses (shipped together as well). In there, you have options to change the size and positioning of the widget.
+**The last change wins.** `config.json` is applied whenever its contents change, and is ignored after that. Replacing it during an update changes nothing, because the settings it carried are already stored.
+
+**Mistakes don't break the bar.** A value that isn't valid is ignored and everything else still applies. A warning icon appears in the bar until the file is fixed. Hover over it to see which settings were ignored.
+
+**Sections** can be `true` (always shown), `false` (removed, along with the data it collects) or `"auto"`, the default, which shows what there's room for. `network` can also be `"interface"` or `"statistics"`. `disk` and `keyboard` are off until you turn them on. `bar.primaryMonitorOnly` lists the sections that only appear on the primary monitor.
+
+**Arranging:** drag sections between the left, middle and right groups on the Sections page of the settings window. The workspaces move the same way, and the settings, power and heart buttons move together. With taskbar integration, the taskbar's icons stay in the centre, and what you put in the middle group sits either side of them. In `config.json` this is `arrangement`, a list for each group.
+
+**Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
+
+When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way.
+
+Right-clicking the clock switches the date on or off, and saves it. Turning it on sets `clock.fullDate` to `"preferred"`: other sections give way to it, but it can still collapse if they can't make enough room, and if there's no room for it at all, the click does nothing. Clicking the weather switches the unit, which is saved too. Saved settings apply to every monitor.
+
+Some settings have to be configured in `zpack.json`, which is the configuration file Zebar uses (shipped together as well). In there, you have options to change the size and positioning of the widget.
 
 > [!NOTE]
 > If you're using window scaling in Windows, you may need to edit `zpack.json` to set the correct height (default is `40px`).
 
-## 🎨 CSS & Themes
+### Flyouts
 
-Style and color configuration is defined in `config.css`. After making changes there, reload Zebar.
+Clicking a section opens a popup beside it, which closes when you click anywhere else:
 
-Neosoft Zebar currently ships with 5 different themes: Tau (custom), Rosé Pine, Catppuccin, Nord, and Material. These themes are provided as palettes, with the colors represented by CSS variables. You can see the variables of each theme in [this directory](src/themes). At the moment, I've provided presets for 2 (+2 flavors) themes which are available below. In order to use them, replace the color variables (variables under `/* colors */`) in `config.css` with the corresponding variables from the desired theme. There are additional themes without presets which you can experiment with on your own, contributions for these themes are welcome!
+| Section                      | Flyout                                                                     |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| Volume                       | A slider and mute button for every playback and recording device           |
+| Clock                        | A calendar with week numbers                                               |
+| Network                      | Addresses, link speed, totals and a graph of recent traffic                |
+| CPU, memory, disk or battery | Recent usage, disks, battery health and uptime                             |
+| Media title                  | Every player, with its artist, album, progress and controls                |
+| Power                        | Lock, sleep, sign out, restart and shut down, which all ask you to confirm |
 
-In order to use custom colors, you need to replace the color variables with HSL-encoded colors without commas. For example, to change the text and accent colors modify the first lines:
+Restarting and shutting down wait a minute, and the Power flyout can cancel them. Scrolling changes the volume over the volume icon, the workspace over the workspaces, and the player over the media section.
 
-```css
-  /* colors */
-  --text: 0 73% 56%;
-  --accent: 300 100% 50%;
-  ...
+### System tray (experimental)
+
+`sections.tray` shows the tray in a flyout, with any icons you pin in the bar. Drag icons to rearrange them, or to the top of the flyout to pin them.
+
+> [!WARNING]
+> It's off by default because Zebar's tray provider can break the native system tray on Windows 10 until Explorer restarts ([zebar#301](https://github.com/glzr-io/zebar/issues/301)). This part of the pack hasn't been tried against the real provider yet, and order and pins are matched by tooltip, because Zebar's icon ids change on every update.
+
+### Upgrading from 1.x
+
+Your old `config.json` still works: put it back and reload, and it's converted. Sections you had left on become `"auto"`, and anything you turned off stays off.
+
+`config.css` is no longer read, but it's still valid: rename it to `custom.css`, and it keeps working (see [Custom CSS](#custom-css)). Remove any colors you didn't change first, because a color set there stays the same in every theme.
+
+## 🎨 Themes
+
+Pick a preset with `theme.preset`:
+
+| Preset                                                                              | Theme                                            |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `tau`                                                                               | Tau, the default                                 |
+| `rose-pine`, `rose-pine-moon`, `rose-pine-dawn`                                     | [Rosé Pine](https://rosepinetheme.com/)          |
+| `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe`, `catppuccin-latte` | [Catppuccin](https://catppuccin.com/)            |
+| `nord`                                                                              | [Nord](https://www.nordtheme.com/)               |
+| `material`                                                                          | [Material](https://m2.material.io/design/color/) |
+
+To change individual colors, use `theme.colors`, with HSL-encoded colors without commas. A color can also point at another with `var(--name)`: one of the theme's own, such as `var(--ws-2)`, which follows the preset, or any color in the [bundled palettes](src/themes). The Sections page of the settings window has each section's colors, with the theme's own as swatches. The names are in [`presets.css`](src/themes/presets.css).
+
+```json
+{
+  "theme": {
+    "preset": "tau",
+    "colors": {
+      "text": "0 73% 56%",
+      "accent": "var(--rp-love)"
+    }
+  }
+}
 ```
 
-In addition to colors, `config.css` provides variables that control other style options, such as border radius with `--radius`, fonts with `--font-family` (Montserrat is bundled as `Montserrat Variable`) and different margins. Use all configuration files (`config.json`, `config.css`, `zpack.json`) to achieve the exact widget style you want.
+`theme` also sets the corner radius with `radius` and the font with `fontFamily` (Figtree is bundled as `Figtree Variable`).
+
+### Custom CSS
+
+For everything else, create a file called `custom.css` beside `config.json`, and reload Zebar with **Empty cache & reload configs**. It's added after the theme, so it can override any of the variables in `presets.css`, such as `--bar-margin-x` or `--shadow-size-bar`, and it can style anything else too:
+
+```css
+:root {
+  --bar-margin-x: 0.5rem;
+  --accent: 300 100% 50%;
+}
+```
+
+Like `config.json`, it applies when its contents change, and the CSS is then stored, so it survives updates even though the file stays behind in the old version's folder. To remove your CSS, empty the file. Deleting it keeps the last CSS you imported.
+
+For a line or two, `theme.customCss` in `config.json` does the same job:
+
+```json
+{ "theme": { "customCss": ":root { --bar-margin-x: 0.5rem; }" } }
+```
 
 > [!TIP]
-> To scale the entire widget, you need to both increase height in `zpack.json` and increase the font size in `config.css`. Neosoft Zebar's component sizes are all sized relative to the font size.
-
-#### **Here are the theme presets:**
-
-### Tau (Default)
-
-<details>
-<summary>config.css</summary>
-
-```css
-/* colors */
---text: var(--tau-text);
---accent: var(--tau-accent);
---bg: var(--tau-overlay);
---muted: var(--tau-muted);
---border: var(--tau-highlight-low);
---shadow: var(--tau-highlight-low);
---icon: var(--tau-love);
---memory: var(--tau-low);
---cpu: var(--tau-accent);
---cpu-high-usage: var(--tau-strong);
---battery-good: var(--tau-weak);
---battery-mid: var(--tau-mid);
---battery-low: var(--tau-strong);
---focused-process: var(--tau-text);
---process: var(--tau-muted);
---displayed: var(--tau-text);
---ws-1: var(--tau-weak);
---ws-2: var(--tau-low);
---ws-3: var(--tau-accent);
---ws-4: var(--tau-mid);
---ws-5: var(--tau-strong);
---tiling-direction: var(--tau-weak);
---network: var(--tau-text);
---weather: var(--tau-text);
---volume-start: var(--tau-strong);
---volume-end: var(--tau-accent);
---volume-inner: var(--tau-accent);
---bg-focused: var(--tau-highlight-high) / 0.4;
---bg-unfocused: var(--tau-overlay) / 0.5;
-```
-
-</details>
-
-### Rosé Pine (includes flavors)
-
-<details>
-<summary>config.css</summary>
-
-#### Base
-
-```css
-/* colors */
---text: var(--rp-text);
---accent: var(--rp-foam);
---bg: var(--rp-overlay);
---muted: var(--rp-base);
---border: var(--rp-highlight-low);
---shadow: var(--rp-highlight-low);
---icon: var(--rp-love);
---memory: var(--rp-iris);
---cpu: var(--rp-rose);
---cpu-high-usage: var(--rp-love);
---battery-good: var(--rp-pine);
---battery-mid: var(--rp-gold);
---battery-low: var(--rp-love);
---focused-process: var(--rp-text);
---process: var(--rp-muted);
---displayed: var(--rp-text);
---ws-1: var(--rp-gold);
---ws-2: var(--rp-love);
---ws-3: var(--rp-pine);
---ws-4: var(--rp-foam);
---ws-5: var(--rp-iris);
---tiling-direction: var(--rp-rose);
---network: var(--rp-text);
---weather: var(--rp-text);
---volume-start: var(--rp-love);
---volume-end: var(--rp-foam);
---volume-inner: var(--rp-foam);
---bg-focused: var(--rp-subtle) / 0.4;
---bg-unfocused: var(--rp-base) / 0.5;
-```
-
-#### Moon
-
-```css
-/* colors */
---text: var(--rp-moon-text);
---accent: var(--rp-moon-foam);
---bg: var(--rp-moon-overlay);
---muted: var(--rp-moon-base);
---border: var(--rp-moon-highlight-low);
---shadow: var(--rp-moon-highlight-low);
---icon: var(--rp-moon-love);
---memory: var(--rp-moon-iris);
---cpu: var(--rp-moon-rose);
---cpu-high-usage: var(--rp-moon-love);
---battery-good: var(--rp-moon-pine);
---battery-mid: var(--rp-moon-gold);
---battery-low: var(--rp-moon-love);
---focused-process: var(--rp-moon-text);
---process: var(--rp-moon-muted);
---displayed: var(--rp-moon-text);
---ws-1: var(--rp-moon-gold);
---ws-2: var(--rp-moon-love);
---ws-3: var(--rp-moon-pine);
---ws-4: var(--rp-moon-foam);
---ws-5: var(--rp-moon-iris);
---tiling-direction: var(--rp-moon-rose);
---network: var(--rp-moon-text);
---weather: var(--rp-moon-text);
---volume-start: var(--rp-moon-love);
---volume-end: var(--rp-moon-foam);
---volume-inner: var(--rp-moon-foam);
---bg-focused: var(--rp-moon-subtle) / 0.4;
---bg-unfocused: var(--rp-moon-base) / 0.5;
-```
-
-#### Dawn
-
-```css
-/* colors */
---text: var(--rp-dawn-text);
---accent: var(--rp-dawn-foam);
---bg: var(--rp-dawn-base);
---muted: var(--rp-dawn-base);
---border: var(--rp-dawn-highlight-low);
---shadow: var(--rp-dawn-highlight-low);
---icon: var(--rp-dawn-love);
---memory: var(--rp-dawn-iris);
---cpu: var(--rp-dawn-rose);
---cpu-high-usage: var(--rp-dawn-love);
---battery-good: var(--rp-dawn-pine);
---battery-mid: var(--rp-dawn-gold);
---battery-low: var(--rp-dawn-love);
---focused-process: var(--rp-dawn-text);
---process: var(--rp-dawn-muted);
---displayed: var(--rp-dawn-text);
---ws-1: var(--rp-dawn-gold);
---ws-2: var(--rp-dawn-love);
---ws-3: var(--rp-dawn-pine);
---ws-4: var(--rp-dawn-foam);
---ws-5: var(--rp-dawn-iris);
---tiling-direction: var(--rp-dawn-rose);
---network: var(--rp-dawn-text);
---weather: var(--rp-dawn-text);
---volume-start: var(--rp-dawn-love);
---volume-end: var(--rp-dawn-foam);
---volume-inner: var(--rp-dawn-foam);
---bg-focused: var(--rp-dawn-overlay) / 0.4;
---bg-unfocused: var(--rp-dawn-text) / 0.5;
-```
-
-</details>
-
-### Catppuccin (partial)
-
-<details>
-<summary>Colors</summary>
-
-#### Mocha (thanks @Miitto!)
-
-```css
-/* colors */
---text: var(--ctp-mocha-text);
---accent: var(--ctp-mocha-lavender);
---bg: var(--ctp-mocha-base);
---muted: var(--ctp-mocha-subtext0);
---border: var(--ctp-mocha-overlay0);
---shadow: var(--ctp-mocha-crust);
---icon: var(--ctp-mocha-red);
---memory: var(--ctp-mocha-sky);
---cpu: var(--ctp-mocha-blue);
---cpu-high-usage: var(--ctp-mocha-sapphire);
---battery-good: var(--ctp-mocha-green);
---battery-mid: var(--ctp-mocha-teal);
---battery-low: var(--ctp-mocha-red);
---focused-process: var(--ctp-mocha-text);
---process: var(--ctp-mocha-subtext0);
---displayed: var(--ctp-mocha-text);
---ws-1: var(--ctp-mocha-lavender);
---ws-2: var(--ctp-mocha-mauve);
---ws-3: var(--ctp-mocha-sapphire);
---ws-4: var(--ctp-mocha-green);
---ws-5: var(--ctp-mocha-peach);
---tiling-direction: var(--ctp-mocha-rosewater);
---network: var(--ctp-mocha-text);
---weather: var(--ctp-mocha-text);
---volume-start: var(--ctp-mocha-mauve);
---volume-end: var(--ctp-mocha-flamingo);
---volume-inner: var(--ctp-mocha-lavender);
---bg-focused: var(--ctp-mocha-lavender) / 0.4;
---bg-unfocused: var(--ctp-mocha-base) / 0.5;
-```
-
-</details>
+> To scale the entire widget, you need to both increase height in `zpack.json` and increase `theme.fontSize`. Neosoft Zebar's component sizes are all sized relative to the font size.
 
 ## 🎉 Background Effects & Click-Through
 
@@ -353,7 +205,7 @@ In addition to colors, `config.css` provides variables that control other style 
 
 ### Enable Background Effects
 
-In `config.json`, set the `backgroundEffect` field to one of the values provided by the schema.
+In `config.json`, set `bar.backgroundEffect` to one of the values provided by the schema.
 
 ### Enable Click-Through
 
@@ -397,15 +249,7 @@ The taskbar must be:
 - Have clickable-through empty regions (so you can interact with the Zebar widget)
 - Have centered icons
 
-After configuring the taskbar, adjust the Zebar widget sizes and margins to align the icons perfectly. In `config.css`, modify these variables:
-
-```css
---process-icon-width: 50px;
---right-margin: 290px;
---left-margin: 50px;
-```
-
-Enable taskbar integration in `config.json`:
+Enable taskbar integration in `config.json`, and adjust the Zebar widget sizes and margins to align the icons perfectly:
 
 ```json
 {
@@ -414,7 +258,10 @@ Enable taskbar integration in `config.json`:
       "enabled": true,
       "extraIcons": 0,
       "primaryMonitorSelection": "all",
-      "secondaryMonitorSelection": "monitor"
+      "secondaryMonitorSelection": "monitor",
+      "iconWidth": "50px",
+      "marginLeft": "50px",
+      "marginRight": "290px"
    }
    ...
 }
@@ -439,3 +286,7 @@ Contributions are welcome! If you have suggestions, improvements, or bug fixes, 
 An easy way to contribute is by creating theme presets, or by adding additional themes. You can also help with the process icon map in [`src/lib/icon_loader.ts`](src/lib/icon_loader.ts).
 
 Before opening a pull request, run `pnpm verify`, which runs the linters, the type check and a build.
+
+## Acknowledgements
+
+The settings window, the flyouts and keeping settings in `localStorage` were inspired by [overline-zebar](https://github.com/mushfikurr/overline-zebar) by [mushfikurr](https://github.com/mushfikurr).

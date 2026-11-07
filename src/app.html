@@ -1,11 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="tau">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="config.css" />
     <link rel="preload" as="fetch" href="config.json" crossorigin="anonymous" />
     %sveltekit.head%
+    <script>
+      // Zebar adds a normalize.css to every widget, outside any cascade layer, which
+      // puts it above everything in Tailwind's layers, utilities included, so the
+      // margins and text sizes of buttons and inputs would be ignored. Tailwind's own
+      // base styles do the same job, so it's taken out as soon as it's added. Zebar
+      // adds it when the document has loaded, with a listener registered before this.
+      document.addEventListener("DOMContentLoaded", () => {
+        document
+          .querySelector('link[data-zebar][href$="normalize.css"]')
+          ?.remove();
+      });
+
+      // Painting here, ahead of the app, stops the default look flashing on every
+      // start. `src/lib/theme.ts` saves what's read here.
+      window.paintTheme = ({ preset, variables, customCss }) => {
+        const setStyle = (id, css) => {
+          let style = document.getElementById(id);
+          if (!style) {
+            style = document.createElement("style");
+            style.id = id;
+            document.head.append(style);
+          }
+          style.textContent = css;
+        };
+
+        const declarations = Object.entries(variables)
+          .map(([name, value]) => `${name}: ${value};`)
+          .join("");
+
+        document.documentElement.dataset.theme = preset;
+
+        // Variables on the root element's own style would beat the custom CSS. In a
+        // layer they lose to it, whichever of the two the user wrote. These are two
+        // elements so that a mistake in the custom CSS can't swallow the variables,
+        // and so that it can start with an `@import`.
+        setStyle(
+          "theme-variables",
+          `@layer presets, overrides; @layer overrides { :root { ${declarations} } }`
+        );
+        setStyle("custom-css", customCss);
+      };
+
+      try {
+        const saved = localStorage.getItem("neosoft.theme");
+        if (saved) window.paintTheme(JSON.parse(saved));
+      } catch (error) {
+        console.error("Error applying the saved theme:", error);
+      }
+    </script>
   </head>
   <body style="height: 100dvh">
     <div style="display: contents">%sveltekit.body%</div>

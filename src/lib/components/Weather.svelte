@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { config } from "#lib/state/config.svelte.ts";
-  import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
+  import { config, updateSetting } from "#lib/state/config.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import type { WeatherStatus } from "zebar";
 
@@ -21,20 +20,16 @@
   };
 
   let weather = $derived(providers.weather);
-  let useCelsius = $derived(config.useCelsiusByDefault);
+  let useCelsius = $derived(config.weather.unit === "celsius");
 </script>
 
 {#if weather}
   <button
-    class="hover:text-zb-accent"
-    onclick={() => (useCelsius = !useCelsius)}
+    class="text-zb-weather hover:text-zb-accent"
+    onclick={() =>
+      updateSetting("weather.unit", useCelsius ? "fahrenheit" : "celsius")}
   >
-    <div
-      class={[
-        "flex items-center truncate pr-2",
-        !isOnPrimaryMonitor() && "pl-1"
-      ]}
-    >
+    <div class="flex items-center truncate">
       <span class="text-2xl">
         <i class="weather-icon">{STATUS_GLYPHS[weather.status]}</i>
       </span>

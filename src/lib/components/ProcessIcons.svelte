@@ -6,7 +6,6 @@
   import { getWindows } from "#lib/utils/glaze_wm_utils.ts";
   import type { Window } from "glazewm";
   import type { GlazeWmOutput } from "zebar";
-  import SmoothDiv from "./SmoothDiv.svelte";
 
   let glazewm = $derived(providers.glazewm);
 
@@ -38,15 +37,10 @@
   };
 </script>
 
-<SmoothDiv>
-  {#if glazewm}
-    <div
-      class="flex items-center"
-      style="width: calc({config.taskbarIntegration.extraIcons +
-        getIconCount(
-          glazewm,
-          config.taskbarIntegration
-        )} * var(--process-icon-width));"
-    ></div>
-  {/if}
-</SmoothDiv>
+<div
+  class="transition-[width]"
+  style="width: calc({glazewm
+    ? config.taskbarIntegration.extraIcons +
+      getIconCount(glazewm, config.taskbarIntegration)
+    : 0} * var(--process-icon-width));"
+></div>

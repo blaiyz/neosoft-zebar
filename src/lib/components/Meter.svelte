@@ -15,7 +15,7 @@
   );
 
   const size = 100;
-  const strokeWidth = 8;
+  const strokeWidth = 9;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = $derived(
@@ -23,31 +23,25 @@
   );
 </script>
 
-<div class={["group relative", className]}>
+<div class={["meter relative flex aspect-square items-center", className]}>
   <div
-    class={[
-      "flex aspect-square h-full items-center justify-center",
-      animate &&
-        "transition-all group-hover:translate-y-full group-hover:opacity-0"
-    ]}
+    class="dial relative flex aspect-square h-full items-center justify-center"
   >
     <svg
-      class="h-full transition-all"
+      class="h-full"
       viewBox="0 0 {size} {size}"
       preserveAspectRatio="xMidYMid meet"
     >
-      <!-- Background circle -->
       <circle
-        class="stroke-zb-border"
+        class="stroke-zb-surface-3"
         stroke-width={strokeWidth}
         r={radius}
         cx={size / 2}
         cy={size / 2}
         fill="transparent"
       ></circle>
-      <!-- Progress circle -->
       <circle
-        class={["transition-all", className]}
+        class="progress"
         stroke-width={strokeWidth}
         stroke-linecap="round"
         r={radius}
@@ -65,12 +59,49 @@
       {/if}
     </div>
   </div>
-
   {#if animate}
+    <!-- Three digits are smaller, so that a full meter still fits in its dial. -->
     <span
-      class="absolute inset-0 flex -translate-y-full items-center justify-center opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100"
+      class={[
+        "number absolute inset-0 flex items-center justify-center tabular-nums",
+        normalizedPercent >= 100 && "text-[0.85em]"
+      ]}
     >
-      {normalizedPercent}%
+      {normalizedPercent}<span class="text-[0.7em]">%</span>
     </span>
   {/if}
 </div>
+
+<style>
+  .meter {
+    transition:
+      color var(--transition-duration) var(--ease),
+      stroke var(--transition-duration) var(--ease);
+  }
+
+  .progress {
+    transition: stroke-dashoffset var(--time-melt) var(--spring-melt);
+  }
+
+  .dial,
+  .number {
+    transition:
+      opacity var(--transition-duration) var(--spring-out),
+      translate var(--time-soft) var(--spring-soft);
+  }
+
+  .number {
+    opacity: 0;
+    translate: 0 -100%;
+  }
+
+  .meter:hover .dial:has(+ .number) {
+    opacity: 0;
+    translate: 0 100%;
+  }
+
+  .meter:hover .number {
+    opacity: 1;
+    translate: 0;
+  }
+</style>

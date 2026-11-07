@@ -1,0 +1,490 @@
+/* Everything here sits in a layer, so that `theme.customCss` overrides it.
+
+  `theme.colors`, `theme.fontSize`, `theme.radius`, `theme.fontFamily` and the taskbar sizes go
+  in the `overrides` layer above this one, and the sizes below are the defaults they replace. */
+@layer presets {
+  :root {
+    --height: 100%;
+
+    --bar-margin-y: 0rem;
+    --bar-margin-x: 0rem;
+
+    --process-icon-width: 50px;
+    --right-margin: 1rem;
+    --left-margin: 1rem;
+
+    --font-family:
+      "Figtree Variable", Figtree, "SF Pro Display", Roboto, Helvetica, Arial,
+      sans-serif;
+    --font-size: 14px;
+    --font-weight: 500;
+
+    --border-size: 0.1rem;
+    --radius: 20px;
+
+    --shadow-size-bar: 0rem;
+    --shadow-size-button: 0rem;
+
+    --ease: cubic-bezier(0.33, 1, 0.68, 1);
+
+    /* Springs written out as curves, so that CSS can run them without any script. */
+    --spring-soft: linear(
+      0,
+      0.078,
+      0.25,
+      0.446,
+      0.629,
+      0.778,
+      0.889,
+      0.963,
+      1.008,
+      1.03,
+      1.038,
+      1.037,
+      1.031,
+      1.023,
+      1.016,
+      1.01,
+      1.005,
+      1.002,
+      1,
+      0.999,
+      1
+    );
+    --spring-melt: linear(
+      0,
+      0.055,
+      0.1734,
+      0.3101,
+      0.4422,
+      0.5591,
+      0.6575,
+      0.7374,
+      0.8009,
+      0.8503,
+      0.8883,
+      0.9172,
+      0.9389,
+      0.9551,
+      0.9672,
+      0.9761,
+      0.9826,
+      0.9874,
+      0.9909,
+      0.9935,
+      0.9953,
+      0.9966,
+      0.9976,
+      0.9983,
+      1
+    );
+    --spring-pop: linear(
+      0,
+      0.103,
+      0.331,
+      0.589,
+      0.815,
+      0.98,
+      1.079,
+      1.122,
+      1.123,
+      1.101,
+      1.069,
+      1.038,
+      1.012,
+      0.996,
+      0.987,
+      0.984,
+      0.986,
+      0.989,
+      0.993,
+      0.997,
+      1
+    );
+    --spring-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --well-radius: calc(var(--radius) * 0.7);
+    --control-radius: calc(var(--radius) * 0.6);
+  }
+
+  /* Tones of a theme's own colors. A value with `var()` in it resolves where it's
+    declared, so these are repeated for anything that shows a different theme. */
+  :root,
+  [data-theme] {
+    --surface-1: color-mix(in srgb, hsl(var(--text)) 6%, hsl(var(--bg)));
+    --surface-2: color-mix(in srgb, hsl(var(--text)) 11%, hsl(var(--bg)));
+    --surface-3: color-mix(in srgb, hsl(var(--text)) 17%, hsl(var(--bg)));
+    --dim: color-mix(in srgb, hsl(var(--text)) 64%, hsl(var(--bg)));
+    --faint: color-mix(in srgb, hsl(var(--text)) 42%, hsl(var(--bg)));
+  }
+
+  [data-theme="tau"] {
+    --text: var(--tau-text);
+    --accent: var(--tau-accent);
+    --bg: var(--tau-overlay);
+    --muted: var(--tau-muted);
+    --border: var(--tau-highlight-low);
+    --shadow: var(--tau-highlight-low);
+    --icon: var(--tau-love);
+    --memory: var(--tau-low);
+    --cpu: var(--tau-accent);
+    --cpu-high-usage: var(--tau-strong);
+    --memory-high-usage: var(--tau-strong);
+    --disk: var(--tau-mid);
+    --disk-high-usage: var(--tau-strong);
+    --battery-good: var(--tau-weak);
+    --battery-mid: var(--tau-mid);
+    --battery-low: var(--tau-strong);
+    --focused-process: var(--tau-text);
+    --process: var(--tau-muted);
+    --ws-1: var(--tau-weak);
+    --ws-2: var(--tau-low);
+    --ws-3: var(--tau-accent);
+    --ws-4: var(--tau-mid);
+    --ws-5: var(--tau-strong);
+    --tiling-direction: var(--tau-weak);
+    --click-through: var(--tau-weak);
+    --paused: var(--tau-weak);
+    --network: var(--tau-text);
+    --weather: var(--tau-text);
+    --keyboard: var(--tau-text);
+    --volume-start: var(--tau-strong);
+    --volume-end: var(--tau-accent);
+    --volume-inner: var(--tau-accent);
+    --bg-focused: var(--tau-highlight-high) / 0.4;
+    --bg-unfocused: var(--tau-overlay) / 0.5;
+  }
+
+  [data-theme="rose-pine"] {
+    --text: var(--rp-text);
+    --accent: var(--rp-foam);
+    --bg: var(--rp-overlay);
+    --muted: var(--rp-base);
+    --border: var(--rp-highlight-low);
+    --shadow: var(--rp-highlight-low);
+    --icon: var(--rp-love);
+    --memory: var(--rp-iris);
+    --cpu: var(--rp-rose);
+    --cpu-high-usage: var(--rp-love);
+    --memory-high-usage: var(--rp-love);
+    --disk: var(--rp-foam);
+    --disk-high-usage: var(--rp-love);
+    --battery-good: var(--rp-pine);
+    --battery-mid: var(--rp-gold);
+    --battery-low: var(--rp-love);
+    --focused-process: var(--rp-text);
+    --process: var(--rp-muted);
+    --ws-1: var(--rp-gold);
+    --ws-2: var(--rp-love);
+    --ws-3: var(--rp-pine);
+    --ws-4: var(--rp-foam);
+    --ws-5: var(--rp-iris);
+    --tiling-direction: var(--rp-rose);
+    --click-through: var(--rp-rose);
+    --paused: var(--rp-rose);
+    --network: var(--rp-text);
+    --weather: var(--rp-text);
+    --keyboard: var(--rp-text);
+    --volume-start: var(--rp-love);
+    --volume-end: var(--rp-foam);
+    --volume-inner: var(--rp-foam);
+    --bg-focused: var(--rp-subtle) / 0.4;
+    --bg-unfocused: var(--rp-base) / 0.5;
+  }
+
+  [data-theme="rose-pine-moon"] {
+    --text: var(--rp-moon-text);
+    --accent: var(--rp-moon-foam);
+    --bg: var(--rp-moon-overlay);
+    --muted: var(--rp-moon-base);
+    --border: var(--rp-moon-highlight-low);
+    --shadow: var(--rp-moon-highlight-low);
+    --icon: var(--rp-moon-love);
+    --memory: var(--rp-moon-iris);
+    --cpu: var(--rp-moon-rose);
+    --cpu-high-usage: var(--rp-moon-love);
+    --memory-high-usage: var(--rp-moon-love);
+    --disk: var(--rp-moon-foam);
+    --disk-high-usage: var(--rp-moon-love);
+    --battery-good: var(--rp-moon-pine);
+    --battery-mid: var(--rp-moon-gold);
+    --battery-low: var(--rp-moon-love);
+    --focused-process: var(--rp-moon-text);
+    --process: var(--rp-moon-muted);
+    --ws-1: var(--rp-moon-gold);
+    --ws-2: var(--rp-moon-love);
+    --ws-3: var(--rp-moon-pine);
+    --ws-4: var(--rp-moon-foam);
+    --ws-5: var(--rp-moon-iris);
+    --tiling-direction: var(--rp-moon-rose);
+    --click-through: var(--rp-moon-rose);
+    --paused: var(--rp-moon-rose);
+    --network: var(--rp-moon-text);
+    --weather: var(--rp-moon-text);
+    --keyboard: var(--rp-moon-text);
+    --volume-start: var(--rp-moon-love);
+    --volume-end: var(--rp-moon-foam);
+    --volume-inner: var(--rp-moon-foam);
+    --bg-focused: var(--rp-moon-subtle) / 0.4;
+    --bg-unfocused: var(--rp-moon-base) / 0.5;
+  }
+
+  [data-theme="rose-pine-dawn"] {
+    --text: var(--rp-dawn-text);
+    --accent: var(--rp-dawn-foam);
+    --bg: var(--rp-dawn-base);
+    --muted: var(--rp-dawn-base);
+    --border: var(--rp-dawn-highlight-low);
+    --shadow: var(--rp-dawn-highlight-low);
+    --icon: var(--rp-dawn-love);
+    --memory: var(--rp-dawn-iris);
+    --cpu: var(--rp-dawn-rose);
+    --cpu-high-usage: var(--rp-dawn-love);
+    --memory-high-usage: var(--rp-dawn-love);
+    --disk: var(--rp-dawn-foam);
+    --disk-high-usage: var(--rp-dawn-love);
+    --battery-good: var(--rp-dawn-pine);
+    --battery-mid: var(--rp-dawn-gold);
+    --battery-low: var(--rp-dawn-love);
+    --focused-process: var(--rp-dawn-text);
+    --process: var(--rp-dawn-muted);
+    --ws-1: var(--rp-dawn-gold);
+    --ws-2: var(--rp-dawn-love);
+    --ws-3: var(--rp-dawn-pine);
+    --ws-4: var(--rp-dawn-foam);
+    --ws-5: var(--rp-dawn-iris);
+    --tiling-direction: var(--rp-dawn-rose);
+    --click-through: var(--rp-dawn-rose);
+    --paused: var(--rp-dawn-rose);
+    --network: var(--rp-dawn-text);
+    --weather: var(--rp-dawn-text);
+    --keyboard: var(--rp-dawn-text);
+    --volume-start: var(--rp-dawn-love);
+    --volume-end: var(--rp-dawn-foam);
+    --volume-inner: var(--rp-dawn-foam);
+    --bg-focused: var(--rp-dawn-overlay) / 0.4;
+    --bg-unfocused: var(--rp-dawn-text) / 0.5;
+  }
+
+  [data-theme="catppuccin-mocha"] {
+    --text: var(--ctp-mocha-text);
+    --accent: var(--ctp-mocha-lavender);
+    --bg: var(--ctp-mocha-base);
+    --muted: var(--ctp-mocha-subtext0);
+    --border: var(--ctp-mocha-overlay0);
+    --shadow: var(--ctp-mocha-crust);
+    --icon: var(--ctp-mocha-red);
+    --memory: var(--ctp-mocha-sky);
+    --cpu: var(--ctp-mocha-blue);
+    --cpu-high-usage: var(--ctp-mocha-sapphire);
+    --memory-high-usage: var(--ctp-mocha-sapphire);
+    --disk: var(--ctp-mocha-green);
+    --disk-high-usage: var(--ctp-mocha-sapphire);
+    --battery-good: var(--ctp-mocha-green);
+    --battery-mid: var(--ctp-mocha-teal);
+    --battery-low: var(--ctp-mocha-red);
+    --focused-process: var(--ctp-mocha-text);
+    --process: var(--ctp-mocha-subtext0);
+    --ws-1: var(--ctp-mocha-lavender);
+    --ws-2: var(--ctp-mocha-mauve);
+    --ws-3: var(--ctp-mocha-sapphire);
+    --ws-4: var(--ctp-mocha-green);
+    --ws-5: var(--ctp-mocha-peach);
+    --tiling-direction: var(--ctp-mocha-rosewater);
+    --click-through: var(--ctp-mocha-rosewater);
+    --paused: var(--ctp-mocha-rosewater);
+    --network: var(--ctp-mocha-text);
+    --weather: var(--ctp-mocha-text);
+    --keyboard: var(--ctp-mocha-text);
+    --volume-start: var(--ctp-mocha-mauve);
+    --volume-end: var(--ctp-mocha-flamingo);
+    --volume-inner: var(--ctp-mocha-lavender);
+    --bg-focused: var(--ctp-mocha-lavender) / 0.4;
+    --bg-unfocused: var(--ctp-mocha-base) / 0.5;
+  }
+
+  [data-theme="catppuccin-macchiato"] {
+    --text: var(--ctp-macchiato-text);
+    --accent: var(--ctp-macchiato-lavender);
+    --bg: var(--ctp-macchiato-base);
+    --muted: var(--ctp-macchiato-subtext0);
+    --border: var(--ctp-macchiato-overlay0);
+    --shadow: var(--ctp-macchiato-crust);
+    --icon: var(--ctp-macchiato-red);
+    --memory: var(--ctp-macchiato-sky);
+    --cpu: var(--ctp-macchiato-blue);
+    --cpu-high-usage: var(--ctp-macchiato-sapphire);
+    --memory-high-usage: var(--ctp-macchiato-sapphire);
+    --disk: var(--ctp-macchiato-green);
+    --disk-high-usage: var(--ctp-macchiato-sapphire);
+    --battery-good: var(--ctp-macchiato-green);
+    --battery-mid: var(--ctp-macchiato-teal);
+    --battery-low: var(--ctp-macchiato-red);
+    --focused-process: var(--ctp-macchiato-text);
+    --process: var(--ctp-macchiato-subtext0);
+    --ws-1: var(--ctp-macchiato-lavender);
+    --ws-2: var(--ctp-macchiato-mauve);
+    --ws-3: var(--ctp-macchiato-sapphire);
+    --ws-4: var(--ctp-macchiato-green);
+    --ws-5: var(--ctp-macchiato-peach);
+    --tiling-direction: var(--ctp-macchiato-rosewater);
+    --click-through: var(--ctp-macchiato-rosewater);
+    --paused: var(--ctp-macchiato-rosewater);
+    --network: var(--ctp-macchiato-text);
+    --weather: var(--ctp-macchiato-text);
+    --keyboard: var(--ctp-macchiato-text);
+    --volume-start: var(--ctp-macchiato-mauve);
+    --volume-end: var(--ctp-macchiato-flamingo);
+    --volume-inner: var(--ctp-macchiato-lavender);
+    --bg-focused: var(--ctp-macchiato-lavender) / 0.4;
+    --bg-unfocused: var(--ctp-macchiato-base) / 0.5;
+  }
+
+  [data-theme="catppuccin-frappe"] {
+    --text: var(--ctp-frappe-text);
+    --accent: var(--ctp-frappe-lavender);
+    --bg: var(--ctp-frappe-base);
+    --muted: var(--ctp-frappe-subtext0);
+    --border: var(--ctp-frappe-overlay0);
+    --shadow: var(--ctp-frappe-crust);
+    --icon: var(--ctp-frappe-red);
+    --memory: var(--ctp-frappe-sky);
+    --cpu: var(--ctp-frappe-blue);
+    --cpu-high-usage: var(--ctp-frappe-sapphire);
+    --memory-high-usage: var(--ctp-frappe-sapphire);
+    --disk: var(--ctp-frappe-green);
+    --disk-high-usage: var(--ctp-frappe-sapphire);
+    --battery-good: var(--ctp-frappe-green);
+    --battery-mid: var(--ctp-frappe-teal);
+    --battery-low: var(--ctp-frappe-red);
+    --focused-process: var(--ctp-frappe-text);
+    --process: var(--ctp-frappe-subtext0);
+    --ws-1: var(--ctp-frappe-lavender);
+    --ws-2: var(--ctp-frappe-mauve);
+    --ws-3: var(--ctp-frappe-sapphire);
+    --ws-4: var(--ctp-frappe-green);
+    --ws-5: var(--ctp-frappe-peach);
+    --tiling-direction: var(--ctp-frappe-rosewater);
+    --click-through: var(--ctp-frappe-rosewater);
+    --paused: var(--ctp-frappe-rosewater);
+    --network: var(--ctp-frappe-text);
+    --weather: var(--ctp-frappe-text);
+    --keyboard: var(--ctp-frappe-text);
+    --volume-start: var(--ctp-frappe-mauve);
+    --volume-end: var(--ctp-frappe-flamingo);
+    --volume-inner: var(--ctp-frappe-lavender);
+    --bg-focused: var(--ctp-frappe-lavender) / 0.4;
+    --bg-unfocused: var(--ctp-frappe-base) / 0.5;
+  }
+
+  [data-theme="catppuccin-latte"] {
+    --text: var(--ctp-latte-text);
+    --accent: var(--ctp-latte-lavender);
+    --bg: var(--ctp-latte-base);
+    --muted: var(--ctp-latte-subtext0);
+    --border: var(--ctp-latte-overlay0);
+    --shadow: var(--ctp-latte-crust);
+    --icon: var(--ctp-latte-red);
+    --memory: var(--ctp-latte-sky);
+    --cpu: var(--ctp-latte-blue);
+    --cpu-high-usage: var(--ctp-latte-sapphire);
+    --memory-high-usage: var(--ctp-latte-sapphire);
+    --disk: var(--ctp-latte-green);
+    --disk-high-usage: var(--ctp-latte-sapphire);
+    --battery-good: var(--ctp-latte-green);
+    --battery-mid: var(--ctp-latte-teal);
+    --battery-low: var(--ctp-latte-red);
+    --focused-process: var(--ctp-latte-text);
+    --process: var(--ctp-latte-subtext0);
+    --ws-1: var(--ctp-latte-lavender);
+    --ws-2: var(--ctp-latte-mauve);
+    --ws-3: var(--ctp-latte-sapphire);
+    --ws-4: var(--ctp-latte-green);
+    --ws-5: var(--ctp-latte-peach);
+    --tiling-direction: var(--ctp-latte-rosewater);
+    --click-through: var(--ctp-latte-rosewater);
+    --paused: var(--ctp-latte-rosewater);
+    --network: var(--ctp-latte-text);
+    --weather: var(--ctp-latte-text);
+    --keyboard: var(--ctp-latte-text);
+    --volume-start: var(--ctp-latte-mauve);
+    --volume-end: var(--ctp-latte-flamingo);
+    --volume-inner: var(--ctp-latte-lavender);
+    --bg-focused: var(--ctp-latte-lavender) / 0.4;
+    --bg-unfocused: var(--ctp-latte-base) / 0.5;
+  }
+
+  [data-theme="nord"] {
+    --text: var(--nord6);
+    --accent: var(--nord8);
+    --bg: var(--nord0);
+    --muted: var(--nord3);
+    --border: var(--nord2);
+    --shadow: var(--nord1);
+    --icon: var(--nord11);
+    --memory: var(--nord15);
+    --cpu: var(--nord9);
+    --cpu-high-usage: var(--nord11);
+    --memory-high-usage: var(--nord11);
+    --disk: var(--nord13);
+    --disk-high-usage: var(--nord11);
+    --battery-good: var(--nord14);
+    --battery-mid: var(--nord13);
+    --battery-low: var(--nord11);
+    --focused-process: var(--nord6);
+    --process: var(--nord4);
+    --ws-1: var(--nord8);
+    --ws-2: var(--nord9);
+    --ws-3: var(--nord14);
+    --ws-4: var(--nord13);
+    --ws-5: var(--nord15);
+    --tiling-direction: var(--nord7);
+    --click-through: var(--nord7);
+    --paused: var(--nord7);
+    --network: var(--nord6);
+    --weather: var(--nord6);
+    --keyboard: var(--nord6);
+    --volume-start: var(--nord10);
+    --volume-end: var(--nord8);
+    --volume-inner: var(--nord8);
+    --bg-focused: var(--nord3) / 0.4;
+    --bg-unfocused: var(--nord0) / 0.5;
+  }
+
+  [data-theme="material"] {
+    --text: var(--md-grey-100);
+    --accent: var(--md-teal-300);
+    --bg: var(--md-grey-900);
+    --muted: var(--md-grey-500);
+    --border: var(--md-grey-800);
+    --shadow: var(--md-grey-800);
+    --icon: var(--md-red-400);
+    --memory: var(--md-purple-300);
+    --cpu: var(--md-blue-300);
+    --cpu-high-usage: var(--md-red-400);
+    --memory-high-usage: var(--md-red-400);
+    --disk: var(--md-amber-300);
+    --disk-high-usage: var(--md-red-400);
+    --battery-good: var(--md-green-400);
+    --battery-mid: var(--md-amber-400);
+    --battery-low: var(--md-red-400);
+    --focused-process: var(--md-grey-100);
+    --process: var(--md-grey-500);
+    --ws-1: var(--md-blue-300);
+    --ws-2: var(--md-purple-300);
+    --ws-3: var(--md-teal-300);
+    --ws-4: var(--md-amber-300);
+    --ws-5: var(--md-pink-300);
+    --tiling-direction: var(--md-cyan-300);
+    --click-through: var(--md-cyan-300);
+    --paused: var(--md-cyan-300);
+    --network: var(--md-grey-100);
+    --weather: var(--md-grey-100);
+    --keyboard: var(--md-grey-100);
+    --volume-start: var(--md-pink-300);
+    --volume-end: var(--md-teal-300);
+    --volume-inner: var(--md-teal-300);
+    --bg-focused: var(--md-grey-700) / 0.4;
+    --bg-unfocused: var(--md-grey-900) / 0.5;
+  }
+}

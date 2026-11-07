@@ -30,7 +30,7 @@ export function initAutotiler() {
     // Using ID to avoid unnecessary updates
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     focusedWindowId;
-    if (!config.enableAutoTiling) {
+    if (!config.autoTiling) {
       // Auto-tiling is disabled
       return;
     }
