@@ -47,7 +47,7 @@ export type Arrangement = Record<BarGroup, BarItem[]>;
 export const defaultArrangement: Arrangement = {
   left: ["buttons", "cpu", "memory", "disk", "battery", "network"],
   middle: ["workspaces", "taskbar"],
-  right: ["media", "tray", "keyboard", "volume", "weather", "clock"]
+  right: ["media", "volume", "weather", "tray", "keyboard", "clock"]
 };
 
 const groupOfItem = (arrangement: Arrangement, item: BarItem) =>

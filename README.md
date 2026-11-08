@@ -78,7 +78,7 @@ To work on the look of the bar in a normal browser, `pnpm run dev:mock` starts a
 
 Neosoft Zebar keeps its settings in Zebar's storage, not in the folder of the installed pack, so they survive updates. There are two ways to change them, and they can be mixed.
 
-**The settings window** opens from the gear at the left end of the bar, or from the `settings` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Exports leave out which tray icons are pinned and their order, since those are your PC's apps. Undo there goes back to before the last import or reset.
+**The settings window** opens from the gear at the left end of the bar, or from the `settings` widget's `default` preset in Zebar's tray menu. Changes apply to every bar as you make them. Its Config page exports your settings or just your theme, to the clipboard or to your Downloads folder, and imports them again, so a theme can be shared by pasting it. Exports leave out which tray icons are pinned and their order, since those are your PC's apps. Undo there goes back to before the last import or reset.
 
 **`config.json`** ships together with the bundle. Edit it and reload Zebar with **Empty cache & reload configs** from its tray menu.
 
@@ -107,7 +107,7 @@ To see the description and value options for each field, open `config.json` in V
 
 **Styles:** `workspaces.style` and `media.style` each offer four looks, shown as live previews on the Sections page of the settings window.
 
-**Performance:** the bar is always on screen, so `performance.animations` can cut how much it animates. `interactive` only animates what you do, like hovering the bar or switching workspaces, and `none` turns animations off. Turning off `performance.keepFlyoutsReady` saves around 40 MB by closing the flyout window when it's unused, at the cost of a short wait on some opens. Longer `providers.refreshIntervals` save CPU and GPU too. These are on the Behavior page of the settings window.
+**Performance:** the bar is always on screen, so `performance.animations` can cut how much it animates. `interactive`, the default, only animates what you do, like hovering the bar or switching workspaces, `all` animates every change, like the meters as readings come in, and `none` turns animations off. Turning off `performance.keepFlyoutsReady` saves around 40 MB by closing the flyout window when it's unused, at the cost of a second's wait when a flyout starts it again. Longer `providers.refreshIntervals` save CPU and GPU too. These are on the Behavior page of the settings window.
 
 When the bar runs out of room, `"auto"` sections shorten and then hide, least useful first, and come back when there's room again. A section set to `true` never gives way, so the others make room for it. `clock.fullDate` and `workspaces.thinButtons` work the same way.
 
@@ -144,7 +144,7 @@ Restarting and shutting down wait a minute, and the Power flyout can cancel them
 
 Your old `config.json` still works: put it back and reload, and it's converted. Sections you had left on become `"auto"`, and anything you turned off stays off.
 
-`config.css` is no longer read, but it's still valid: rename it to `custom.css`, and it keeps working (see [Custom CSS](#custom-css)). Remove any colors you didn't change first, because a color set there stays the same in every theme.
+`config.css` is no longer read, but it's still valid: rename it to `custom.css`, and it keeps working (see [Custom CSS](#custom-css)). Keep only the lines you changed, because anything set there wins over the settings: a color stays the same in every theme, and `--font-family`, `--font-size`, `--radius` and the taskbar integration sizes would override `theme.fontFamily`, `theme.fontSize`, `theme.radius` and `taskbarIntegration`. The 1.x template's Montserrat font isn't included any more.
 
 ## 🎨 Themes
 
@@ -158,7 +158,7 @@ Pick a preset with `theme.preset`:
 | `nord`                                                                              | [Nord](https://www.nordtheme.com/)               |
 | `material`                                                                          | [Material](https://m2.material.io/design/color/) |
 
-To change individual colors, use `theme.colors`, with HSL-encoded colors without commas. A color can also point at another with `var(--name)`: one of the theme's own, such as `var(--ws-2)`, which follows the preset, or any color in the [bundled palettes](src/themes). The Sections page of the settings window has each section's colors, with the theme's own as swatches. The names are in [`presets.css`](src/themes/presets.css).
+To change individual colors, use `theme.colors`, with HSL-encoded colors without commas. A color can also point at another with `var(--name)`: one of the theme's own, such as `var(--ws-2)`, which follows the preset, or any color in the [bundled palettes](https://github.com/blaiyz/neosoft-zebar/tree/main/src/themes). The Sections page of the settings window has each section's colors, with the theme's own as swatches. The names are in [`presets.css`](https://github.com/blaiyz/neosoft-zebar/blob/main/src/themes/presets.css).
 
 ```json
 {
@@ -199,7 +199,7 @@ For a line or two, `theme.customCss` in `config.json` does the same job:
 ## 🎉 Background Effects & Click-Through
 
 > [!WARNING]
-> Background effects do not work in Windows 11 (Currently, supports only Windows 10). To achieve similar background effects, use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
+> Background effects may not work correctly on Windows 11: they have been seen to disappear, leaving the bar opaque, once it loses focus. They work on Windows 10, except `mica`, which is Windows 11 only. For similar effects, you can use an external application like [Mica For Everyone](https://github.com/MicaForEveryone/MicaForEveryone).
 > Click-through works fine in all platforms, however note that it completely disables interactivity with the Zebar widget.
 
 > [!NOTE]
@@ -285,7 +285,7 @@ This hasn't been tested. If you find a way to achieve the same taskbar effect as
 
 Contributions are welcome! If you have suggestions, improvements, or bug fixes, please open an issue or submit a pull request.
 
-An easy way to contribute is by creating theme presets, or by adding additional themes. You can also help with the process icon map in [`src/lib/icon_loader.ts`](src/lib/icon_loader.ts).
+An easy way to contribute is by creating theme presets, or by adding additional themes. You can also help with the process icon map in [`src/lib/icon_loader.ts`](https://github.com/blaiyz/neosoft-zebar/blob/main/src/lib/icon_loader.ts).
 
 Before opening a pull request, run `pnpm verify`, which runs the linters, the type check and a build.
 

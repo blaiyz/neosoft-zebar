@@ -95,13 +95,20 @@ const bar = z
       .number()
       .min(0)
       .default(400)
-      .describe("The duration of transitions in milliseconds."),
+      .describe("The duration of transitions (animations) in milliseconds."),
     primaryMonitorOnly: z
       .array(z.enum(sectionIds))
       .default(["network", "media", "volume"])
       .describe("Sections that only appear on the primary monitor.")
   })
   .prefault({});
+
+/**
+ * A value that goes into a CSS declaration, which can't end it or start a rule of
+ * its own. Anything more is for `theme.customCss`.
+ */
+const cssValue = () =>
+  z.string().regex(/^[^;{}]*$/, "It can't hold `;`, `{` or `}`");
 
 const theme = z
   .object({
@@ -110,25 +117,26 @@ const theme = z
       .default("tau")
       .describe("The color preset the bar starts from."),
     colors: z
-      .record(z.string(), z.string())
+      .record(
+        z.string().regex(/^[\w-]+$/, "Only a color's name, like `accent`"),
+        cssValue()
+      )
       .default({})
       .describe(
         'Overrides for individual colors, as HSL without commas, or another color as `var(--name)`. For example `{ "accent": "300 100% 50%", "cpu": "var(--ws-2)" }`. See the README for the names.'
       ),
-    fontFamily: z
-      .string()
+    fontFamily: cssValue()
       .nullable()
       .default(null)
       .describe(
         "The font of the bar, as a CSS font family. Figtree is bundled as `Figtree Variable`, and `null` uses it."
       ),
-    fontSize: z
-      .string()
+    fontSize: cssValue()
       .default("14px")
       .describe(
         "The font size. Every part of the bar is sized from it, so to scale the bar, change this and the height in `zpack.json` together."
       ),
-    radius: z.string().default("20px").describe("The corner radius."),
+    radius: cssValue().default("20px").describe("The corner radius."),
     customCss: z
       .string()
       .default("")
@@ -193,7 +201,7 @@ const workspaces = z
   .object({
     style: z
       .enum(["keys", "track", "string", "solid"])
-      .default("track")
+      .default("keys")
       .describe(
         "How workspaces look. `keys` are tinted buttons with a ring around the current one, `track` is one groove with a bead across it, `string` shrinks the others to dots, and `solid` fills the current one with its color."
       ),
@@ -418,17 +426,14 @@ const taskbarIntegration = z
       .default("all")
       .describe("Which windows to include in the number of taskbar icons."),
     secondaryMonitorSelection: windowSelection.default("monitor"),
-    iconWidth: z
-      .string()
+    iconWidth: cssValue()
       .default("50px")
       .describe("The width of one taskbar icon."),
-    marginLeft: z
-      .string()
-      .default("1rem")
+    marginLeft: cssValue()
+      .default("5rem")
       .describe("Space to keep clear at the left end of the bar."),
-    marginRight: z
-      .string()
-      .default("1rem")
+    marginRight: cssValue()
+      .default("5rem")
       .describe("Space to keep clear at the right end of the bar.")
   })
   .prefault({});
@@ -437,7 +442,7 @@ const performance = z
   .object({
     animations: z
       .enum(["all", "interactive", "none"])
-      .default("all")
+      .default("interactive")
       .describe(
         [
           "Which animations run. Fewer animations take less CPU and GPU, which matters for something that's always on screen.",
@@ -450,7 +455,7 @@ const performance = z
       .boolean()
       .default(true)
       .describe(
-        "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, it starts as the pointer rests on the bar and closes a minute after the last flyout closes, which saves around 40 MB of memory in between. A flyout opened before it's ready takes about a second."
+        "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, the first flyout starts it, which takes about a second, and it closes a minute after the last flyout closes, which saves around 40 MB of memory in between."
       )
   })
   .prefault({});

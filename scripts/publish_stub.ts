@@ -16,13 +16,8 @@ import { buffer } from "node:stream/consumers";
 const PORT = 8787;
 const MAX_TARBALL_BYTES = 3_000_000;
 const MAX_PREVIEW_IMAGES = 6;
-const REQUIRED_FILES = [
-  "zpack.json",
-  "index.html",
-  "config.json",
-  "README.md",
-  "LICENSE"
-];
+/** Besides each widget's page and the preview images that zpack.json names. */
+const REQUIRED_FILES = ["zpack.json", "config.json", "README.md", "LICENSE"];
 
 async function listTarball(tarball: File) {
   const dir = mkdtempSync(join(tmpdir(), "publish-stub-"));
@@ -56,16 +51,21 @@ async function findProblems(token: unknown, form: FormData) {
   }
 
   const packConfig = form.get("packConfig") as File;
-  const { previewImages = [] } = JSON.parse(await packConfig.text()) as {
+  const { previewImages = [], widgets = [] } = JSON.parse(
+    await packConfig.text()
+  ) as {
     previewImages?: string[];
+    widgets?: { htmlPath: string }[];
   };
+  const pages = widgets.map(({ htmlPath }) => htmlPath.replace(/^\.\//, ""));
+  if (pages.length === 0) problems.push("no widgets");
   if (previewImages.length < 1 || previewImages.length > MAX_PREVIEW_IMAGES) {
     problems.push(`${previewImages.length} preview images`);
   }
 
   const files = await listTarball(tarball);
   console.log(`Tarball: ${tarball.size} bytes, ${files.length} files`);
-  for (const file of [...REQUIRED_FILES, ...previewImages]) {
+  for (const file of [...REQUIRED_FILES, ...pages, ...previewImages]) {
     if (!files.includes(file)) problems.push(`${file} is not in the tarball`);
   }
 

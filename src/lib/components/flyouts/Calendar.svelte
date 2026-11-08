@@ -1,9 +1,7 @@
 <script lang="ts">
-  import { config, updateSetting } from "#lib/state/config.svelte.ts";
   import { region } from "#lib/state/region.svelte.ts";
   import ChevronLeft from "@lucide/svelte/icons/chevron-left";
   import ChevronRight from "@lucide/svelte/icons/chevron-right";
-  import Toggle from "../Toggle.svelte";
 
   const today = new Date();
 
@@ -139,18 +137,6 @@
       {/each}
     </div>
   {/key}
-</div>
-
-<div
-  class="flex items-center justify-between gap-3 rounded-well bg-zb-surface-1 px-3 py-2"
->
-  <span>Show the date in the bar</span>
-  <Toggle
-    label="Show the date in the bar"
-    checked={config.clock.fullDate !== false}
-    onchange={(checked: boolean) =>
-      updateSetting("clock.fullDate", checked ? "preferred" : false)}
-  />
 </div>
 
 <style>

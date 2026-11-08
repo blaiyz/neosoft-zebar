@@ -8,6 +8,7 @@
   } from "#lib/state/config.svelte.ts";
   import {
     closeFlyout,
+    FLYOUT_WINDOW_LOCK,
     flyoutWindow,
     openFlyout,
     startFlyoutWindow,
@@ -28,9 +29,6 @@
    * In milliseconds.
    */
   const BLUR_GRACE = 150;
-
-  /** Only one of these windows runs, however many ask for it. */
-  const WINDOW_LOCK = "neosoft.flyout-window";
 
   /** The most a frame gets to reach the screen, in milliseconds. */
   const PAINT_TIMEOUT = 100;
@@ -186,11 +184,13 @@
   onMount(() => {
     const widget = currentWidget();
 
-    lock = holdSingleWindow(WINDOW_LOCK, flyoutWindow, async () => {
-      holding = true;
+    // Zebar creates the window showing. It's hidden before anything follows a
+    // request, so that showing it for the first flyout activates it too.
+    lock = holdSingleWindow(FLYOUT_WINDOW_LOCK, flyoutWindow, async () => {
       void readRegion();
       for (const { load } of Object.values(flyoutViews)) void load();
-      if (!openFlyout.value) await widget.tauriWindow.hide();
+      await widget.tauriWindow.hide();
+      holding = true;
     });
 
     const unlisten = widget.tauriWindow.listen("tauri://blur", onBlur);

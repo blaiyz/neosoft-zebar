@@ -6,10 +6,12 @@
   import { currentWidget } from "zebar";
 
   type Drag = {
-    startX: number;
-    startY: number;
-    originX: number;
-    originY: number;
+    /** The pointer's last screen position, in CSS pixels. */
+    screenX: number;
+    screenY: number;
+    /** Where the window was put last, in physical pixels. */
+    x: number;
+    y: number;
   };
 
   let { children }: { children: Snippet } = $props();
@@ -20,7 +22,8 @@
    * Widgets aren't allowed to start a native window drag, so this moves the window
    * itself. It works from screen coordinates, which don't change as the window moves
    * under the pointer. They're read first, as the event's values can't be relied on
-   * after waiting for the window's position.
+   * after waiting for the window's position. Each move is scaled on its own, so that
+   * crossing to a monitor with another scale doesn't rescale the way already come.
    */
   const onPointerDown = async (
     event: PointerEvent & { currentTarget: HTMLElement }
@@ -29,13 +32,13 @@
       event.target instanceof Element && event.target.closest("button");
     if (event.button !== 0 || onButton) return;
 
-    const { pointerId, screenX: startX, screenY: startY } = event;
+    const { pointerId, screenX, screenY } = event;
     const handle = event.currentTarget;
     handle.setPointerCapture(pointerId);
 
     const origin = await currentWidget().tauriWindow.outerPosition();
     if (handle.hasPointerCapture(pointerId)) {
-      drag = { startX, startY, originX: origin.x, originY: origin.y };
+      drag = { screenX, screenY, x: origin.x, y: origin.y };
     }
   };
 
@@ -43,10 +46,12 @@
     if (!drag) return;
 
     const scale = window.devicePixelRatio;
-    const x = drag.originX + (screenX - drag.startX) * scale;
-    const y = drag.originY + (screenY - drag.startY) * scale;
+    drag.x += (screenX - drag.screenX) * scale;
+    drag.y += (screenY - drag.screenY) * scale;
+    drag.screenX = screenX;
+    drag.screenY = screenY;
     void currentWidget().tauriWindow.setPosition(
-      new PhysicalPosition(Math.round(x), Math.round(y))
+      new PhysicalPosition(Math.round(drag.x), Math.round(drag.y))
     );
   };
 

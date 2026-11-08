@@ -1,5 +1,6 @@
 <script lang="ts">
   import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
+  import { motion } from "#lib/state/motion.svelte.ts";
   import { pendingPower } from "#lib/state/power.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import IconPowerButton from "@tabler/icons-svelte/icons/power";
@@ -10,7 +11,7 @@
 </script>
 
 <BeadButton
-  class={pending ? "animate-pulse" : ""}
+  class={pending && !motion.still ? "animate-pulse" : ""}
   label="Power"
   tone={pending ? "--accent" : "--memory"}
   {@attach opensFlyout("power")}
