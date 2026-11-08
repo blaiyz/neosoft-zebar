@@ -15,8 +15,12 @@
     "volume"
   ],
   "previewImages": [
-    "preview/fullscreen.jpg",
-    "preview/taskbar-integration.jpg"
+    "preview/overview.jpg",
+    "preview/system.jpg",
+    "preview/media.jpg",
+    "preview/network.jpg",
+    "preview/themes.jpg",
+    "preview/sections.jpg"
   ],
   "repositoryUrl": "https://github.com/blaiyz/neosoft-zebar",
   "widgets": [

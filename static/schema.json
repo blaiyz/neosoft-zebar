@@ -590,13 +590,13 @@
           "pattern": "^[^;{}]*$"
         },
         "marginLeft": {
-          "default": "5rem",
+          "default": "1rem",
           "description": "Space to keep clear at the left end of the bar.",
           "type": "string",
           "pattern": "^[^;{}]*$"
         },
         "marginRight": {
-          "default": "5rem",
+          "default": "1rem",
           "description": "Space to keep clear at the right end of the bar.",
           "type": "string",
           "pattern": "^[^;{}]*$"

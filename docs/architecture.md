@@ -148,7 +148,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 - `ci.yml` runs `pnpm lint`, `pnpm check`, actionlint, zizmor and the build on pushes to `main` and on pull requests. The build is `build.yml`, a reusable workflow, so CI, `release.yml` and `publish-marketplace.yml` all build the same way. The composite action in `.github/actions/setup` installs pnpm, Node and the locked dependencies.
 - `publish-rehearsal.yml` runs on pull requests that touch packaging, or by hand. It runs `scripts/publish.sh`, the same script as a real publish, against `scripts/publish_stub.ts`, a local stand-in that checks the form fields and the tarball. Nothing reaches the marketplace, and the marketplace's own validation isn't covered.
-- `release.yml` is started by hand. It builds, zips `build/` and creates a GitHub release with `gh release create`.
+- `release.yml` is started by hand. It refuses a version that isn't `X.Y.Z`, then builds, zips `build/` and creates a draft GitHub release with `gh release create`. It never publishes one, so publishing the draft by hand is the only way a release reaches users, and that also starts `publish-marketplace.yml`.
 - `publish-marketplace.yml` runs when a release is published, building its tag, or by hand, building the ref it's started on. `.github/actions/zebar-cli` installs a pinned Zebar build, and `scripts/publish.sh` runs `zebar publish` with `ZEBAR_PUBLISH_TOKEN`, passing the version from the tag.
 
 The steps are in `.claude/skills/release/SKILL.md`.
