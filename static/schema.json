@@ -36,7 +36,7 @@
         },
         "transitionDuration": {
           "default": 400,
-          "description": "The duration of transitions in milliseconds.",
+          "description": "The duration of transitions (animations) in milliseconds.",
           "type": "number",
           "minimum": 0
         },
@@ -92,26 +92,38 @@
           "description": "Overrides for individual colors, as HSL without commas, or another color as `var(--name)`. For example `{ \"accent\": \"300 100% 50%\", \"cpu\": \"var(--ws-2)\" }`. See the README for the names.",
           "type": "object",
           "propertyNames": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[\\w-]+$"
           },
           "additionalProperties": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[^;{}]*$"
           }
         },
         "fontFamily": {
           "default": null,
           "description": "The font of the bar, as a CSS font family. Figtree is bundled as `Figtree Variable`, and `null` uses it.",
-          "type": ["string", "null"]
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[^;{}]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "fontSize": {
           "default": "14px",
           "description": "The font size. Every part of the bar is sized from it, so to scale the bar, change this and the height in `zpack.json` together.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^;{}]*$"
         },
         "radius": {
           "default": "20px",
           "description": "The corner radius.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^;{}]*$"
         },
         "customCss": {
           "default": "",
@@ -249,10 +261,10 @@
         "right": {
           "default": [
             "media",
-            "tray",
-            "keyboard",
             "volume",
             "weather",
+            "tray",
+            "keyboard",
             "clock"
           ],
           "type": "array",
@@ -283,7 +295,7 @@
       "type": "object",
       "properties": {
         "style": {
-          "default": "track",
+          "default": "keys",
           "description": "How workspaces look. `keys` are tinted buttons with a ring around the current one, `track` is one groove with a bead across it, `string` shrinks the others to dots, and `solid` fills the current one with its color.",
           "type": "string",
           "enum": ["keys", "track", "string", "solid"]
@@ -533,14 +545,14 @@
       "type": "object",
       "properties": {
         "animations": {
-          "default": "all",
+          "default": "interactive",
           "description": "Which animations run. Fewer animations take less CPU and GPU, which matters for something that's always on screen.\n\n`all`- Everything animates.\n\n`interactive`- Only what you do animates: hovering and clicking the bar, its flyouts and settings, and switching windows and workspaces in GlazeWM. Otherwise new readings, like CPU and memory, change without easing, and the equalizer rests.\n\n`none`- Nothing animates.",
           "type": "string",
           "enum": ["all", "interactive", "none"]
         },
         "keepFlyoutsReady": {
           "default": true,
-          "description": "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, it starts as the pointer rests on the bar and closes a minute after the last flyout closes, which saves around 40 MB of memory in between. A flyout opened before it's ready takes about a second.",
+          "description": "Whether the flyout window keeps running in the background, so that flyouts open at once. Off, the first flyout starts it, which takes about a second, and it closes a minute after the last flyout closes, which saves around 40 MB of memory in between.",
           "type": "boolean"
         }
       }
@@ -574,17 +586,20 @@
         "iconWidth": {
           "default": "50px",
           "description": "The width of one taskbar icon.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^;{}]*$"
         },
         "marginLeft": {
-          "default": "1rem",
+          "default": "5rem",
           "description": "Space to keep clear at the left end of the bar.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^;{}]*$"
         },
         "marginRight": {
-          "default": "1rem",
+          "default": "5rem",
           "description": "Space to keep clear at the right end of the bar.",
-          "type": "string"
+          "type": "string",
+          "pattern": "^[^;{}]*$"
         }
       }
     },

@@ -1,6 +1,6 @@
 import { currentWidget, startWidgetPreset } from "zebar";
 import { RemoteState } from "./remote_state.svelte.ts";
-import { holdSingleWindow } from "./single_window.ts";
+import { holdSingleWindow, isLockHeld } from "./single_window.ts";
 
 /** Whether the settings window is open, which only that window sets. */
 export const settingsWindow = new RemoteState("settings.window", false);
@@ -22,8 +22,7 @@ const requests =
  * `settingsWindow` could be left saying it's open.
  */
 export async function toggleSettings() {
-  const { held = [] } = await navigator.locks.query();
-  if (held.some(({ name }) => name === WINDOW_LOCK)) {
+  if (await isLockHeld(WINDOW_LOCK)) {
     requests?.postMessage(CLOSE);
     return;
   }

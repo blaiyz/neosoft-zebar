@@ -2,6 +2,15 @@ import { currentWidget } from "zebar";
 import type { RemoteState } from "./remote_state.svelte.ts";
 
 /**
+ * Whether a window holds `lock`. Unlike a `running` state, this can't be left saying
+ * yes by a window that ended without saying it had stopped.
+ */
+export async function isLockHeld(lock: string) {
+  const { held = [] } = await navigator.locks.query();
+  return held.some(({ name }) => name === lock);
+}
+
+/**
  * Keeps a widget to one window. The first to take `lock` holds it for as long as
  * it lives, says so in `running`, and calls `start`. Any other closes itself. The
  * browser lets go of a lock however the window ends, so a window that crashed

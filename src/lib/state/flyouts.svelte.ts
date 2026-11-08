@@ -2,8 +2,8 @@ import { flyoutViews, type FlyoutId } from "#lib/flyouts.ts";
 import { config, configStatus } from "#lib/state/config.svelte.ts";
 import { remToPx } from "#lib/state/layout.svelte.ts";
 import { isOnPrimaryMonitor } from "#lib/state/monitor.svelte.ts";
-import { motion } from "#lib/state/motion.svelte.ts";
 import { RemoteState } from "#lib/state/remote_state.svelte.ts";
+import { isLockHeld } from "#lib/state/single_window.ts";
 import type { PhysicalPosition } from "@tauri-apps/api/dpi";
 import { currentMonitor, type Monitor } from "@tauri-apps/api/window";
 import type { Attachment } from "svelte/attachments";
@@ -15,11 +15,6 @@ const EDGE_MARGIN = 8;
 const FLOAT_MARGIN = 0.5;
 /** How long a bar gives the flyout window to make itself known, in milliseconds. */
 const WINDOW_CHECK_TIME = 1000;
-/**
- * How long the pointer rests on a bar before the flyout window starts, when it isn't
- * kept ready, in milliseconds. Passing over the bar doesn't start it.
- */
-const REST_TIME = 300;
 /** What a press lands on that has a job of its own, and so doesn't open a flyout. */
 const INTERACTIVE =
   "button, a, input, select, textarea, [role='button'], [role='slider']";
@@ -57,6 +52,8 @@ export const openFlyout = new RemoteState<FlyoutRequest | null>("flyout", null);
 
 /** Whether the flyout window is running, hidden or not. */
 export const flyoutWindow = new RemoteState("flyout.window", false);
+/** Held by the flyout window for as long as it lives, and by no other. */
+export const FLYOUT_WINDOW_LOCK = "neosoft.flyout-window";
 
 /** The group of this bar that a flyout is growing out of, which changes shape to meet it. */
 export const melt = $state<{
@@ -94,11 +91,12 @@ export function startFlyoutWindow() {
 }
 
 /**
- * Starts the flyout window ahead of time, because a new window takes around a second
- * to show anything. Call once from the bar. Kept ready, it starts with the bar on the
- * primary monitor, after a wait, because a reload brings back a window that was
- * already running. Otherwise it starts when the pointer rests on any bar, as it does
- * on its way to a flyout, and closes itself once it's been unused for a while.
+ * Starts the flyout window ahead of time when flyouts are kept ready, because a new
+ * window takes around a second to show anything. Call once from the bar. It starts
+ * with the bar on the primary monitor, after a wait, because a reload brings back a
+ * window that was already running. Otherwise the first flyout starts it, and it
+ * closes itself once it's been unused for a while. It isn't started on hover, because
+ * a new window takes focus for a moment.
  *
  * Also lets go of the bar's shape, and of the opener it followed, when the flyout
  * they were for has gone.
@@ -113,18 +111,15 @@ export function initFlyoutWindow() {
 
   $effect(() => {
     if (!configStatus.loaded) return;
-    const ready = config.performance.keepFlyoutsReady;
-    if (ready ? !isOnPrimaryMonitor() : !motion.hovered) return;
+    if (!config.performance.keepFlyoutsReady || !isOnPrimaryMonitor()) return;
 
-    const timer = setTimeout(
-      () => {
-        if (flyoutWindow.value) return;
-        startFlyoutWindow().catch((error: unknown) => {
+    const timer = setTimeout(() => {
+      void isLockHeld(FLYOUT_WINDOW_LOCK)
+        .then((running) => (running ? undefined : startFlyoutWindow()))
+        .catch((error: unknown) => {
           console.error("Error starting the flyout window:", error);
         });
-      },
-      ready ? WINDOW_CHECK_TIME : REST_TIME
-    );
+    }, WINDOW_CHECK_TIME);
 
     return () => {
       clearTimeout(timer);
@@ -389,6 +384,12 @@ function followOpener(
 /** The request this bar made last, since another monitor's bar can open one too. */
 let openedHere: number | undefined;
 
+/** Whether `view` is open, from this bar. */
+export function isOpenHere(view: FlyoutId) {
+  const current = openFlyout.value;
+  return current?.view === view && current.id === openedHere;
+}
+
 async function showFlyout(view: FlyoutId, opener: Element) {
   const [monitor, position] = await Promise.all([
     currentMonitor(),
@@ -403,7 +404,10 @@ async function showFlyout(view: FlyoutId, opener: Element) {
   followOpener(view, opener, id, place);
 
   // If it hasn't started or has been closed, it finds the request when it starts.
-  if (!flyoutWindow.value) await startFlyoutWindow();
+  // The lock is checked too, in case it ended without saying so.
+  if (!flyoutWindow.value || !(await isLockHeld(FLYOUT_WINDOW_LOCK))) {
+    await startFlyoutWindow();
+  }
 }
 
 /**
@@ -422,8 +426,7 @@ export const opensFlyout =
   (view: FlyoutId): Attachment<HTMLElement> =>
   (element) => {
     const toggle = () => {
-      const current = openFlyout.value;
-      if (current?.view === view && current.id === openedHere) {
+      if (isOpenHere(view)) {
         closeFlyout();
         return;
       }

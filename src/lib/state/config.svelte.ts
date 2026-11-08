@@ -113,15 +113,19 @@ function backUp(text: string | null) {
   if (text !== null) localStorage.setItem(BACKUP_KEY, text);
 }
 
+/** A stored document brought up to date, or an error if it can't be read. */
+function parseStored(text: string) {
+  const stored: unknown = JSON.parse(text);
+  if (!isDocument(stored)) throw new Error("Not an object");
+  return { stored, migrated: migrate(stored) };
+}
+
 function readDocument(): ConfigDocument {
   const text = localStorage.getItem(DOCUMENT_KEY);
-  if (text === null) return {};
+  if (text === null) return { ...EMPTY_DOCUMENT };
 
   try {
-    const stored: unknown = JSON.parse(text);
-    if (!isDocument(stored)) throw new Error("Not an object");
-
-    const migrated = migrate(stored);
+    const { stored, migrated } = parseStored(text);
     if (migrated.version !== stored.version) {
       backUp(text);
       writeDocument(migrated);
@@ -131,7 +135,7 @@ function readDocument(): ConfigDocument {
     console.error("Discarding unreadable settings:", error);
     backUp(text);
     localStorage.removeItem(DOCUMENT_KEY);
-    return {};
+    return { ...EMPTY_DOCUMENT };
   }
 }
 
@@ -246,31 +250,69 @@ function exportConfig(scope: "all" | "theme") {
 }
 
 /**
- * Merges a shared file over the settings, in any version it was written in. Keys
- * that can't be used are left out and reported.
+ * Merges changes into the stored document. It keeps this version's number, even
+ * when the changes came from a newer one, so that no migration is skipped later.
+ */
+const mergeChanges = (current: ConfigDocument, changes: ConfigDocument) => ({
+  ...mergeDocuments(current, changes),
+  version: CONFIG_VERSION
+});
+
+/** Keeps the document as it was, so that what comes next can be undone. */
+const backUpDocument = () => {
+  backUp(localStorage.getItem(DOCUMENT_KEY) ?? JSON.stringify(EMPTY_DOCUMENT));
+};
+
+/**
+ * Merges a shared file over the settings, in any version it was written in. A theme
+ * in it replaces the whole theme, so that it looks as it did where it was shared,
+ * apart from the user's own CSS, which only CSS in the file replaces. Keys that
+ * can't be used are left out and reported, and `customCss` says whether it brought
+ * CSS of its own.
  */
 function importConfig(text: string) {
   const file: unknown = JSON5.parse(text);
   if (!isDocument(file)) throw new Error("It should hold an object");
 
   const { document, issues } = parseDocument(migrate(file));
-  backUp(localStorage.getItem(DOCUMENT_KEY));
-  publishDocument(mergeDocuments(readDocument(), document));
-  return issues;
+  backUpDocument();
+  const current = readDocument();
+  const { theme } = document;
+  if (isDocument(theme)) {
+    const own = isDocument(current.theme) ? current.theme.customCss : undefined;
+    current.theme = own === undefined ? {} : { customCss: own };
+  }
+  publishDocument(mergeChanges(current, document));
+
+  const customCss = isDocument(theme) && Boolean(theme.customCss);
+  return { issues, customCss };
 }
 
-/** Swaps the document with its backup, so that undoing can be undone too. */
+/**
+ * Swaps the document with its backup, so that undoing can be undone too. A backup
+ * that can't be read is dropped instead, and nothing changes.
+ */
 function undoConfigChange() {
   const backup = localStorage.getItem(BACKUP_KEY);
-  if (backup === null) return;
+  if (backup === null) return false;
 
-  backUp(localStorage.getItem(DOCUMENT_KEY) ?? JSON.stringify(EMPTY_DOCUMENT));
-  localStorage.setItem(DOCUMENT_KEY, backup);
-  publishDocument(readDocument());
+  let previous: ConfigDocument;
+  try {
+    previous = parseStored(backup).migrated;
+  } catch (error) {
+    console.error("Dropping an unreadable backup:", error);
+    localStorage.removeItem(BACKUP_KEY);
+    configStatus.canUndo = false;
+    return false;
+  }
+
+  backUpDocument();
+  publishDocument(previous);
+  return true;
 }
 
 function resetConfig() {
-  backUp(localStorage.getItem(DOCUMENT_KEY));
+  backUpDocument();
   publishDocument(EMPTY_DOCUMENT);
 }
 
@@ -298,7 +340,7 @@ function importIfChanged(
   if (text === localStorage.getItem(importedKey)) return;
 
   backUp(localStorage.getItem(DOCUMENT_KEY));
-  const merged = mergeDocuments(readDocument(), changes);
+  const merged = mergeChanges(readDocument(), changes);
   writeDocument(merged);
   localStorage.setItem(importedKey, text);
   announceDocument(merged);

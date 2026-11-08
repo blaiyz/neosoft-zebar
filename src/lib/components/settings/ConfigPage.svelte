@@ -53,12 +53,16 @@
 
   const runImport = (text: string) => {
     try {
-      const issues = importConfig(text);
+      const { issues, customCss } = importConfig(text);
       imported = "";
-      message =
+      message = [
         issues.length > 0
           ? `Imported, without these: ${issues.join("; ")}`
-          : "Imported.";
+          : "Imported.",
+        customCss
+          ? "It came with custom CSS, which can load things from other sites. Check it under Appearance, or undo the import."
+          : ""
+      ].join(" ");
     } catch (error) {
       message = `Couldn't import: ${String(error)}`;
     }
@@ -71,8 +75,9 @@
   };
 
   const undo = () => {
-    undoConfigChange();
-    message = "Went back to the settings from before.";
+    message = undoConfigChange()
+      ? "Went back to the settings from before."
+      : "The earlier settings couldn't be read, so nothing changed.";
   };
 
   const reset = () => {
@@ -131,7 +136,7 @@
 
 <SettingsGroup title="Import">
   <Description
-    text="Paste a shared file or choose one. It's merged over your settings, so a theme-only file only changes the theme. A `config.json` next to the pack does the same when its text changes."
+    text="Paste a shared file or choose one. It's merged over your settings, and a theme in it replaces your whole theme, apart from your custom CSS unless it brings its own. A `config.json` next to the pack is merged too when its text changes, one setting at a time."
   />
   <textarea
     class="mt-2 code-editor h-28"

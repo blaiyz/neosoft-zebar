@@ -1,6 +1,6 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
-  import { opensFlyout } from "#lib/state/flyouts.svelte.ts";
+  import { isOpenHere, opensFlyout } from "#lib/state/flyouts.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import { arrangeTray } from "#lib/utils/tray.ts";
   import ChevronUp from "@lucide/svelte/icons/chevron-up";
@@ -27,7 +27,14 @@
       aria-label="System tray"
       {@attach opensFlyout("tray")}
     >
-      <ChevronUp class={[config.bar.direction === "top" && "rotate-180"]} />
+      <!-- Points the way the flyout opens, and back once it's open. -->
+      <ChevronUp
+        class={[
+          "transition-transform",
+          (config.bar.direction === "top") !== isOpenHere("tray") &&
+            "rotate-180"
+        ]}
+      />
     </button>
   </div>
 {/if}

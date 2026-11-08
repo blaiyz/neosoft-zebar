@@ -41,10 +41,6 @@ export const motion = {
   get still() {
     const { animations } = config.performance;
     return animations === "none" || (animations === "interactive" && !inUse());
-  },
-  /** Whether the pointer is over this window. */
-  get hovered() {
-    return hovered;
   }
 };
 
