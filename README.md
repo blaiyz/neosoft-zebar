@@ -19,17 +19,17 @@ A Zebar configuration forked from [Neobrutal Zebar](https://github.com/adriankar
 
 ## 🖼️ Showcase
 
-![fullscreen](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/fullscreen.png)
+![The bar over a forest wallpaper](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/overview.jpg)
 
-https://github.com/user-attachments/assets/f1c8f09f-aa07-4077-890b-8d1162ef65af
+![The system flyout](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/system.jpg)
 
-https://github.com/user-attachments/assets/c0abbb25-0e5a-4531-9400-c52b9a7f2ffe
+![The bar in six presets, with different workspace and media styles](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/themes.jpg)
 
-https://github.com/user-attachments/assets/47b0a9ae-4f7d-4784-a224-cdf0b10943aa
+More in the [Gallery](#-gallery).
 
 ### Taskbar Integration
 
-![Taskbar Integration](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/taskbar-integration.png)
+![The bar at the bottom with taskbar integration, the Windows taskbar's icons in the middle and the system tray on the right](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/taskbar-integration.jpg)
 
 ## 🚀 Getting Started
 
@@ -280,6 +280,48 @@ This creates segments with rounded corners, click-through enabled, transparency,
 ### Windows 11
 
 This hasn't been tested. If you find a way to achieve the same taskbar effect as TaskbarX, please let me know (Windhawk might be capable of this).
+
+## 📷 Gallery
+
+The bar over a forest wallpaper, with the `keys` workspace style and the `pill` media style:
+
+![The bar over a forest wallpaper](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/overview.jpg)
+
+The system flyout, with the `track` workspace style and the `capsule` media style:
+
+![The system flyout](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/system.jpg)
+
+The network flyout in Catppuccin Mocha, with the `string` workspace style:
+
+![The network flyout in Catppuccin Mocha](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/network.jpg)
+
+The media flyout, with a player for each app, and the `solid` workspace style and `tucked` media style:
+
+![The media flyout with two players](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/media.jpg)
+
+The audio flyout in Rosé Pine, with the `equalizer` media style:
+
+![The audio flyout in Rosé Pine](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/audio.jpg)
+
+The calendar flyout:
+
+![The calendar flyout](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/calendar.jpg)
+
+Six of the presets:
+
+![The bar in six presets](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/themes.jpg)
+
+The settings window's Appearance page:
+
+![The settings window's Appearance page](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/settings.jpg)
+
+The Sections page, with a map of the bar to pick a part from, and the workspace styles:
+
+![The settings window's Sections page](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/sections.jpg)
+
+Taskbar integration:
+
+![The bar with taskbar integration](https://raw.githubusercontent.com/blaiyz/neosoft-zebar/main/misc/taskbar-integration.jpg)
 
 ## Contributing
 

@@ -430,10 +430,10 @@ const taskbarIntegration = z
       .default("50px")
       .describe("The width of one taskbar icon."),
     marginLeft: cssValue()
-      .default("5rem")
+      .default("1rem")
       .describe("Space to keep clear at the left end of the bar."),
     marginRight: cssValue()
-      .default("5rem")
+      .default("1rem")
       .describe("Space to keep clear at the right end of the bar.")
   })
   .prefault({});
