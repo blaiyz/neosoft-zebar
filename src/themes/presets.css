@@ -1,6 +1,6 @@
 /* Everything here sits in a layer, so that `theme.customCss` overrides it.
 
-  `theme.colors`, `theme.fontSize`, `theme.radius`, `theme.fontFamily` and the taskbar sizes go
+  `theme.colors`, `theme.fontSize`, `theme.radius`, `theme.fontFamily`, the bar's margins and the taskbar sizes go
   in the `overrides` layer above this one, and the sizes below are the defaults they replace. */
 @layer presets {
   :root {
@@ -8,6 +8,9 @@
 
     --bar-margin-y: 0rem;
     --bar-margin-x: 0rem;
+    /* `bar.outerMarginLeft` and `bar.outerMarginRight`, when set. */
+    --bar-margin-left: var(--bar-margin-x);
+    --bar-margin-right: var(--bar-margin-x);
 
     --process-icon-width: 50px;
     --right-margin: 1rem;

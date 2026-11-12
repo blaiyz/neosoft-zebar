@@ -83,7 +83,8 @@
 
   --spacing-bar: var(--height);
   --spacing-radius: var(--radius);
-  --spacing-zbx: var(--bar-margin-x);
+  --spacing-zbl: var(--bar-margin-left);
+  --spacing-zbr: var(--bar-margin-right);
   --spacing-zby: var(--bar-margin-y);
   --spacing-zrby: var(--right-margin);
   --spacing-zlby: var(--left-margin);

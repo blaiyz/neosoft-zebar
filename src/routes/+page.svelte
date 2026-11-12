@@ -55,6 +55,8 @@
       ? "bg-linear-to-t/srgb"
       : "bg-linear-to-b/srgb"
   );
+  let rounding = $derived(config.bar.roundGradient && "rounded-base");
+  let centered = $derived(config.bar.keepMiddleCentered);
 
   initAutotiler();
   initBindingModes();
@@ -102,6 +104,7 @@
       <div
         class={[
           "absolute inset-0",
+          rounding,
           gradientDirection,
           "from-zb-bg-focused to-transparent",
           !glazewm?.currentMonitor.hasFocus && "opacity-0"
@@ -110,6 +113,7 @@
       <div
         class={[
           "absolute inset-0",
+          rounding,
           gradientDirection,
           "from-zb-bg-unfocused to-transparent",
           glazewm?.currentMonitor.hasFocus && "opacity-0"
@@ -119,17 +123,23 @@
       <div
         class={[
           "absolute inset-0",
+          rounding,
           glazewm?.currentMonitor.hasFocus
             ? "bg-zb-bg-focused"
             : "bg-zb-bg-unfocused"
         ]}
       ></div>
     {/if}
+    <!-- Padding the outer columns, the margins keep the middle group in the centre.
+      Around the grid, they centre it between them. -->
     <div
-      class="relative z-10 mx-zbx my-zby grid h-full w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-1 items-center"
+      class={[
+        "relative z-10 my-zby grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] grid-rows-1 items-center",
+        !centered && "mr-zbr ml-zbl"
+      ]}
     >
       <div
-        class="flex h-full min-w-0 justify-start"
+        class={["flex h-full min-w-0 justify-start", centered && "pl-zbl"]}
         {@attach trackColumn("left")}
       >
         {#if arrangement.left.length > 0}
@@ -196,7 +206,7 @@
         {/if}
       </div>
       <div
-        class="flex h-full min-w-0 justify-end"
+        class={["flex h-full min-w-0 justify-end", centered && "pr-zbr"]}
         {@attach trackColumn("right")}
       >
         {#if arrangement.right.length > 0}

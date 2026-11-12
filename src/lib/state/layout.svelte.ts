@@ -61,6 +61,16 @@ export const remToPx = (rem: number) =>
 
 const widthOf = (element: Element) => element.getBoundingClientRect().width;
 
+/** The width inside an element's padding, which is where its content can go. */
+function innerWidth(element: Element) {
+  const style = getComputedStyle(element);
+  return (
+    widthOf(element) -
+    parseFloat(style.paddingLeft) -
+    parseFloat(style.paddingRight)
+  );
+}
+
 /** The width of a group's content, with what surrounds it inside the group. */
 function occupiedWidth(content: HTMLElement) {
   const own = getComputedStyle(content);
@@ -124,8 +134,8 @@ function readFit(): FitInput<PartId> | null {
   // inner end of a column.
   const gap = remToPx(GROUP_GAP);
   const capacity = {
-    left: widthOf(left) - centerGiven / 2 - gap - occupied("before"),
-    right: widthOf(right) - centerGiven / 2 - gap - occupied("after")
+    left: innerWidth(left) - centerGiven / 2 - gap - occupied("before"),
+    right: innerWidth(right) - centerGiven / 2 - gap - occupied("after")
   };
 
   const steps = collapseSteps.flatMap(({ part, toFloor, partial }) => {

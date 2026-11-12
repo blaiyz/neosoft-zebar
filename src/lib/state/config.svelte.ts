@@ -80,7 +80,11 @@ const lookOf = ({
     media.style,
     workspaces.style,
     bar.gradient,
+    bar.roundGradient,
     bar.attachSides,
+    bar.outerMarginLeft,
+    bar.outerMarginRight,
+    bar.keepMiddleCentered,
     clock.use24h,
     clock.showSeconds,
     taskbarIntegration

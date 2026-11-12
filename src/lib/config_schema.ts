@@ -42,6 +42,13 @@ const highUsage = z
     "The usage, in percent, from which the meter has its high usage color."
   );
 
+/**
+ * A value that goes into a CSS declaration, which can't end it or start a rule of
+ * its own. Anything more is for `theme.customCss`.
+ */
+const cssValue = () =>
+  z.string().regex(/^[^;{}]*$/, "It can't hold `;`, `{` or `}`");
+
 const bar = z
   .object({
     direction: z
@@ -67,14 +74,38 @@ const bar = z
           "`disabled`- Background color is disabled."
         ].join("\n\n")
       ),
+    roundGradient: z
+      .boolean()
+      .default(false)
+      .describe(
+        "Whether the background, gradient or solid, has rounded ends like the groups. Made for the `floating` direction with `attachSides` off, where the ends of the background then line up with the ends of the groups."
+      ),
     attachSides: z
       .boolean()
       .default(true)
       .describe(
         [
           "Whether to attach the left and right sides of the widgets or to use smooth corners.",
-          "To see the full corners, you must have some margin (`--bar-margin-x` in `theme.customCss`)"
+          "To see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`)."
         ].join("\n\n")
+      ),
+    outerMarginLeft: cssValue()
+      .nullable()
+      .default(null)
+      .describe(
+        "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none."
+      ),
+    outerMarginRight: cssValue()
+      .nullable()
+      .default(null)
+      .describe(
+        "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none."
+      ),
+    keepMiddleCentered: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether the middle group stays in the center of the widget when the outer margins differ. Off, it's centered between the margins instead. Keep it on with taskbar integration, so that the middle group lines up with the taskbar's icons."
       ),
     backgroundEffect: z
       .enum(["inherit", "acrylic", "blur", "mica"])
@@ -102,13 +133,6 @@ const bar = z
       .describe("Sections that only appear on the primary monitor.")
   })
   .prefault({});
-
-/**
- * A value that goes into a CSS declaration, which can't end it or start a rule of
- * its own. Anything more is for `theme.customCss`.
- */
-const cssValue = () =>
-  z.string().regex(/^[^;{}]*$/, "It can't hold `;`, `{` or `}`");
 
 const theme = z
   .object({
@@ -536,6 +560,7 @@ export const configSchema = z.object({
 export type Config = z.infer<typeof configSchema>;
 export type AttachmentDirection = Config["bar"]["direction"];
 export type BackgroundEffect = Config["bar"]["backgroundEffect"];
+export type Bar = Config["bar"];
 export type MediaStyle = Config["media"]["style"];
 export type TaskbarIntegration = Config["taskbarIntegration"];
 export type Theme = Config["theme"];

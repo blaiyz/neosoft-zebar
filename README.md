@@ -178,13 +178,15 @@ To change individual colors, use `theme.colors`, with each color written as HSL 
 
 `theme` also sets the corner radius with `radius`, and the font with `fontFamily` (Figtree is bundled as `Figtree Variable`).
 
+`bar.outerMarginLeft` and `bar.outerMarginRight` move the groups in from the ends of the widget, which the background still spans. The middle group stays in the center unless you turn off `bar.keepMiddleCentered`. For pills that float over the background, set `bar.direction` to `floating`, `bar.attachSides` to `false` and `bar.roundGradient` to `true`, so that the background has rounded ends too.
+
 ### Custom CSS
 
-For anything else, create a file called `custom.css` next to `config.json`, and reload Zebar with **Empty cache & reload configs**. It's loaded after the theme, so it can override any of the variables in `presets.css`, such as `--bar-margin-x` or `--shadow-size-bar`, and style anything else too:
+For anything else, create a file called `custom.css` next to `config.json`, and reload Zebar with **Empty cache & reload configs**. It's loaded after the theme, so it can override any of the variables in `presets.css`, such as `--bar-margin-y` or `--shadow-size-bar`, and style anything else too:
 
 ```css
 :root {
-  --bar-margin-x: 0.5rem;
+  --shadow-size-bar: 0.2rem;
   --accent: 300 100% 50%;
 }
 ```
@@ -194,7 +196,7 @@ Like `config.json`, it's read when its contents change, and the CSS is then stor
 For a line or two, `theme.customCss` in `config.json` does the same job:
 
 ```json
-{ "theme": { "customCss": ":root { --bar-margin-x: 0.5rem; }" } }
+{ "theme": { "customCss": ":root { --shadow-size-bar: 0.2rem; }" } }
 ```
 
 > [!TIP]

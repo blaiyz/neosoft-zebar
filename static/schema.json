@@ -23,9 +23,45 @@
           "type": "string",
           "enum": ["top", "bottom", "solid", "disabled"]
         },
+        "roundGradient": {
+          "default": false,
+          "description": "Whether the background, gradient or solid, has rounded ends like the groups. Made for the `floating` direction with `attachSides` off, where the ends of the background then line up with the ends of the groups.",
+          "type": "boolean"
+        },
         "attachSides": {
           "default": true,
-          "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`--bar-margin-x` in `theme.customCss`)",
+          "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`).",
+          "type": "boolean"
+        },
+        "outerMarginLeft": {
+          "default": null,
+          "description": "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none.",
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[^;{}]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outerMarginRight": {
+          "default": null,
+          "description": "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none.",
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[^;{}]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keepMiddleCentered": {
+          "default": true,
+          "description": "Whether the middle group stays in the center of the widget when the outer margins differ. Off, it's centered between the margins instead. Keep it on with taskbar integration, so that the middle group lines up with the taskbar's icons.",
           "type": "boolean"
         },
         "backgroundEffect": {

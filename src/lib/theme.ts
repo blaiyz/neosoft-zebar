@@ -1,4 +1,4 @@
-import type { TaskbarIntegration, Theme } from "#lib/config_schema.ts";
+import type { Bar, TaskbarIntegration, Theme } from "#lib/config_schema.ts";
 
 /** Read by the script in `src/app.html` to paint the theme before the page loads. */
 const THEME_KEY = "neosoft.theme";
@@ -51,7 +51,11 @@ export type ThemeSnapshot = {
   customCss: string;
 };
 
-export function applyTheme(theme: Theme, taskbar: TaskbarIntegration) {
+export function applyTheme(
+  theme: Theme,
+  bar: Pick<Bar, "outerMarginLeft" | "outerMarginRight">,
+  taskbar: TaskbarIntegration
+) {
   const snapshot: ThemeSnapshot = {
     preset: theme.preset,
     variables: {
@@ -64,6 +68,12 @@ export function applyTheme(theme: Theme, taskbar: TaskbarIntegration) {
       ...(theme.fontFamily !== null && { "--font-family": theme.fontFamily }),
       "--font-size": theme.fontSize,
       "--radius": theme.radius,
+      ...(bar.outerMarginLeft !== null && {
+        "--bar-margin-left": bar.outerMarginLeft
+      }),
+      ...(bar.outerMarginRight !== null && {
+        "--bar-margin-right": bar.outerMarginRight
+      }),
       "--process-icon-width": taskbar.iconWidth,
       "--left-margin": taskbar.marginLeft,
       "--right-margin": taskbar.marginRight

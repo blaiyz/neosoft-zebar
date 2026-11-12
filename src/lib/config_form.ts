@@ -6,6 +6,8 @@ type Property = {
   description?: string;
   minimum?: number;
   properties?: Record<string, Property>;
+  /** How the schema writes a setting that can also be `null`. */
+  anyOf?: Property[];
 };
 
 export type Option = { value: unknown; label: string };
@@ -58,7 +60,12 @@ function toControl(property: Property): Control | null {
     return { type: "choice", options: values.map(toOption) };
   }
 
-  const types = [property.type].flat();
+  const types = [
+    property.type,
+    ...(property.anyOf ?? []).map(({ type }) => type)
+  ]
+    .flat()
+    .filter((type) => type !== undefined);
   if (types.includes("boolean")) return { type: "toggle" };
   if (types.includes("number") || types.includes("integer")) {
     return { type: "number", minimum: property.minimum };

@@ -16,7 +16,7 @@
 
   $effect(() => {
     if (configStatus.loaded)
-      applyTheme(config.theme, config.taskbarIntegration);
+      applyTheme(config.theme, config.bar, config.taskbarIntegration);
   });
 
   // A view transition belongs to the root, above where the other times are set.
