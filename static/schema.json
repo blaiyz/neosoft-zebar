@@ -351,6 +351,11 @@
           "description": "Whether workspaces with no windows are dimmed. Only those that GlazeWM keeps alive can be empty without being shown.",
           "type": "boolean"
         },
+        "showIcons": {
+          "default": true,
+          "description": "Whether the icons of the current workspace's windows show beside the workspaces.",
+          "type": "boolean"
+        },
         "clickToFocus": {
           "default": true,
           "description": "Whether clicking a window's icon focuses that window.",

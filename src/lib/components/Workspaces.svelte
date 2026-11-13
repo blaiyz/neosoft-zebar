@@ -228,34 +228,36 @@
       {/snippet}
     </AnimatedList>
 
-    <div class="flex h-full" bind:this={icons}>
-      <AnimatedList items={shownWindows} key={(child: Window) => child.id}>
-        {#snippet item(child: Window)}
-          {@const Icon = getProcessIcon(child)}
-          <button
-            class={[
-              "ml-1 flex h-full items-center text-xl transition-colors hover:text-zb-accent",
-              child.hasFocus ? "text-zb-focused-process" : "text-zb-process"
-            ]}
-            aria-label={child.title || child.processName}
-            onclick={() => {
-              if (config.workspaces.clickToFocus) {
-                void glazewm.runCommand(`focus --container-id ${child.id}`);
-              }
-            }}
-          >
-            <Icon />
-          </button>
-        {/snippet}
-      </AnimatedList>
-      <AnimatedList
-        items={iconsCapped ? [windows.length - shownWindows.length] : []}
-        key={() => "more"}
-      >
-        {#snippet item(hidden: number)}
-          <span class="ml-1 w-6 text-center text-sm">+{hidden}</span>
-        {/snippet}
-      </AnimatedList>
-    </div>
+    {#if config.workspaces.showIcons}
+      <div class="flex h-full" bind:this={icons}>
+        <AnimatedList items={shownWindows} key={(child: Window) => child.id}>
+          {#snippet item(child: Window)}
+            {@const Icon = getProcessIcon(child)}
+            <button
+              class={[
+                "ml-1 flex h-full items-center text-xl transition-colors hover:text-zb-accent",
+                child.hasFocus ? "text-zb-focused-process" : "text-zb-process"
+              ]}
+              aria-label={child.title || child.processName}
+              onclick={() => {
+                if (config.workspaces.clickToFocus) {
+                  void glazewm.runCommand(`focus --container-id ${child.id}`);
+                }
+              }}
+            >
+              <Icon />
+            </button>
+          {/snippet}
+        </AnimatedList>
+        <AnimatedList
+          items={iconsCapped ? [windows.length - shownWindows.length] : []}
+          key={() => "more"}
+        >
+          {#snippet item(hidden: number)}
+            <span class="ml-1 w-6 text-center text-sm">+{hidden}</span>
+          {/snippet}
+        </AnimatedList>
+      </div>
+    {/if}
   </div>
 {/if}
