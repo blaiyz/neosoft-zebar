@@ -247,6 +247,12 @@ const workspaces = z
       .describe(
         "Whether workspaces with no windows are dimmed. Only those that GlazeWM keeps alive can be empty without being shown."
       ),
+    showIcons: z
+      .boolean()
+      .default(true)
+      .describe(
+        "Whether the icons of the current workspace's windows show beside the workspaces."
+      ),
     clickToFocus: z
       .boolean()
       .default(true)
