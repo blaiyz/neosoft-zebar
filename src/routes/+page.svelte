@@ -55,7 +55,22 @@
       ? "bg-linear-to-t/srgb"
       : "bg-linear-to-b/srgb"
   );
-  let rounding = $derived(config.bar.roundGradient && "rounded-base");
+  // The background ends where the groups do, margins included, so that none of it
+  // shows around them. Where their outer ends are rounded, it stays 1px inside them
+  // with a curve that follows theirs, or its antialiased edge shows through theirs.
+  const roundedEnds = {
+    top: "top-zby right-[calc(var(--bar-margin-right)+1px)] bottom-[calc(var(--bar-margin-y)+1px)] left-[calc(var(--bar-margin-left)+1px)] rounded-b-[calc(var(--radius)-1px)]",
+    bottom:
+      "top-[calc(var(--bar-margin-y)+1px)] right-[calc(var(--bar-margin-right)+1px)] bottom-zby left-[calc(var(--bar-margin-left)+1px)] rounded-t-[calc(var(--radius)-1px)]",
+    floating:
+      "top-[calc(var(--bar-margin-y)+1px)] right-[calc(var(--bar-margin-right)+1px)] bottom-[calc(var(--bar-margin-y)+1px)] left-[calc(var(--bar-margin-left)+1px)] rounded-[calc(var(--radius)-1px)]"
+  };
+  let background = $derived([
+    "absolute",
+    config.bar.attachSides
+      ? "top-zby right-zbr bottom-zby left-zbl"
+      : roundedEnds[config.bar.direction]
+  ]);
   let centered = $derived(config.bar.keepMiddleCentered);
 
   initAutotiler();
@@ -103,8 +118,7 @@
     {#if config.bar.gradient !== "solid" && config.bar.gradient !== "disabled"}
       <div
         class={[
-          "absolute inset-0",
-          rounding,
+          background,
           gradientDirection,
           "from-zb-bg-focused to-transparent",
           !glazewm?.currentMonitor.hasFocus && "opacity-0"
@@ -112,8 +126,7 @@
       ></div>
       <div
         class={[
-          "absolute inset-0",
-          rounding,
+          background,
           gradientDirection,
           "from-zb-bg-unfocused to-transparent",
           glazewm?.currentMonitor.hasFocus && "opacity-0"
@@ -122,8 +135,7 @@
     {:else if config.bar.gradient === "solid"}
       <div
         class={[
-          "absolute inset-0",
-          rounding,
+          background,
           glazewm?.currentMonitor.hasFocus
             ? "bg-zb-bg-focused"
             : "bg-zb-bg-unfocused"

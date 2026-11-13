@@ -178,7 +178,7 @@ To change individual colors, use `theme.colors`, with each color written as HSL 
 
 `theme` also sets the corner radius with `radius`, and the font with `fontFamily` (Figtree is bundled as `Figtree Variable`).
 
-`bar.outerMarginLeft` and `bar.outerMarginRight` move the groups in from the ends of the widget, which the background still spans. The middle group stays in the center unless you turn off `bar.keepMiddleCentered`. For pills that float over the background, set `bar.direction` to `floating`, `bar.attachSides` to `false` and `bar.roundGradient` to `true`, so that the background has rounded ends too.
+`bar.outerMarginLeft` and `bar.outerMarginRight` move the groups in from the ends of the widget, and the background with them. The middle group stays in the center unless you turn off `bar.keepMiddleCentered`. With `bar.attachSides` set to `false`, the groups have rounded outer ends, and so does the background. With `bar.direction` set to `floating` as well, they are pills.
 
 ### Custom CSS
 
