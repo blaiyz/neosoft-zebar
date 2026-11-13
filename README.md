@@ -274,7 +274,7 @@ Enable taskbar integration in `config.json`, then adjust the widget's sizes and 
 }
 ```
 
-### Windows 10 (Tested Configuration)
+### Windows 10
 
 Download and install TaskbarX from its [GitHub releases](https://github.com/ChrisAnd1998/TaskbarX/releases), then run it with these arguments:
 
@@ -284,7 +284,19 @@ This makes the taskbar transparent and click-through, centers its icons, and spl
 
 ### Windows 11
 
-This hasn't been tested. If you find a way to get the same taskbar effect as TaskbarX (Windhawk might be able to), please open an issue.
+Install [Windhawk](https://windhawk.net), then add the [Windows 11 Taskbar Styler](https://windhawk.net/mods/windows-11-taskbar-styler) mod (version 1.11.1 or newer) with these settings:
+
+| Setting               | Value                                                    |
+| --------------------- | -------------------------------------------------------- |
+| Theme                 | `DockLike`                                               |
+| Click-through taskbar | On                                                       |
+| Style constants       | `DockBackground=<SolidColorBrush Color="Transparent" />` |
+
+- **Click-through taskbar** clips the taskbar on every monitor to just its icons and system tray, so clicks anywhere else reach Zebar underneath.
+- **`DockLike`** shrinks the icon area to fit the icons and centers it. Without it, the icon area spans the whole taskbar and almost nothing would be click-through.
+- **The `DockBackground` constant** makes the background behind the icons and the tray transparent. It has the same name as the theme's own constant, so it replaces the theme's acrylic background.
+
+The taskbar's height doesn't need changing, since it's transparent.
 
 ## 📷 Gallery
 
