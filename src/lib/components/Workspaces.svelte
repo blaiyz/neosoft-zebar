@@ -167,7 +167,7 @@
       <div class="w-max" bind:this={thinButtons}>
         {@render buttonSizes(true)}
       </div>
-      {#if windows[0]}
+      {#if config.workspaces.showIcons && windows[0]}
         {@const Icon = getProcessIcon(windows[0])}
         <div class="w-max" bind:this={oneIcon}>
           <span class="ml-1 flex items-center text-xl"><Icon /></span>
@@ -228,7 +228,7 @@
       {/snippet}
     </AnimatedList>
 
-    {#if config.workspaces.showIcons}
+    <Reveal when={config.workspaces.showIcons}>
       <div class="flex h-full" bind:this={icons}>
         <AnimatedList items={shownWindows} key={(child: Window) => child.id}>
           {#snippet item(child: Window)}
@@ -258,6 +258,6 @@
           {/snippet}
         </AnimatedList>
       </div>
-    {/if}
+    </Reveal>
   </div>
 {/if}
