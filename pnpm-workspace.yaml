@@ -5,9 +5,12 @@ minimumReleaseAge: 10080 # minutes: a release must be 7 days old to be installed
 trustPolicy: no-downgrade
 blockExoticSubdeps: true
 strictDepBuilds: true
+catalog:
+  # Matches the version zebar depends on. See the updates skill.
+  "@tauri-apps/api": 2.0.2
 overrides:
-  # Keeps one copy, at the version pinned in package.json.
-  "@tauri-apps/api": "$@tauri-apps/api"
+  # Keeps one copy, at the version in the catalog.
+  "@tauri-apps/api": "catalog:"
 allowBuilds:
   esbuild: false # ships its binary as an optional package
 trustPolicyExclude:

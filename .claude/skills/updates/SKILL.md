@@ -7,7 +7,7 @@ description: Keep dependencies and CI healthy - review Dependabot PRs, fix a red
 
 ## Dependabot PRs
 
-Dependabot opens weekly PRs for npm packages and GitHub Actions (`.github/dependabot.yml`), with minor and patch updates grouped. It waits 7 days after a release, like `minimumReleaseAge`, and skips the versions that follow Zebar. The owner merges them.
+Dependabot opens PRs for npm packages and GitHub Actions on the 1st of every other month (`.github/dependabot.yml`), with minor and patch updates grouped. It waits 7 days after a release, like `minimumReleaseAge`, and skips the versions that follow Zebar. The owner merges them.
 
 ```sh
 gh pr list --author "app/dependabot"
@@ -38,7 +38,7 @@ Find the cause and fix it with `/change`. Workflows are in `.github/workflows/`.
 Several places follow the Zebar version, and they can drift apart:
 
 - `zebar` in `package.json`, and what `pnpm-lock.yaml` resolves it to: the client library that gets bundled.
-- `@tauri-apps/api` in `package.json`: an exact pin matching the version `zebar` depends on. Window objects come from Zebar's copy, so a newer version here adds a second copy to the bundle and its types can stop matching.
+- `@tauri-apps/api` in the `catalog` of `pnpm-workspace.yaml`: an exact pin matching the version `zebar` depends on. `package.json` and the override both point at it with `catalog:`. Window objects come from Zebar's copy, so a newer version here adds a second copy to the bundle and its types can stop matching.
 - `glazewm` in `package.json`: stays on the version `zebar` depends on, so the bundle keeps one copy and its types keep matching Zebar's output.
 - `$schema` in `static/zpack.json`: the pack format.
 
