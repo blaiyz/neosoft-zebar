@@ -23,19 +23,14 @@
           "type": "string",
           "enum": ["top", "bottom", "solid", "disabled"]
         },
-        "roundGradient": {
-          "default": false,
-          "description": "Whether the background, gradient or solid, has rounded ends like the groups. Made for the `floating` direction with `attachSides` off, where the ends of the background then line up with the ends of the groups.",
-          "type": "boolean"
-        },
         "attachSides": {
           "default": true,
-          "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`).",
+          "description": "Whether to attach the left and right sides of the widgets or to use smooth corners.\n\nTo see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`).\n\nWith this off, the background, gradient or solid, has the same rounded ends as the groups.",
           "type": "boolean"
         },
         "outerMarginLeft": {
           "default": null,
-          "description": "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none.",
+          "description": "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background ends with the group. Empty uses the theme's margin, which is none.",
           "anyOf": [
             {
               "type": "string",
@@ -48,7 +43,7 @@
         },
         "outerMarginRight": {
           "default": null,
-          "description": "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none.",
+          "description": "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background ends with the group. Empty uses the theme's margin, which is none.",
           "anyOf": [
             {
               "type": "string",

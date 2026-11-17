@@ -74,32 +74,27 @@ const bar = z
           "`disabled`- Background color is disabled."
         ].join("\n\n")
       ),
-    roundGradient: z
-      .boolean()
-      .default(false)
-      .describe(
-        "Whether the background, gradient or solid, has rounded ends like the groups. Made for the `floating` direction with `attachSides` off, where the ends of the background then line up with the ends of the groups."
-      ),
     attachSides: z
       .boolean()
       .default(true)
       .describe(
         [
           "Whether to attach the left and right sides of the widgets or to use smooth corners.",
-          "To see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`)."
+          "To see the full corners, you must have some margin (`outerMarginLeft` and `outerMarginRight`).",
+          "With this off, the background, gradient or solid, has the same rounded ends as the groups."
         ].join("\n\n")
       ),
     outerMarginLeft: cssValue()
       .nullable()
       .default(null)
       .describe(
-        "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none."
+        "Space between the left edge of the widget and the left group, as a CSS length like `0.5rem`. The background ends with the group. Empty uses the theme's margin, which is none."
       ),
     outerMarginRight: cssValue()
       .nullable()
       .default(null)
       .describe(
-        "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background still spans the whole widget. Empty uses the theme's margin, which is none."
+        "Space between the right edge of the widget and the right group, as a CSS length like `0.5rem`. The background ends with the group. Empty uses the theme's margin, which is none."
       ),
     keepMiddleCentered: z
       .boolean()

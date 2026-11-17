@@ -80,7 +80,6 @@ const lookOf = ({
     media.style,
     workspaces.style,
     bar.gradient,
-    bar.roundGradient,
     bar.attachSides,
     bar.outerMarginLeft,
     bar.outerMarginRight,
