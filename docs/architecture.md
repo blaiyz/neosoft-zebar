@@ -134,7 +134,7 @@ Click-through relies on a GlazeWM binding mode. A keybinding enables and immedia
 
 ## Privileged actions
 
-`zebar.shellExec` only runs what `privileges.shellCommands` in `zpack.json` allows, so each new command needs a rule there, in `static/zpack.json` and in `dev_static/zpack.json` to work in dev builds. Rules belong to a widget, and each widget carries only the rules for what its own windows run: the bar opens the repository link, and the `flyout` widget runs the power actions and reads the region. Tauri window calls are limited by the permissions Zebar ships.
+`zebar.shellExec` only runs what `privileges.shellCommands` in `zpack.json` allows, so each new command needs a rule there, in `static/zpack.json` and in `dev_static/zpack.json` to work in dev builds. Rules belong to a widget, and each widget carries only the rules for what its own windows run: the bar opens the repository link, and the `flyout` widget runs the power actions and reads the region and the processor's base speed. Tauri window calls are limited by the permissions Zebar ships.
 
 ## Builds
 

@@ -384,9 +384,11 @@ export function startWidgetPreset(name: string) {
 export function shellExec(program: string, args: string[]) {
   console.log("[mock] shell command:", program, ...args);
   const stdout =
-    program === "reg"
-      ? "LocaleName    REG_SZ    en-US\n    iFirstDayOfWeek    REG_SZ    6"
-      : "";
+    program !== "reg"
+      ? ""
+      : args.includes("~MHz")
+        ? "    ~MHz    REG_DWORD    0xe10"
+        : "LocaleName    REG_SZ    en-US\n    iFirstDayOfWeek    REG_SZ    6";
   return Promise.resolve({ stdout, stderr: "", code: 0 });
 }
 

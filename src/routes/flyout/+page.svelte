@@ -14,6 +14,7 @@
     startFlyoutWindow,
     type FlyoutRequest
   } from "#lib/state/flyouts.svelte.ts";
+  import { readCpuSpeed } from "#lib/state/cpu_speed.svelte.ts";
   import { motion } from "#lib/state/motion.svelte.ts";
   import { initProviders } from "#lib/state/providers.svelte.ts";
   import { readRegion } from "#lib/state/region.svelte.ts";
@@ -188,6 +189,7 @@
     // request, so that showing it for the first flyout activates it too.
     lock = holdSingleWindow(FLYOUT_WINDOW_LOCK, flyoutWindow, async () => {
       void readRegion();
+      void readCpuSpeed();
       for (const { load } of Object.values(flyoutViews)) void load();
       await widget.tauriWindow.hide();
       holding = true;

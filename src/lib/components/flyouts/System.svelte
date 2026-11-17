@@ -1,5 +1,6 @@
 <script lang="ts">
   import { config } from "#lib/state/config.svelte.ts";
+  import { cpuSpeed } from "#lib/state/cpu_speed.svelte.ts";
   import { history } from "#lib/state/history.svelte.ts";
   import { providers } from "#lib/state/providers.svelte.ts";
   import {
@@ -14,6 +15,7 @@
 
   let battery = $derived(providers.battery);
   let cpu = $derived(providers.cpu);
+  let speedMhz = $derived(cpuSpeed.baseMhz ?? (cpu?.frequency || null));
   let disks = $derived(providers.disk?.disks ?? []);
   let host = $derived(providers.host);
   let memory = $derived(providers.memory);
@@ -36,7 +38,9 @@
   />
   {#if cpu}
     <Row label="Usage">{Math.round(cpu.usage)}%</Row>
-    <Row label="Frequency">{(cpu.frequency / 1000).toFixed(2)} GHz</Row>
+    {#if speedMhz}
+      <Row label="Base speed">{(speedMhz / 1000).toFixed(2)} GHz</Row>
+    {/if}
     <Row label="Cores">
       {cpu.physicalCoreCount} cores, {cpu.logicalCoreCount} threads
     </Row>

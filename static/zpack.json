@@ -84,6 +84,10 @@
             "argsRegex": "^query HKCU\\\\Control Panel\\\\International$"
           },
           {
+            "program": "reg",
+            "argsRegex": "^query HKLM\\\\HARDWARE\\\\DESCRIPTION\\\\System\\\\CentralProcessor\\\\0 /v ~MHz$"
+          },
+          {
             "program": "shutdown",
             "argsRegex": "^/(a|l|(s|r) /t 60)$"
           },
